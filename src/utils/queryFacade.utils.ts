@@ -2,8 +2,9 @@ import {Query} from '@utils/types.utils';
 import {Vulnerability} from '@utils/types.utils';
 import {VulDatabase} from '@utils/types.utils';
 import axios from 'axios'
+import e from 'express';
 
-/**HTTP GET */
+/***************** GET VULNERABILITIES FROM EXT DATABASES ****************************/
 export async function getVulnerabilities(query: Query){
 	let config: any = {
 		method: query.method,
@@ -16,14 +17,34 @@ export async function getVulnerabilities(query: Query){
 		},
 		data: query.body
 	}
+
 	return axios(
 		config
 	).then((response)=> {
 		return response.data;
-	});
+	}).catch(function(error) {
+		if (error.response) {
+			// The request was made and the server responded with a status code
+			// that falls out of the range of 2xx
+			console.log(error.response.data);
+			console.log(error.response.status);
+			console.log(error.response.headers);
+		  } else if (error.request) {
+			// The request was made but no response was received
+			// `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+			// http.ClientRequest in node.js
+			console.log(error.request);
+		  } else {
+			// Something happened in setting up the request that triggered an Error
+			console.log('Error', error.message);
+		  }
+		  console.log(error.config);
+		  return error.response.status;
+		}
+	);
 }
 
-/**Response Cleaner Interface */
+/****************** RESPONSE CLEANER INTERFACE **********************/
 interface QueryCleaner {
 	(rawResponse: any): Vulnerability[];
  };
@@ -61,8 +82,8 @@ nvdCleaner = function(rawResponse): Vulnerability[] {
 
 sonatypeCleaner = function(rawResponse): Vulnerability[] {
 	let vulns: Vulnerability[] = [];
-	let rawVulns: any = rawResponse[0].vulnerabilities;	//get all vulnerabilities
-	console.log(rawVulns);
+
+	let rawVulns: any = rawResponse[0].vulnerabilities;
 
 	//Create Vulnerability for each cve in response
 	rawVulns.forEach(function(cve : any) { 
@@ -80,36 +101,48 @@ sonatypeCleaner = function(rawResponse): Vulnerability[] {
 			let cvssVector: string = cve.cvssVector;
 			
 			if(cvssVector.startsWith('CVSS:2')){//V2
-				v.cveId = cvssVector;
+				v.cvss2 = cvssVector;
 			}
 			else if(cvssVector.startsWith('CVSS:3')){//V3
 				//TO-DO:map cvss2 to cvss3
-				v.cveId = cvssVector;
+				v.cvss2 = cvssVector;
 			}
 		}
 		vulns.push(v);
 	})
 
-	console.log(vulns); 
 	return vulns;
-	
 }
 
 
-/** Query Facade Functions */
+/****************** QUERY FACADE API **********************/
 //Sends one query, returns list of Vulnerabilities
-export function sendQuery(query: Query) : Vulnerability[] {
-	let resp = getVulnerabilities(query);
-	switch(query.database){
-		case VulDatabase.NVD: {
-			return nvdCleaner(resp);
+async function sendQuery(query: Query) {
+	
+	return getVulnerabilities(query).then((response)=>
+		{
+			//Handle error
+			if(!isNaN(response)){
+				//To-do error handle
+				return [];
+			}
+
+			// Clean response
+			switch(query.database){
+				case VulDatabase.NVD: {
+					return  nvdCleaner(response);
+				}
+				case VulDatabase.Sonatype: {
+					return sonatypeCleaner(response);
+				}
+				default: {
+					console.log("Query Facade: database not supported!");
+					return [];
+				} 
+			}
 		}
-		default: {
-			console.log("Query Facade: database not supported!");
-			return [];
-		} 
-	}
+	)
 }
 
 /** Module Exports */
-export {nvdCleaner, sonatypeCleaner}
+export {sendQuery}

@@ -1,6 +1,6 @@
 export enum VulDatabase{
     NVD = 1,
-    SonaType,
+    Sonatype,
     /*Add supported DBs here */
 }
 
