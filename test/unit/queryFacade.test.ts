@@ -1,13 +1,17 @@
 import { Query, VulDatabase, Vulnerability } from '@utils/types.utils';
 import { sendQuery } from '@utils/queryFacade.utils';
-import * as authconfig from 'authconfig.json';
+import dotenv from 'dotenv';
+
+dotenv.config();
+const API_KEY = (process.env.API_KEY as string);
+const AUTH = (process.env.AUTHORIZATION as string)
 
 //Test 1: NVD valid CVEID
 let query1: Query = {
   database: VulDatabase.NVD,
   method: 'get',
   url: 'https://services.nvd.nist.gov/rest/json/cves/2.0',
-  headers: { authKey: 'apiKey', authValue: authconfig.NVD.apiKey },
+  headers: { authKey: 'apiKey', authValue: API_KEY },
   params: { searchKey: 'cveId', searchValue: 'CVE-2021-20089' },
   body: null,
 };
@@ -34,7 +38,7 @@ let query2: Query = {
   database: VulDatabase.NVD,
   method: 'get',
   url: 'https://services.nvd.nist.gov/rest/json/cves/2.0',
-  headers: { authKey: 'apiKey', authValue: authconfig.NVD.apiKey },
+  headers: { authKey: 'apiKey', authValue: API_KEY},
   params: {
     searchKey: 'cpeName',
     searchValue: 'cpe:2.3:a:1e:client:4.1.0.267:*:*:*:*:windows:*:*',
@@ -72,7 +76,7 @@ let query3: Query = {
   database: VulDatabase.NVD,
   method: 'get',
   url: 'https://services.nvd.nist.gov/rest/json/cves/2.0',
-  headers: { authKey: 'apiKey', authValue: authconfig.NVD.apiKey },
+  headers: { authKey: 'apiKey', authValue: API_KEY },
   params: { searchKey: 'keywordSearch', searchValue: 'Bootstrap v3.4.1' },
   body: null,
 };
@@ -99,7 +103,7 @@ let query4: Query = {
   database: VulDatabase.NVD,
   method: 'get',
   url: 'https://services.nvd.nist.gov/rest/json/cves/2.0',
-  headers: { authKey: 'apiKey', authValue: authconfig.NVD.apiKey },
+  headers: { authKey: 'apiKey', authValue: API_KEY },
   params: { searchKey: 'keywordSearch', searchValue: 'Bootstrapv3.4.1' },
   body: null,
 };
@@ -137,7 +141,7 @@ let query6: Query = {
   url: 'https://ossindex.sonatype.org/api/v3/authorized/component-report',
   headers: {
     authKey: 'Authorization',
-    authValue: 'Basic ' + authconfig.Sonatype.Authorization,
+    authValue: 'Basic ' + AUTH,
   },
   params: { searchKey: '', searchValue: null },
   body: {
@@ -217,7 +221,7 @@ let query7: Query = {
   url: 'https://ossindex.sonatype.org/api/v3/authorized/component-report',
   headers: {
     authKey: 'Authorization',
-    authValue: 'Basic ' + authconfig.Sonatype.Authorization,
+    authValue: 'Basic ' + AUTH,
   },
   params: { searchKey: '', searchValue: null },
   body: {
