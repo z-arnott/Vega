@@ -1,13 +1,12 @@
 pipeline {
     agent any
-    
+    environment{
+        CREDS = credential('env')
+    }
     stages {
         stage('build') {
             steps {
                 echo 'Building..'
-                withCredentials([file(credentialsId: 'env', variable: 'mySecretEnvFile')]){
-                    sh 'cp $mySecretEnvFile $WORKSPACE'
-                }
                 sh 'npm install'
                 sh 'npm run build'
                 sh 'npm run prettier'
