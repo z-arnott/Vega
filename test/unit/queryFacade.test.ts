@@ -2,9 +2,11 @@ import { Query, VulDatabase, Vulnerability } from '@utils/types.utils';
 import { sendQuery } from '@utils/queryFacade.utils';
 import dotenv from 'dotenv';
 
+//Setup
 dotenv.config();
 const API_KEY = process.env.API_KEY as string;
 const AUTH = process.env.AUTHORIZATION as string;
+jest.setTimeout(20000)
 
 //Test 1: NVD valid CVEID
 let query1: Query = {
