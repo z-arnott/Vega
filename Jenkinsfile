@@ -1,12 +1,13 @@
 pipeline {
     agent any
-    environment{
-        CREDS = credentials('env')
-    }
+ 
     stages {
         stage('build') {
             steps {
                 echo 'Building..'
+                withCredentials([file(credentialsId: 'env', variable: 'mySecretEnvFile')]){
+                    sh 'cp $mySecretEnvFile $WORKSPACE'
+                }
                 sh 'npm install'
                 sh 'npm run build'
                 sh 'npm run prettier'
@@ -17,6 +18,16 @@ pipeline {
                 echo 'Testing..'
                 sh 'npm test'
             }
+        }
+    }
+    post {
+        // Clean after build
+        always {
+            cleanWs(cleanWhenNotBuilt: true,
+                    deleteDirs: true,
+                    disableDeferredWipeout: true,
+                    notFailBuild: true,
+                    patterns: [[pattern: '**/node_modules/', type: 'EXCLUDE']])
         }
     }
 }
