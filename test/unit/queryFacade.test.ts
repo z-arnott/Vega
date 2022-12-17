@@ -3,8 +3,8 @@ import { sendQuery } from '@utils/queryFacade.utils';
 import dotenv from 'dotenv';
 
 dotenv.config();
-const API_KEY = (process.env.API_KEY as string);
-const AUTH = (process.env.AUTHORIZATION as string)
+const API_KEY = process.env.API_KEY as string;
+const AUTH = process.env.AUTHORIZATION as string;
 
 //Test 1: NVD valid CVEID
 let query1: Query = {
@@ -38,7 +38,7 @@ let query2: Query = {
   database: VulDatabase.NVD,
   method: 'get',
   url: 'https://services.nvd.nist.gov/rest/json/cves/2.0',
-  headers: { authKey: 'apiKey', authValue: API_KEY},
+  headers: { authKey: 'apiKey', authValue: API_KEY },
   params: {
     searchKey: 'cpeName',
     searchValue: 'cpe:2.3:a:1e:client:4.1.0.267:*:*:*:*:windows:*:*',

@@ -7,7 +7,7 @@
     "build": "npx tsc",
     "start": "npm run build -- -w",
     "test": "jest",
-    "prettier": "npx prettier --write"
+    "prettier": "npx prettier --write ."
   },
   "repository": {
     "type": "git",

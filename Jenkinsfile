@@ -1,14 +1,12 @@
-
-Jenkinsfile (Declarative Pipeline)
-
 pipeline {
     agent any
 
     stages {
-        stage('Build') {
+        stage('build') {
             steps {
                 echo 'Building..'
                 sh 'npm run build'
+                sh 'npm run prettier'
             }
         }
         stage('Test') {
