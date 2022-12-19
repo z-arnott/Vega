@@ -2,7 +2,7 @@ pipeline {
     agent any
  
     stages {
-        stage('build') {
+        stage('Build') {
             steps {
                 echo 'Building..'
                 withCredentials([file(credentialsId: 'env', variable: 'mySecretEnvFile')]){
@@ -10,7 +10,6 @@ pipeline {
                 }
                 sh 'npm install'
                 sh 'npm run build'
-                sh 'npm run prettier'
             }
         }
         stage('Test') {

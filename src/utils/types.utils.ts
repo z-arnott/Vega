@@ -1,13 +1,12 @@
 export enum VulDatabase {
-  NVD = 1,
-  Sonatype,
+  NVD = 'https://services.nvd.nist.gov/rest/json/cves/2.0',
+  SONATYPE = 'https://ossindex.SONATYPE.org/api/v3/authorized/component-report',
   /*Add supported DBs here */
 }
 
 export interface Query {
   database: VulDatabase;
   method: string;
-  url: string;
   headers: { authKey: string; authValue: string };
   params: { searchKey: string; searchValue: string | null };
   body: any | null;

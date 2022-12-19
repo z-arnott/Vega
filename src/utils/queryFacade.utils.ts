@@ -1,14 +1,13 @@
-import { Query } from '@utils/types.utils';
+import { Query, VulDatabase } from '@utils/types.utils';
 import { Vulnerability } from '@utils/types.utils';
-import { VulDatabase } from '@utils/types.utils';
 import axios from 'axios';
-import e from 'express';
+
 
 /***************** GET VULNERABILITIES FROM EXT DATABASES ****************************/
 export async function getVulnerabilities(query: Query) {
   let config: any = {
     method: query.method,
-    url: query.url,
+    url: query.database,
     headers: {
       [query.headers.authKey]: query.headers.authValue,
     },
@@ -116,29 +115,22 @@ sonatypeCleaner = function (rawResponse): Vulnerability[] {
   return vulns;
 };
 
+/* Register cleaning strategies here */
+let cleaningStrategy = {
+  [VulDatabase.SONATYPE]  : sonatypeCleaner,
+  [VulDatabase.NVD]       : nvdCleaner
+};
+
 /****************** QUERY FACADE API **********************/
 //Sends one query, returns list of Vulnerabilities
 async function sendQuery(query: Query) {
   return getVulnerabilities(query).then((response) => {
     //Handle error
     if (!isNaN(response)) {
-      //To-do error handle
+      //To-do error handleide
       return [];
     }
-
-    // Clean response
-    switch (query.database) {
-      case VulDatabase.NVD: {
-        return nvdCleaner(response);
-      }
-      case VulDatabase.Sonatype: {
-        return sonatypeCleaner(response);
-      }
-      default: {
-        console.log('Query Facade: database not supported!');
-        return [];
-      }
-    }
+    return cleaningStrategy[query.database](response)
   });
 }
 

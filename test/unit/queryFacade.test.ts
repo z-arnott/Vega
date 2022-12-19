@@ -12,7 +12,6 @@ jest.setTimeout(20000)
 let query1: Query = {
   database: VulDatabase.NVD,
   method: 'get',
-  url: 'https://services.nvd.nist.gov/rest/json/cves/2.0',
   headers: { authKey: 'apiKey', authValue: API_KEY },
   params: { searchKey: 'cveId', searchValue: 'CVE-2021-20089' },
   body: null,
@@ -39,7 +38,6 @@ test('Test 1: NVD with valid cveId', () => {
 let query2: Query = {
   database: VulDatabase.NVD,
   method: 'get',
-  url: 'https://services.nvd.nist.gov/rest/json/cves/2.0',
   headers: { authKey: 'apiKey', authValue: API_KEY },
   params: {
     searchKey: 'cpeName',
@@ -77,7 +75,6 @@ test('Test 2: NVD Valid cpeName', () => {
 let query3: Query = {
   database: VulDatabase.NVD,
   method: 'get',
-  url: 'https://services.nvd.nist.gov/rest/json/cves/2.0',
   headers: { authKey: 'apiKey', authValue: API_KEY },
   params: { searchKey: 'keywordSearch', searchValue: 'Bootstrap v3.4.1' },
   body: null,
@@ -104,7 +101,6 @@ test('Test 3: NVD valid keyword', () => {
 let query4: Query = {
   database: VulDatabase.NVD,
   method: 'get',
-  url: 'https://services.nvd.nist.gov/rest/json/cves/2.0',
   headers: { authKey: 'apiKey', authValue: API_KEY },
   params: { searchKey: 'keywordSearch', searchValue: 'Bootstrapv3.4.1' },
   body: null,
@@ -122,7 +118,6 @@ test('Test 4: NVD valid keyword w/o matches', () => {
 let query5: Query = {
   database: VulDatabase.NVD,
   method: 'get',
-  url: 'https://services.nvd.nist.gov/rest/json/cves/2.0',
   headers: { authKey: 'apiKey', authValue: 'badKey' },
   params: { searchKey: 'cveId', searchValue: 'CVE-2021-20089' },
   body: null,
@@ -136,11 +131,10 @@ test('Test 5: NVD bad api key', () => {
   });
 });
 
-//Test6: sonatype query by valid purl
+//Test6: SONATYPE query by valid purl
 let query6: Query = {
-  database: VulDatabase.Sonatype,
+  database: VulDatabase.SONATYPE,
   method: 'post',
-  url: 'https://ossindex.sonatype.org/api/v3/authorized/component-report',
   headers: {
     authKey: 'Authorization',
     authValue: 'Basic ' + AUTH,
@@ -210,17 +204,16 @@ let expectedResult6: Vulnerability[] = [
   },
 ];
 
-test('Test 6: Sonatype valid purl', () => {
+test('Test 6: SONATYPE valid purl', () => {
   return sendQuery(query6).then((data) => {
     expect(data.sort()).toStrictEqual(expectedResult6.sort());
   });
 });
 
-//Test7: sonatype query by valid purl - not in sonatype
+//Test7: SONATYPE query by valid purl - not in SONATYPE
 let query7: Query = {
-  database: VulDatabase.Sonatype,
+  database: VulDatabase.SONATYPE,
   method: 'post',
-  url: 'https://ossindex.sonatype.org/api/v3/authorized/component-report',
   headers: {
     authKey: 'Authorization',
     authValue: 'Basic ' + AUTH,
@@ -233,17 +226,16 @@ let query7: Query = {
 
 let expectedResult7: any = [];
 
-test('Test 7: Sonatype valid purl not in db', () => {
+test('Test 7: SONATYPE valid purl not in db', () => {
   return sendQuery(query7).then((data) => {
     expect(data.sort()).toStrictEqual(expectedResult7.sort());
   });
 });
 
-//Test8: sonatype bad auth
+//Test8: SONATYPE bad auth
 let query8: Query = {
-  database: VulDatabase.Sonatype,
+  database: VulDatabase.SONATYPE,
   method: 'post',
-  url: 'https://ossindex.sonatype.org/api/v3/authorized/component-report',
   headers: { authKey: 'Authorization', authValue: 'Basic ' + 'badAuth' },
   params: { searchKey: '', searchValue: null },
   body: {
@@ -253,17 +245,16 @@ let query8: Query = {
 
 let expectedResult8: any = [];
 
-test('Test 8: Sonatype valid purl not in db', () => {
+test('Test 8: SONATYPE valid purl not in db', () => {
   return sendQuery(query8).then((data) => {
     expect(data.sort()).toStrictEqual(expectedResult8.sort());
   });
 });
 
-//Test9: sonatype with invalid body
+//Test9: SONATYPE with invalid body
 let query9: Query = {
-  database: VulDatabase.Sonatype,
+  database: VulDatabase.SONATYPE,
   method: 'post',
-  url: 'https://ossindex.sonatype.org/api/v3/authorized/component-report',
   headers: { authKey: 'Authorization', authValue: 'Basic ' + 'badAuth' },
   params: { searchKey: '', searchValue: null },
   body: 'badBody',
@@ -271,7 +262,7 @@ let query9: Query = {
 
 let expectedResult9: any = [];
 
-test('Test 9: Sonatype invalid body', () => {
+test('Test 9: SONATYPE invalid body', () => {
   return sendQuery(query9).then((data) => {
     expect(data.sort()).toStrictEqual(expectedResult9.sort());
   });
