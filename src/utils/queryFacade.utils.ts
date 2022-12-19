@@ -2,7 +2,6 @@ import { Query, VulDatabase } from '@utils/types.utils';
 import { Vulnerability } from '@utils/types.utils';
 import axios from 'axios';
 
-
 /***************** GET VULNERABILITIES FROM EXT DATABASES ****************************/
 export async function getVulnerabilities(query: Query) {
   let config: any = {
@@ -117,8 +116,8 @@ sonatypeCleaner = function (rawResponse): Vulnerability[] {
 
 /* Register cleaning strategies here */
 let cleaningStrategy = {
-  [VulDatabase.SONATYPE]  : sonatypeCleaner,
-  [VulDatabase.NVD]       : nvdCleaner
+  [VulDatabase.SONATYPE]: sonatypeCleaner,
+  [VulDatabase.NVD]: nvdCleaner,
 };
 
 /****************** QUERY FACADE API **********************/
@@ -130,7 +129,7 @@ async function sendQuery(query: Query) {
       //To-do error handleide
       return [];
     }
-    return cleaningStrategy[query.database](response)
+    return cleaningStrategy[query.database](response);
   });
 }
 
