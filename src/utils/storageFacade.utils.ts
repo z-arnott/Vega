@@ -1,9 +1,8 @@
+//import supabase info
 const supabase = require ('./utils/supabase.js');
 console.log(supabase)
 
-
-/****************** STORAGE FACADE API **********************/
-//Receives read requests, returns requested data
+//Receives read requests, returns requested data (sample)
 function ReadData{
   const {public:tablename} = await supabase
   .from('tablename')
@@ -15,6 +14,21 @@ function ReadData{
     console.log('error', error);
   }
 }
+
+/****************** DB QUERY BUILDER INTERFACE **********************/
+interface DBQueryBuilder {
+  (SessionID: number,Token: string, Param: string[]): (data:any);
+}
+
+//query instance
+let SQLQueryBuilder: DBQueryBuilder;
+
+//query implementation
+SQLQueryBuilder = function (SessionID, Token, Param): data
+  
+
+/****************** STORAGE FACADE API **********************/
+
 //Sends write requests
 //Stores 
 //Transports formatted query requests to VIC
