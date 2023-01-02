@@ -49,19 +49,21 @@ function ReadVulnerability{
       where j.packageid = specificpackage;
 
 //Function #4: Write Request (Package)
-function WriteRequest(tablename: string, packageIDvalue: number, name: string, sessionIDvalue: string, packageversionvalue: float, consRiskvalue: float, consImpactvalue: float, consLikelihoodvalue:float, highestRiskvalue: float, purlstring: string, cpeNamestring: string): void {
+function WritePackageRequest(tablename: string, packageIDvalue: number, name: string, sessionIDvalue: string, packageversionvalue: string, consRiskvalue: float, consImpactvalue: float, consLikelihoodvalue:float, highestRiskvalue: float, purlstring: string, cpeNamestring: string): void {
   const {error} = await supabase
   .from(tablename)
   .insert({packageID: packageIDvalue, sessionID: sessionIDvalue, name: namevalue, packageversion : packageversionvalue, consRisk:consRiskvalue, consImpact:consImpactvalue ,consLikelihood: consLikelihoodvale, highestRisk:highestRiskvalue ,purl: purlstring,cpeName:cpeNamestring)
 }
-
-
-values
-  (
-
-//Function #5: Write Request (Vulnerability
-
+//Function #5: Write Request (Vulnerability)
+function WriteVulnRequest(tablename: string, cveidv: number, descriptions:string, riskv: float, likelihoodv: float, impactv: float): void {
+  const {error} = await supabase
+  .from(tablename)
+  .insert({cveid: cveidv, description: descriptions, risk: riskv, likelihood : likelihoodv, impact:impactv)
+}
+   
 //Function #6: Purge SessionID
+//To be reviewed with Z
+          
 /****************** DB QUERY BUILDER INTERFACE **********************/
 interface DBQueryBuilder {
   (SessionID: number,Token: string, Param: string[]): (data:any);
