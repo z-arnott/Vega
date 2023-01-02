@@ -23,30 +23,41 @@ function ReadData{
 //Function #2: Read Request (Package)
 function ReadPackage{
   const {public:packages} = await supabase //schema:tablename
-  .from('packages') //tablename
-  .select('*')
-  .eq('sessionID',sessionID)
-  .eq('packageID','specificpackage) //if removed, displays all packageIDs
- }
+    .from('packages') //from('tablename')
+    .select('*')
+    .eq('sessionID',sessionID)
+    .eq('packageID','specificpackage); //if removed, displays all packageIDs
+}
 
 //Function #3: Read Request (Vulnerability)
 //using packageID from package, identify CVEIDs
 function ReadVulnerability{
   const {public:package} = await supabase //schema:tablename
-  .from('junction') //tablename
-  .select('CVEIDs')
-  .eq('packageID',specificpackage) //where packageID = packageID
+    .from('junction') //tablename
+    .select('CVEIDs')
+    .eq('packageID',specificpackage) //where packageID = packageID
+   //got stuck here trying to find js/ts equivalent to left join
+    .order('packageID', {ascending:false}) //
  }
 
-//SQL Pseudocode
-//filter level #1: select the desired CVEID from package
- SELECT *
-   from vulnerabilities v
-   left join junction j
-   ON v.cveid = j.cveid
-where j.packageid = specificpackage
+      //SQL Pseudocode
+      //filter level #1: select the desired CVEID from package
+       SELECT *
+         from vulnerabilities v
+         left join junction j
+         ON v.cveid = j.cveid
+      where j.packageid = specificpackage;
 
 //Function #4: Write Request (Package)
+function WriteRequest(tablename: string, packageIDvalue: number, name: string, sessionIDvalue: string, packageversionvalue: float, consRiskvalue: float, consImpactvalue: float, consLikelihoodvalue:float, highestRiskvalue: float, purlstring: string, cpeNamestring: string): void {
+  const {error} = await supabase
+  .from(tablename)
+  .insert({packageID: packageIDvalue, sessionID: sessionIDvalue, name: namevalue, packageversion : packageversionvalue, consRisk:consRiskvalue, consImpact:consImpactvalue ,consLikelihood: consLikelihoodvale, highestRisk:highestRiskvalue ,purl: purlstring,cpeName:cpeNamestring)
+}
+
+
+values
+  (
 
 //Function #5: Write Request (Vulnerability
 
