@@ -3,7 +3,7 @@ const supabase = require ('./utils/supabase.js');
 console.log(supabase)
 
 //import readline to request user input
-import * as readline from 'readline';
+import {sessionID} from @utils/supabase;
 
 //Receives read requests, returns requested data (sample)
 function ReadData{
@@ -18,13 +18,33 @@ function ReadData{
   }
 }
 
-//Function #1: Set SessionID
-const {user, session, error} = await supabase.auth.signUp({
-  email: 
+//Function #1: Set SessionID - set in supabase.js
 
 //Function #2: Read Request (Package)
+function ReadPackage{
+  const {public:packages} = await supabase //schema:tablename
+  .from('packages') //tablename
+  .select('*')
+  .eq('sessionID',sessionID)
+  .eq('packageID','specificpackage) //if removed, displays all packageIDs
+ }
 
 //Function #3: Read Request (Vulnerability)
+//using packageID from package, identify CVEIDs
+function ReadVulnerability{
+  const {public:package} = await supabase //schema:tablename
+  .from('junction') //tablename
+  .select('CVEIDs')
+  .eq('packageID',specificpackage) //where packageID = packageID
+ }
+
+//SQL Pseudocode
+//filter level #1: select the desired CVEID from package
+ SELECT *
+   from vulnerabilities v
+   left join junction j
+   ON v.cveid = j.cveid
+where j.packageid = specificpackage
 
 //Function #4: Write Request (Package)
 
@@ -51,3 +71,18 @@ SQLQueryBuilder = function (SessionID, Token, Param): data
 //Recieves list of vulnerabilities and sends to database for storage
 
 //fetches data for 
+
+/****************** DRAFTS - DELETE WHEN REVIEW IS COMPLETE **********************/
+//Dont-Use-Other SQL notes/attempts (produced other errors)
+ (SELECT cveid
+  FROM junction
+  WHERE packageID = specificpackage
+  LEFT JOIN junction j
+    ON p.packageID = j.packageID
+  
+   SELECT *
+   FROM vulnerabilitie
+   WHERE CVEID = 
+ (SELECT cveid
+  FROM junction
+  WHERE packageID = specificpackage)
