@@ -13,11 +13,12 @@ function ReadPackage(sessionID:number, filterparam:any, sortparam:any): any{
     //.eq('packageID','specificpackage); //if removed, displays all packageIDs
   //Step #3: Incorporate sorting
   //Step #4: Incorporate pagination - see classdiagrams.drawio
+  return packageresult;
 }
 
 /****************** READ VULNERABILITY **********************/
 function ReadVulnerability(packageIDrequired:number):any{
-  let vulnerabilities = await supabase 
+  let vulnerabilitiesresults = await supabase 
     .from(junction')
     .select('cveid, packageid, vulnerabilities!inner(description,risk,likelihood,impact)')
     .filter('packageid','in',packageIDrequired)
@@ -26,6 +27,7 @@ function ReadVulnerability(packageIDrequired:number):any{
   //Step #3: Incorporate sorting
    // .order('packageID', {ascending:false}) 
     //Step #4: Incorporate pagination - see classdiagrams.drawio
+  return vulnerabilitiesresults;
  }
 
 /****************** WRITE PACKAGE**********************/
@@ -63,3 +65,7 @@ SQLQueryBuilder = function (SessionID, Token, Param): data
   
 
 /****************** STORAGE FACADE API **********************/
+//Read Package
+//Write Package
+//Read Vulnerability 
+//Write Vulnerability
