@@ -1,5 +1,5 @@
-import {sessionID} from @utils/supabase;
-
+import {sessionID} from '@utils/supabase';
+import supabase from 'supabase';
 /****************** SET SESSION ID **********************/
 
  
@@ -19,7 +19,7 @@ function ReadPackage(sessionID:number, filterparam:any, sortparam:any): any{
 /****************** READ VULNERABILITY **********************/
 function ReadVulnerability(packageIDrequired:number):any{
   let vulnerabilitiesresults = await supabase 
-    .from(junction')
+    .from('junction')
     .select('cveid, packageid, vulnerabilities!inner(description,risk,likelihood,impact)')
     .filter('packageid','in',packageIDrequired)
   //Step #2: Incorporate filtering

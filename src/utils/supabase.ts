@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = 'https://katamtzaudnxbudjjbhm.supabase.co' 
 const supabaseKey = process.env.SUPABASE_KEY
@@ -8,3 +8,5 @@ module.exports =  createClient(supabaseUrl, supabaseKey)
 
 //Function #1: Set sessionID
 const {user, sessionID, error} = await supabase.auth.signUp()
+
+export {sessionID}
