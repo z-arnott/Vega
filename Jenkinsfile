@@ -12,10 +12,16 @@ pipeline {
                 sh 'npm run build'
             }
         }
+        stage('Start') {
+            steps {
+                echo 'Starting server..'
+                sh 'npm run start'
+            }
+        }
         stage('Test') {
             steps {
                 echo 'Testing..'
-                sh 'npm test'
+                sh 'npm run test'
             }
         }
     }
