@@ -4,6 +4,14 @@ export enum VulDatabase {
   /*Add supported DBs here */
 }
 
+export enum SbomFormat {
+  SPDX_JSON,
+  SPDX_TAGVALUE,
+  CYCLONEDX_XML,
+  CYCLONEDX_JSON,
+  /*Add supported sbom formats here */
+}
+
 export interface Query {
   database: VulDatabase;
   method: string;
@@ -15,12 +23,12 @@ export interface Query {
 export interface Package {
   id: number;
   name: string;
-  purl: string;
-  cpeName: string;
-  impact: number;
-  likelihood: number;
-  consRisk: number;
-  highestRisk: number;
+  purl: string | undefined;
+  cpeName: string | undefined;
+  impact: number | undefined;
+  likelihood: number | undefined;
+  consRisk: number | undefined;
+  highestRisk: number | undefined;
 }
 
 export interface Vulnerability {
