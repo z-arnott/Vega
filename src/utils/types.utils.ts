@@ -21,7 +21,7 @@ export interface Query {
 }
 
 export interface Package {
-  id: number;
+  id: string;
   name: string;
   purl: string | undefined;
   cpeName: string | undefined;
