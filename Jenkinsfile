@@ -26,6 +26,7 @@ pipeline {
         }
     }
     post {
+        sh 'killall -15 node'
         // Clean after build
         always {
             cleanWs(cleanWhenNotBuilt: true,

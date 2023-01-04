@@ -28,3 +28,11 @@ app.get(
 app.listen(port, () => {
   console.log(`server started at http://localhost:${port}`);
 });
+
+/*************** Exit Server ***************/
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  app.close(() => {
+    console.log('HTTP server closed');
+  })
+})
