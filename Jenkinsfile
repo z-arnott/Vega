@@ -15,7 +15,7 @@ pipeline {
         stage('Start') {
             steps {
                 echo 'Starting server..'
-                sh 'npm run start'
+                sh 'screen -d -m -S screen.npmStart npm start'
             }
         }
         stage('Test') {
