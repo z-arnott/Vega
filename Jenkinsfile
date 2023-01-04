@@ -24,9 +24,14 @@ pipeline {
                 sh 'npm run test'
             }
         }
+        stage('Stop') {
+            steps {
+                echo 'Exiting server..'
+                sh 'killall -15 node'
+            }
+        }
     }
     post {
-        sh 'killall -15 node'
         // Clean after build
         always {
             cleanWs(cleanWhenNotBuilt: true,
