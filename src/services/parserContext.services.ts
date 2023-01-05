@@ -17,7 +17,6 @@ spdxJsonParser = function (sbom): Package[] {
   let packages: Package[] = [];
   let sbomPackages: any = sbom.packages; //get all packages
 
-  //Create Vulnerability for each cve in response
   sbomPackages.forEach(function (pkg: any) {
     let p: Package = {
       name: pkg.name,
@@ -33,14 +32,15 @@ spdxJsonParser = function (sbom): Package[] {
     //Get External Reference locators
     if (pkg.hasOwnProperty('externalRefs')) {
       for(let extRef of pkg.externalRefs){
-        if (extRef.referenceType == 'purl') {
+        if (extRef.referenceType == 'purl' && p.purl == undefined) {
           p.purl = extRef.referenceLocator;
           //break here? then we get EITHER cpe or purl
         }
-        if (extRef.referenceType.startsWith('cpe')) {
+        if (extRef.referenceType.startsWith('cpe') && p.cpeName == undefined) {
           p.cpeName = extRef.referenceLocator;
           //break here? then we get EITHER cpe or purl
         }
+        //break if both are define
     }
     packages.push(p);
   }})
@@ -48,46 +48,53 @@ spdxJsonParser = function (sbom): Package[] {
 };
 
 spdxTagValueParser = function (sbom): Package[] {
-  return [];
-};
-cyclonedxXmlParser = function (sbom): Package[] {
-  //Convert xml --> json
-  const parser = new XMLParser({ignoreAttributes :false});
-  let sbomObj = parser.parse(sbom);
   let packages: Package[] = [];
-  let sbomPackages: any = sbomObj.bom.components.component; //get all packages
-  //Create Vulnerability for each cve in response
-  sbomPackages.forEach(function (pkg: any) {
-    let p: Package = {
-      name: pkg.name,
-      id: pkg['@_bom-ref'],
-      purl: undefined,
-      cpeName: undefined,
-      impact: undefined,
-      consRisk: undefined,
-      highestRisk: undefined,
-      likelihood: undefined,
-    };
+  let sbomArray = sbom.toString().split(/\n[#]+.*(Package).*\n\n/gm);//split string by packages
+  sbomArray.shift(); //remove header info before packages
+  console.log(sbomArray);
+  for(let str of sbomArray){
+      let tags = str.split('\n');
+      let name:string = '';
+      let id:string = '';
+      let cpe = undefined;
+      let purl = undefined;
 
-    //Get External Reference locators
-    if (pkg.hasOwnProperty('purl')) {
-      p.purl = pkg.purl;
-      //break here? then we get EITHER cpe or purl
-    }
-    if (pkg.hasOwnProperty('cpe')) {
-      p.cpeName = pkg.cpe;
-      //break here? then we get EITHER cpe or purl
-    }
-    packages.push(p);
-  })
+      for(let line of tags){
+        if(line != ''){
+          const [tag, ...rest] = line.split(':');
+          const value = rest.join(':').trim();
+          if(tag == 'SPDXID'){
+            id = value;
+          }
+          else if(tag == 'PackageName'){
+            name = value;
+          }
+          else if(tag == 'ExternalRef' && value.includes('cpe') && cpe == undefined){
+            cpe = value.split(' ')[2];
+          }
+          else if(tag == 'ExternalRef' && value.includes('purl') && purl == undefined){
+            purl = value.split(' ')[2];
+          }
+        }
+      }
+      let p: Package = {
+        name: name,
+        id: id,
+        purl: purl,
+        cpeName: cpe,
+        impact: undefined,
+        consRisk: undefined,
+        highestRisk: undefined,
+        likelihood: undefined,
+      };
+      packages.push(p);
+  }
   return packages;
 };
 
-cyclonedxJsonParser = function (sbom): Package[] {
+/* Create a list of Packages from JSON package list in CycloneDX format */
+function cyclonedxGetPackages(sbomPackages:any): Package[]{
   let packages: Package[] = [];
-  let sbomPackages: any = sbom.components; //get all packages
-
-  //Create Vulnerability for each cve in response
   sbomPackages.forEach(function (pkg: any) {
     let p: Package = {
       name: pkg.name,
@@ -99,19 +106,31 @@ cyclonedxJsonParser = function (sbom): Package[] {
       highestRisk: undefined,
       likelihood: undefined,
     };
-
     //Get External Reference locators
     if (pkg.hasOwnProperty('purl')) {
       p.purl = pkg.purl;
-      //break here? then we get EITHER cpe or purl
     }
     if (pkg.hasOwnProperty('cpe')) {
       p.cpeName = pkg.cpe;
-      //break here? then we get EITHER cpe or purl
     }
     packages.push(p);
   })
   return packages;
+} 
+
+cyclonedxXmlParser = function (sbom): Package[] {
+  //Convert xml --> json
+  const parser = new XMLParser({ignoreAttributes :false,  attributeNamePrefix : ""});
+  let sbomObj = parser.parse(sbom);
+  //Trim sbom to only package list
+  let sbomPackages: any = sbomObj.bom.components.component;
+  return cyclonedxGetPackages(sbomPackages);
+};
+
+cyclonedxJsonParser = function (sbom): Package[] {
+  //Trim sbom to only package list
+  let sbomPackages: any = sbom.components;
+  return cyclonedxGetPackages(sbomPackages);
 };
 
 /* Register parsing strategies here */
