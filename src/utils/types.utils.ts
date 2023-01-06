@@ -29,6 +29,7 @@ export interface Package {
   likelihood: number | undefined;
   consRisk: number | undefined;
   highestRisk: number | undefined;
+  version: string | undefined;
 }
 
 export interface Vulnerability {

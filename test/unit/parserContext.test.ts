@@ -34,6 +34,7 @@ let packages: Package []= [{
       likelihood: undefined,
       name: "glibc",
       purl: undefined,
+      version: "2.11.1"
 },
 {
       consRisk: undefined,
@@ -44,6 +45,7 @@ let packages: Package []= [{
       likelihood: undefined,
       name: "Apache Commons Lang",
       purl:undefined,
+      version: undefined
 },
 {
       consRisk: undefined,
@@ -54,6 +56,7 @@ let packages: Package []= [{
       likelihood: undefined,
       name: "Jena",
       purl: undefined,
+      version: undefined
 },
 {
       consRisk: undefined,
@@ -64,6 +67,7 @@ let packages: Package []= [{
       likelihood: undefined,
       name: "Saxon",
       purl: undefined,
+      version: "8.8"
 }];
 
 test('Test 2: spdx json: parses accurately', () => {
@@ -89,6 +93,7 @@ let packages2: Package []= [{
       likelihood: undefined,
       name: "glibc",
       purl: undefined,
+      version: "2.11.1"
 }];
 
 test('Test 2: spdx json: parses accurately', () => {
@@ -114,6 +119,7 @@ let package1: Package = {
       likelihood: undefined,
       name: "stack-cors",
       purl: "pkg:composer/asm89/stack-cors@1.3.0",
+      version: "1.3.0"
 };
 let package2: Package = {
       consRisk: undefined,
@@ -124,6 +130,7 @@ let package2: Package = {
       likelihood: undefined,
       name: "commonmark",
       purl: "pkg:composer/league/commonmark@1.6.6",
+      version: "1.6.6"
 };
 let package3: Package = {
       consRisk: undefined,
@@ -134,6 +141,7 @@ let package3: Package = {
       likelihood: undefined,
       name: "portable-ascii",
       purl: "pkg:composer/voku/portable-ascii@1.5.6",
+      version: "1.5.6"
 };
 test('Test 3: cyclonedx json: parses accurately', () => {
       expect(
@@ -164,6 +172,7 @@ let package4: Package  = {
       likelihood: undefined,
       name: "body-parser",
       purl: "pkg:npm/body-parser@1.19.0",
+      version: "1.19.0"
 };
 let package5: Package  = {
       consRisk: undefined,
@@ -174,6 +183,7 @@ let package5: Package  = {
       likelihood: undefined,
       name: "supports-color",
       purl: "pkg:npm/supports-color@6.1.0",
+      version: "6.1.0"
 };
 let package6: Package  = {
       consRisk: undefined,
@@ -184,6 +194,7 @@ let package6: Package  = {
       likelihood: undefined,
       name: "uglify-to-browserify",
       purl: "pkg:npm/uglify-to-browserify@1.0.2",
+      version: "1.0.2"
 };
 test('Test 5: cyclonedx xml: parses accurately', () => {
       expect(

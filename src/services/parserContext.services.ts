@@ -26,6 +26,7 @@ spdxJsonParser = function (sbom): Package[] {
       consRisk: undefined,
       highestRisk: undefined,
       likelihood: undefined,
+      version: pkg.versionInfo
     };
 
     //Get External Reference locators
@@ -56,6 +57,7 @@ spdxTagValueParser = function (sbom): Package[] {
       let id:string = '';
       let cpe = undefined;
       let purl = undefined;
+      let version = undefined;
 
       for(let line of tags){
         if(line != ''){
@@ -66,6 +68,9 @@ spdxTagValueParser = function (sbom): Package[] {
           }
           else if(tag == 'PackageName'){
             name = value;
+          }
+          else if(tag == 'PackageVersion'){
+            version = value;
           }
           else if(tag == 'ExternalRef' && value.includes('cpe') && cpe == undefined){
             cpe = value.split(' ')[2];
@@ -85,6 +90,7 @@ spdxTagValueParser = function (sbom): Package[] {
         consRisk: undefined,
         highestRisk: undefined,
         likelihood: undefined,
+        version: version
       };
       packages.push(p);
   }
@@ -104,6 +110,7 @@ function cyclonedxGetPackages(sbomPackages:any): Package[]{
       consRisk: undefined,
       highestRisk: undefined,
       likelihood: undefined,
+      version: pkg.version,
     };
     //Get External Reference locators
     if (pkg.hasOwnProperty('purl')) {
