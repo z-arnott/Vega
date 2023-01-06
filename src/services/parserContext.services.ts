@@ -16,7 +16,6 @@ let cyclonedxXmlParser: ParsingStrategy;
 spdxJsonParser = function (sbom): Package[] {
   let packages: Package[] = [];
   let sbomPackages: any = sbom.packages; //get all packages
-
   sbomPackages.forEach(function (pkg: any) {
     let p: Package = {
       name: pkg.name,
@@ -36,22 +35,21 @@ spdxJsonParser = function (sbom): Package[] {
           p.purl = extRef.referenceLocator;
           //break here? then we get EITHER cpe or purl
         }
-        if (extRef.referenceType.startsWith('cpe') && p.cpeName == undefined) {
+        if (extRef.referenceType.includes('cpe') && p.cpeName == undefined) {
           p.cpeName = extRef.referenceLocator;
           //break here? then we get EITHER cpe or purl
         }
-        //break if both are define
-    }
+        //break if both are defined?
+    }}
     packages.push(p);
-  }})
+  })
   return packages;
 };
 
 spdxTagValueParser = function (sbom): Package[] {
   let packages: Package[] = [];
-  let sbomArray = sbom.toString().split(/\n[#]+.*(Package).*\n\n/gm);//split string by packages
+  let sbomArray = sbom.toString().split(/\n[#]+.*(?:Package).*\n/gm);//split string by packages
   sbomArray.shift(); //remove header info before packages
-  console.log(sbomArray);
   for(let str of sbomArray){
       let tags = str.split('\n');
       let name:string = '';
@@ -75,6 +73,7 @@ spdxTagValueParser = function (sbom): Package[] {
           else if(tag == 'ExternalRef' && value.includes('purl') && purl == undefined){
             purl = value.split(' ')[2];
           }
+          if(tag.includes('#')){break;}//end of package
         }
       }
       let p: Package = {
