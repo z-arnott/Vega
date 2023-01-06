@@ -267,9 +267,3 @@ test('Test 9: SONATYPE invalid body', () => {
     expect(data.sort()).toStrictEqual(expectedResult9.sort());
   });
 });
-
-const sumtest = require('./sumtrial');
-
-test('adds 1 + 2 to equal 3', () => {
-  expect(sumtest(1, 2)).toBe(3);
-});

@@ -41,18 +41,6 @@
     "typescript": "^4.9.4"
   },
   "jest": {
-    "scriptPreprocessor": "../node_modules/babel-jest",
-    "testFileExtensions": [
-      "es6",
-      "js",
-      "ts"
-    ],
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "es6",
-      "ts"
-    ],
     "roots": [
       "dist"
     ],
