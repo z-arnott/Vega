@@ -12,9 +12,9 @@ function getAppRootDir() : string {
       return currentDir
 }
 const sbom_filepath = 'test/sbom_examples/unit_tests';
-const spdx_json  = JSON.parse(fs.readFileSync(path.join(getAppRootDir(), sbom_filepath, 'bom.spdx.json'), 'utf-8'));
+const spdx_json  = fs.readFileSync(path.join(getAppRootDir(), sbom_filepath, 'bom.spdx.json'), 'utf-8');
 const spdx = fs.readFileSync(path.join(getAppRootDir(), sbom_filepath, 'bom.spdx'), 'utf-8');
-const cyclonedx_json = JSON.parse(fs.readFileSync(path.join(getAppRootDir(), sbom_filepath, 'bom.cyclonedx.json'), 'utf-8'));
+const cyclonedx_json = fs.readFileSync(path.join(getAppRootDir(), sbom_filepath, 'bom.cyclonedx.json'), 'utf-8');
 const cyclonedx_xml = fs.readFileSync(path.join(getAppRootDir(), sbom_filepath, 'bom.cyclonedx.xml'));
 
 //SPDX JSON

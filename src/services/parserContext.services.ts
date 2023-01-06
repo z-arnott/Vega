@@ -1,9 +1,9 @@
-import { Package, SbomFormat } from '@utils/types.utils';
+import { Package, SbomFormat } from '../utils/types.utils';
 import {XMLParser, XMLBuilder} from 'fast-xml-parser';
 
 /****************** PARSING STRATEGY INTERFACE **********************/
 interface ParsingStrategy {
-  (sbom: any): Package[];
+  (sbom: string): Package[];
 }
 
 //Parser instances
@@ -15,7 +15,7 @@ let cyclonedxXmlParser: ParsingStrategy;
 //Cleaner implementaions
 spdxJsonParser = function (sbom): Package[] {
   let packages: Package[] = [];
-  let sbomPackages: any = sbom.packages; //get all packages
+  let sbomPackages: any = JSON.parse(sbom).packages; //get all packages
   sbomPackages.forEach(function (pkg: any) {
     let p: Package = {
       name: pkg.name,
@@ -128,7 +128,7 @@ cyclonedxXmlParser = function (sbom): Package[] {
 
 cyclonedxJsonParser = function (sbom): Package[] {
   //Trim sbom to only package list
-  let sbomPackages: any = sbom.components;
+  let sbomPackages: any = JSON.parse(sbom).components;
   return cyclonedxGetPackages(sbomPackages);
 };
 

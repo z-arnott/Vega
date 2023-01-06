@@ -78,7 +78,7 @@ PackageLicenseInfoFromFiles: GPL-2.0
 PackageLicenseInfoFromFiles: LicenseRef-1
 PackageLicenseInfoFromFiles: LicenseRef-2
 PackageLicenseDeclared: (LicenseRef-3 AND LGPL-2.0)
-PackageLicenseComments: <text>The license for this project changed with the release of version x.y.  The version of the project included here post-dates the license change.</text>
+PackageLicenseComments: <text>The license for this project changed with the release of version x.y.  The version of the project included here post-dates the license change. Testing having#</text>
 PackageCopyrightText: <text>Copyright 2008-2010 John Smith</text>
 PackageSummary: <text>GNU C library.</text>
 PackageDescription: <text>The GNU C Library defines functions that are specified by the ISO C standard, as well as additional features specific to POSIX and other derivatives of the Unix operating system, and extensions specific to GNU systems.</text>
