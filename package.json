@@ -46,7 +46,8 @@
     ],
     "moduleDirectories": [
       "node_modules",
-      "src"
+      "src",
+      "test"
     ],
     "moduleNameMapper": {
       "^@utils/(.*)$": "<rootDir>/src/utils/$1",
