@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 
 
 const supabaseUrl = 'https://katamtzaudnxbudjjbhm.supabase.co' as string;
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImthdGFtdHphdWRueGJ1ZGpqYmhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzIzMTA1ODgsImV4cCI6MTk4Nzg4NjU4OH0.NV2_eztn3turMfX2RChCycB7vTskgknCC2KeAdaE8QA' as string;
+const supabaseKey = process.env.SUPABASE_KEY as string;
 
 // Create a single supabase client for interacting with your database
 dotenv.config();
