@@ -36,13 +36,13 @@ export interface DBPackage {
   packageid: number;
   sessionid: number;
   name: string | null
-  // packageversion: string | null;
-  // consrisk: number | null; 
-  // impact: number | null;
-  // likelihood: number | null;
-  // highesrisk: number | null;
-  // purl: string | null;
-  // cpename: string | null;
+  packageversion: string | null;
+  consrisk: number | null; 
+  impact: number | null;
+  likelihood: number | null;
+  highestrisk: number | null;
+  purl: string | null;
+  cpename: string | null;
 }
 
 export interface DBResponse{

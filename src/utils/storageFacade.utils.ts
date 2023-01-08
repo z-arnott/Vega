@@ -3,11 +3,11 @@ import { supabase } from "./supabase";
 /****************** SET SESSION ID **********************/
 
  
-/****************** READ PACKAGE **********************/
-export async function ReadPackage(sessionid:number,packageid:number){
+/****************** READ PACKAGES **********************/
+export async function ReadSpecificPackage(sessionid:number,packageid:number){
   let packageresult = await supabase //common syntax on JS: const {data,error} = await...
     .from('packages') 
-    .select('sessionid,packageid,name') //values are outputted first in, last out
+    .select('*') //values are outputted first in, last out
     .eq('sessionid',sessionid)
     .eq('packageid',packageid)
   //Step #2: Incorporate filtering
@@ -17,6 +17,17 @@ export async function ReadPackage(sessionid:number,packageid:number){
   return packageresult;
 }
 
+export async function ReadAllPackage(sessionid:number){
+  let packageresult = await supabase //common syntax on JS: const {data,error} = await...
+    .from('packages') 
+    .select('*') //values are outputted first in, last out
+    .eq('sessionid',sessionid)
+  //Step #2: Incorporate filtering
+    //.eq('packageID','specificpackage); //if removed, displays all packageIDs
+  //Step #3: Incorporate sorting
+  //Step #4: Incorporate pagination - see classdiagrams.drawio
+  return packageresult;
+}
 // // /****************** READ VULNERABILITY **********************/
 // export async function ReadVulnerability(packageIDrequired:number){
 //   let vulnerabilitiesresults = await supabase 
