@@ -2,8 +2,6 @@ import { Package, SbomFormat } from '../src/utils/types.utils';
 import {parse} from '../src/services/parserContext.services';
 import fileUpload from 'express-fileupload';
 
-let num = SbomFormat.CYCLONEDX_JSON;
-
 const express = require('express');
 const app = express();
 app.use(express.json());
