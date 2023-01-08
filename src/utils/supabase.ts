@@ -1,11 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from './database.types';
+import dotenv from 'dotenv';
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
 
-// Create a single supabase client for interacting with your databasd
-const supabase  =  createClient<Database>(supabaseUrl!, supabaseKey!)
+const supabaseUrl = 'https://katamtzaudnxbudjjbhm.supabase.co' as string;
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImthdGFtdHphdWRueGJ1ZGpqYmhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzIzMTA1ODgsImV4cCI6MTk4Nzg4NjU4OH0.NV2_eztn3turMfX2RChCycB7vTskgknCC2KeAdaE8QA' as string;
+
+// Create a single supabase client for interacting with your database
+dotenv.config();
+const supabase  =  createClient(supabaseUrl, supabaseKey)
 
 export {supabase}
 
@@ -17,7 +20,7 @@ export async function getJunction() {
 type JunctionResponse = Awaited<ReturnType<typeof getJunction>>
 export type JunctionResponsesuccess = JunctionResponse['data'];
 export type JunctionResponseerror = JunctionResponse['error'];
-console.log(getJunction());
+//console.log(getJunction());
 // export async function getJunction2(){
 //   const {data:junction, error} = await supabase.from('junction').select('cveid, packageid');
 //   return {

@@ -31,3 +31,26 @@ export interface Vulnerability {
   likelihood: number;
   risk: number;
 }
+
+export interface DBPackage {
+  packageid: number;
+  sessionid: number;
+  name: string | null
+  // packageversion: string | null;
+  // consrisk: number | null; 
+  // impact: number | null;
+  // likelihood: number | null;
+  // highesrisk: number | null;
+  // purl: string | null;
+  // cpename: string | null;
+}
+
+export interface DBResponse{
+  count: number | null;
+  data: any;  
+  error: string | null;
+  status: number | null;
+  statusText: string | null;     
+
+
+}

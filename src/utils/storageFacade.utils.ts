@@ -4,12 +4,12 @@ import { supabase } from "./supabase";
 
  
 /****************** READ PACKAGE **********************/
-export async function ReadPackage(sessionID:number,packageID:number){
+export async function ReadPackage(sessionid:number,packageid:number){
   let packageresult = await supabase //common syntax on JS: const {data,error} = await...
     .from('packages') 
-    .select('packageid,name,purl,cpeName,impact,likelihood,consRisk,highestRisk')
-    .eq('sessionID',sessionID)
-    .eq('packageID',packageID)
+    .select('sessionid,packageid,name') //values are outputted first in, last out
+    .eq('sessionid',sessionid)
+    .eq('packageid',packageid)
   //Step #2: Incorporate filtering
     //.eq('packageID','specificpackage); //if removed, displays all packageIDs
   //Step #3: Incorporate sorting
