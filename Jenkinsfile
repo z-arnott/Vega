@@ -12,10 +12,22 @@ pipeline {
                 sh 'npm run build'
             }
         }
+        stage('Start') {
+            steps {
+                echo 'Starting server..'
+                sh 'screen -d -m -S screen.npmStart npm start'
+            }
+        }
         stage('Test') {
             steps {
                 echo 'Testing..'
-                sh 'npm test'
+                sh 'npm run test'
+            }
+        }
+        stage('Stop') {
+            steps {
+                echo 'Exiting server..'
+                sh 'killall -15 node'
             }
         }
     }
