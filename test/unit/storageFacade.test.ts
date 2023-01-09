@@ -1,6 +1,6 @@
 //import { supabase } from @;
 //import { Database };
-import { ReadSpecificPackage,ReadAllPackage,ReadMultipleVulnerability } from '@utils/storageFacade.utils'; 
+import { ReadSpecificPackage,ReadAllPackage,ReadMultipleVulnerability,WritePackageRequest } from '@utils/storageFacade.utils'; 
 import { DBPackage, DBResponse, DBVulnerability } from '@utils/types.utils';
 import {expect, jest, test} from '@jest/globals';
 import dotenv from 'dotenv';
@@ -129,4 +129,38 @@ test('Test 3: Read Multiple Vulnerabilities Given PackageID no sorting', () => {
   });
 });
 
-//Test 4: Read all vulnerabilities
+//Test 4: Write One package
+
+let expectedData4: DBPackage[] = [{
+  packageid: 5,
+  sessionid: 348,
+  name: "randomtest5",
+  packageversion: null,
+  consrisk: 7.4,
+  impact: 9.0,
+  likelihood: 7.6,
+  highestrisk: 9.4,
+  purl: null,
+  cpename: null
+}
+]
+
+let expectedResult4: DBResponse ={
+  count: null,
+  data: expectedData4,
+  error: null,
+  status: 200,
+  statusText: "OK"
+}
+
+test('Test 4: Write One Package', () => {
+  //return WritePackageRequest(expectedData4).then((data) => {
+   // expect(data).toStrictEqual(expectedResult4)
+  // }
+  WritePackageRequest(expectedData4);
+  return ReadSpecificPackage(348,5).then((data) => {
+  expect(data).toStrictEqual(expectedResult4);
+  });
+  //write delete function to delete insert
+  //if (ReadSpecificPackage(348,5) == expectedResult4){ }
+});

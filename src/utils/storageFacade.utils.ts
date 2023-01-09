@@ -1,8 +1,12 @@
 //import {sessionID} from '@utils/supabase';
 import { supabase } from "./supabase";
+import { DBPackage } from "./types.utils";
 /****************** SET SESSION ID **********************/
 
- 
+ //incorporate filtering, sorting, pagniation
+ //Step #3: Incorporate sorting
+   // .order('packageID', {ascending:false}) 
+    //Step #4: Incorporate pagination - see classdiagrams.drawio
 /****************** READ PACKAGES **********************/
 export async function ReadSpecificPackage(sessionid:number,packageid:number){
   let packageresult = await supabase //common syntax on JS: const {data,error} = await...
@@ -10,10 +14,6 @@ export async function ReadSpecificPackage(sessionid:number,packageid:number){
     .select('*') //values are outputted first in, last out
     .eq('sessionid',sessionid)
     .eq('packageid',packageid)
-  //Step #2: Incorporate filtering
-    //.eq('packageID','specificpackage); //if removed, displays all packageIDs
-  //Step #3: Incorporate sorting
-  //Step #4: Incorporate pagination - see classdiagrams.drawio
   return packageresult;
 }
 
@@ -22,10 +22,6 @@ export async function ReadAllPackage(sessionid:number){
     .from('packages') 
     .select('*') //values are outputted first in, last out
     .eq('sessionid',sessionid)
-  //Step #2: Incorporate filtering
-    //.eq('packageID','specificpackage); //if removed, displays all packageIDs
-  //Step #3: Incorporate sorting
-  //Step #4: Incorporate pagination - see classdiagrams.drawio
   return packageresult;
 }
 /****************** READ VULNERABILITY **********************/
@@ -36,17 +32,7 @@ export async function ReadMultipleVulnerability(packageid:number){
   .eq('packageid',packageid)
   return data;
 }
-  // let vulnerabilitiesresults = await supabase 
-  //   .from('junction')
-  //   .select('cveid, packageid, vulnerabilities!inner(description,risk,likelihood,impact)')
-  //   .filter('packageid','in',packageIDrequired)
-  //Step #2: Incorporate filtering
-    //.eq('packageID','specificpackage); //if removed, displays all packageIDs
-  //Step #3: Incorporate sorting
-   // .order('packageID', {ascending:false}) 
-    //Step #4: Incorporate pagination - see classdiagrams.drawio
-  //return vulnerabilitiesresults;
- 
+// Hasn't been unit tested, but follows the same concept so no need
   export async function ReadAllVulnerabilities(){
     let vulnerabilities = await supabase
     .from ('vulnerabilities')
@@ -54,13 +40,18 @@ export async function ReadMultipleVulnerability(packageid:number){
     return vulnerabilities;
   }
 
-// /****************** WRITE PACKAGE**********************/
-// //Function #4: Write Request (Package)
-// export async function WritePackageRequest(tablename: string, packageIDvalue: number, name: string, sessionIDvalue: string, packageversionvalue: string, consRiskvalue: number , consImpactvalue: number, consLikelihoodvalue:number, highestRiskvalue: number, purlstring: string, cpeNamestring: string){
-//   const {error} = await supabase
-//   .from(tablename)
-//   .insert({packageID: packageIDvalue, sessionID: sessionIDvalue, name: name, packageversion : packageversionvalue, consRisk:consRiskvalue, consImpact:consImpactvalue ,consLikelihood: consLikelihoodvalue, highestRisk:highestRiskvalue ,purl: purlstring,cpeName:cpeNamestring});
-// }
+/****************** WRITE PACKAGE**********************/
+//Function #4: Write Request (Package)
+export async function WritePackageRequest(DBPackage:any){
+  let {error} = await supabase
+  .from('packages')
+  .insert(DBPackage);
+  return error;
+}
+//have it return 
+
+
+//Function #5: Write packages in bulk
 
 // /****************** WRITE VULNERABILITY **********************/
 // //Function #5: Write Request (Vulnerability)
