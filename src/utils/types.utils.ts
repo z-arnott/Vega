@@ -33,10 +33,10 @@ export interface Vulnerability {
 }
 
 export interface DBPackage {
-  packageid: number;
+  packageid: number; //update from Package interface
   sessionid: number;
   name: string | null
-  packageversion: string | null;
+  packageversion: string | null; //addition from Package interface
   consrisk: number | null; 
   impact: number | null;
   likelihood: number | null;
@@ -45,12 +45,21 @@ export interface DBPackage {
   cpename: string | null;
 }
 
+export interface DBVulnerability {
+  cveid: number; //update from Vulnerability interface
+  packageid: number; //update from Vulnerability interface
+  //cvss2: string; 
+  impact: number| null;
+  likelihood: number| null;
+  risk: number| null;
+  description: string| null;
+}
+
 export interface DBResponse{
   count: number | null;
   data: any;  
   error: string | null;
   status: number | null;
   statusText: string | null;     
-
 
 }

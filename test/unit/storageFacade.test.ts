@@ -1,7 +1,7 @@
 //import { supabase } from @;
 //import { Database };
-import { ReadSpecificPackage,ReadAllPackage } from '@utils/storageFacade.utils'; 
-import { DBPackage, DBResponse } from '@utils/types.utils';
+import { ReadSpecificPackage,ReadAllPackage,ReadMultipleVulnerability } from '@utils/storageFacade.utils'; 
+import { DBPackage, DBResponse, DBVulnerability } from '@utils/types.utils';
 import {expect, jest, test} from '@jest/globals';
 import dotenv from 'dotenv';
 
@@ -89,3 +89,44 @@ test('Test 2: Read All PackageInfo Given SessionID', () => {
     expect(data).toStrictEqual(expectedResult2);
   });
 });
+
+//Test 3: Read Multiple Vulnerabilities Given PackageID
+
+let expectedData3: DBVulnerability[] = [
+    {
+        cveid: 7485,
+        packageid: 3,
+        impact: null,
+        likelihood: null,
+        risk: null,
+        description: "broken window"
+      },
+      {
+      cveid: 4765,
+      packageid: 3,
+      impact: null,
+      likelihood: null,
+      risk: null,
+      description: "flat tire"
+      }
+      
+      
+    ];
+
+let expectedResult3: DBResponse ={
+  count: null,
+  data: expectedData3,
+  error: null,
+  status: 200,
+  statusText: "OK"
+
+} 
+
+test('Test 3: Read Multiple Vulnerabilities Given PackageID no sorting', () => {
+  return ReadMultipleVulnerability(3).then((data) => {
+    //expect(data).toEqual(expect.arrayContaining(expectedData3));
+    expect(data).toEqual(expect.arrayContaining(expectedData3)); //good to use here instead of .toEqual or .toStrictEqual 
+  });
+});
+
+//Test 4: Read all vulnerabilities

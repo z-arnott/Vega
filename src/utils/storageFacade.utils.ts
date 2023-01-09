@@ -28,19 +28,31 @@ export async function ReadAllPackage(sessionid:number){
   //Step #4: Incorporate pagination - see classdiagrams.drawio
   return packageresult;
 }
-// // /****************** READ VULNERABILITY **********************/
-// export async function ReadVulnerability(packageIDrequired:number){
-//   let vulnerabilitiesresults = await supabase 
-//     .from('junction')
-//     .select('cveid, packageid, vulnerabilities!inner(description,risk,likelihood,impact)')
-//     .filter('packageid','in',packageIDrequired)
-//   //Step #2: Incorporate filtering
-//     //.eq('packageID','specificpackage); //if removed, displays all packageIDs
-//   //Step #3: Incorporate sorting
-//    // .order('packageID', {ascending:false}) 
-//     //Step #4: Incorporate pagination - see classdiagrams.drawio
-//   return vulnerabilitiesresults;
-//  }
+/****************** READ VULNERABILITY **********************/
+export async function ReadMultipleVulnerability(packageid:number){
+  const {data}  = await supabase
+  .from ('vulnerabilities')
+  .select('*')
+  .eq('packageid',packageid)
+  return data;
+}
+  // let vulnerabilitiesresults = await supabase 
+  //   .from('junction')
+  //   .select('cveid, packageid, vulnerabilities!inner(description,risk,likelihood,impact)')
+  //   .filter('packageid','in',packageIDrequired)
+  //Step #2: Incorporate filtering
+    //.eq('packageID','specificpackage); //if removed, displays all packageIDs
+  //Step #3: Incorporate sorting
+   // .order('packageID', {ascending:false}) 
+    //Step #4: Incorporate pagination - see classdiagrams.drawio
+  //return vulnerabilitiesresults;
+ 
+  export async function ReadAllVulnerabilities(){
+    let vulnerabilities = await supabase
+    .from ('vulnerabilities')
+    .select('*')
+    return vulnerabilities;
+  }
 
 // /****************** WRITE PACKAGE**********************/
 // //Function #4: Write Request (Package)
