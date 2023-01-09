@@ -8,13 +8,13 @@ import { DBPackage } from "./types.utils";
    // .order('packageID', {ascending:false}) 
     //Step #4: Incorporate pagination - see classdiagrams.drawio
 /****************** READ PACKAGES **********************/
-export async function ReadSpecificPackage(sessionid:number,packageid:number){
-  let packageresult = await supabase //common syntax on JS: const {data,error} = await...
+export async function ReadSpecificPackage(sessionid:number | null ,packageid:number){
+  let {data} = await supabase //common syntax on JS: const {data,error} = await...
     .from('packages') 
     .select('*') //values are outputted first in, last out
     .eq('sessionid',sessionid)
     .eq('packageid',packageid)
-  return packageresult;
+  return data;
 }
 
 export async function ReadAllPackage(sessionid:number){
@@ -43,13 +43,25 @@ export async function ReadMultipleVulnerability(packageid:number){
 /****************** WRITE PACKAGE**********************/
 //Function #4: Write Request (Package)
 export async function WritePackageRequest(DBPackage:any){
-  let {error} = await supabase
+  let {status} = await supabase
   .from('packages')
   .insert(DBPackage);
-  return error;
+  return status; 
 }
-//have it return 
+// //Function #5: Write Packages in Bulk
+// export async function WriteAllPackages(DBPackage[]){
+//   let {status} = await supabase
+//   .from('packages')
+//   .insert(DBPackage);
+//}
 
+export async function DeletePackage (packageid:number){
+const { status } = await supabase
+  .from('packages')
+  .delete()
+  .eq('packageid', packageid)
+return status;
+}
 
 //Function #5: Write packages in bulk
 

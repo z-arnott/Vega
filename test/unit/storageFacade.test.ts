@@ -1,6 +1,6 @@
 //import { supabase } from @;
 //import { Database };
-import { ReadSpecificPackage,ReadAllPackage,ReadMultipleVulnerability,WritePackageRequest } from '@utils/storageFacade.utils'; 
+import { ReadSpecificPackage,ReadAllPackage,ReadMultipleVulnerability,WritePackageRequest, DeletePackage } from '@utils/storageFacade.utils'; 
 import { DBPackage, DBResponse, DBVulnerability } from '@utils/types.utils';
 import {expect, jest, test} from '@jest/globals';
 import dotenv from 'dotenv';
@@ -31,18 +31,18 @@ let expectedData1: DBPackage[] = [
       }
     ];
 
-let expectedResult1: DBResponse={
-  count: null,
-  data: expectedData1,
-  error: null,
-  status: 200,
-  statusText: "OK"
+// let expectedResult1: DBResponse={
+//   count: null,
+//   data: expectedData1,
+//   error: null,
+//   status: 200,
+//   statusText: "OK"
 
-} 
+// } 
 
 test('Test 1: Read Specific PackageInfo Given SessionID and PackageID', () => {
   return ReadSpecificPackage(234,1).then((data) => {
-    expect(data).toStrictEqual(expectedResult1);
+    expect(data).toStrictEqual(expectedData1);
   });
 });
 
@@ -154,13 +154,59 @@ let expectedResult4: DBResponse ={
 }
 
 test('Test 4: Write One Package', () => {
-  //return WritePackageRequest(expectedData4).then((data) => {
-   // expect(data).toStrictEqual(expectedResult4)
-  // }
-  WritePackageRequest(expectedData4);
-  return ReadSpecificPackage(348,5).then((data) => {
-  expect(data).toStrictEqual(expectedResult4);
+  //WritePackageRequest(expectedData4);
+  return WritePackageRequest(expectedData4).then((status) => {
+  expect(status).toStrictEqual(201); //201 code for content created
   });
-  //write delete function to delete insert
-  //if (ReadSpecificPackage(348,5) == expectedResult4){ }
+}); 
+
+//Test 5: Delete One Package Given Packageid
+test('Test 5: Delete One Package', () =>{
+  return DeletePackage(5).then((status) => {
+    expect(status).toStrictEqual(204); //204 code for success, no content to return
+  });
 });
+
+//Test 6: Write Packages in Bulk
+let expectedData6: DBPackage[] = [
+  {
+  packageid: 5,
+  sessionid: 348,
+  name: "randomtest5",
+  packageversion: null,
+  consrisk: 7.4,
+  impact: 9.0,
+  likelihood: 7.6,
+  highestrisk: 9.4,
+  purl: null,
+  cpename: null
+},
+{
+  packageid: 6,
+  sessionid: 348,
+  name: "randomtest6",
+  packageversion: null,
+  consrisk: 7.4,
+  impact: 9.0,
+  likelihood: 7.6,
+  highestrisk: 9.4,
+  purl: null,
+  cpename: null
+}
+]
+
+test('Test 6: Write Packages in Bulk', () => {
+  //WritePackageRequest(expectedData4);
+  return WritePackageRequest(expectedData6).then((status) => {
+  expect(status).toStrictEqual(201); //201 code for content created
+  });
+}); 
+
+test('Test 7: Delete Multiple Packages', () =>{
+  DeletePackage(5);
+  DeletePackage(6);
+  return ReadSpecificPackage(null,6).then((data) => {
+    expect(data).toStrictEqual(null); //querying a non-existant entry yield a null in the data field
+  });
+});
+
