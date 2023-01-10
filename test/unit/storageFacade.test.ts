@@ -252,13 +252,11 @@ let expectedData9: DBVulnerabilityInput[] = [
 });
 
 //Delete dummy vulnerabilities created in last step
+test('Test 11: Delete Multiple Vulnerabilities', () =>{
   DeleteVuln(5253);
-  DeleteVuln(508);
-    
-//   ];
-// test('Test 8: Write Vulnerabilities', () =>{
-//   return WriteVulnRequest(expectedData8).then((status) => {
-//     expect(status).toStrictEqual(201);
-//   });
-// });
+  return DeleteVuln(508).then((status) => {
+    expect(status).toStrictEqual(204); //querying a non-existant entry yield a null in the data field
+  });
+});
+  
 
