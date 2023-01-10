@@ -1,7 +1,8 @@
 //import { supabase } from @;
 //import { Database };
-import { ReadSpecificPackage,ReadAllPackage,ReadMultipleVulnerability,WritePackageRequest, DeletePackage } from '@utils/storageFacade.utils'; 
-import { DBPackage, DBResponse, DBVulnerability } from '@utils/types.utils';
+
+import { ReadSpecificPackage,ReadAllPackage,ReadMultipleVulnerability,WritePackageRequest, DeletePackage, WriteVulnRequest, DeleteVuln } from '@utils/storageFacade.utils'; 
+import { DBPackage, DBResponse, DBVulnerability, DBVulnerabilityInput } from '@utils/types.utils';
 import {expect, jest, test} from '@jest/globals';
 import dotenv from 'dotenv';
 
@@ -92,38 +93,32 @@ test('Test 2: Read All PackageInfo Given SessionID', () => {
 
 //Test 3: Read Multiple Vulnerabilities Given PackageID
 
+
 let expectedData3: DBVulnerability[] = [
     {
+      packageid:1,
+      vulnerabilities:{
         cveid: 7485,
-        packageid: 3,
         impact: null,
         likelihood: null,
         risk: null,
         description: "broken window"
+        }
       },
       {
-      cveid: 4765,
-      packageid: 3,
-      impact: null,
-      likelihood: null,
-      risk: null,
-      description: "flat tire"
-      }
-      
-      
-    ];
+      packageid: 1,
+      vulnerabilities:{
+        cveid: 4765,
+        impact: null,
+        likelihood: null,
+        risk: null,
+        description: "flat tire"
+        }
+    }];
 
-let expectedResult3: DBResponse ={
-  count: null,
-  data: expectedData3,
-  error: null,
-  status: 200,
-  statusText: "OK"
-
-} 
 
 test('Test 3: Read Multiple Vulnerabilities Given PackageID no sorting', () => {
-  return ReadMultipleVulnerability(3).then((data) => {
+  return ReadMultipleVulnerability(1).then((data) => {
     //expect(data).toEqual(expect.arrayContaining(expectedData3));
     expect(data).toEqual(expect.arrayContaining(expectedData3)); //good to use here instead of .toEqual or .toStrictEqual 
   });
@@ -168,8 +163,7 @@ test('Test 5: Delete One Package', () =>{
 });
 
 //Test 6: Write Packages in Bulk
-let expectedData6: DBPackage[] = [
-  {
+let expectedData6: DBPackage[] = [{
   packageid: 5,
   sessionid: 348,
   name: "randomtest5",
@@ -209,4 +203,62 @@ test('Test 7: Delete Multiple Packages', () =>{
     expect(data).toStrictEqual(null); //querying a non-existant entry yield a null in the data field
   });
 });
+
+//Test 8: Write One Vulnerabilities
+let expectedData8: DBVulnerabilityInput = {
+  cveid: 5,
+  impact: 9.0,
+  likelihood: 7.6,
+  risk:7.3,
+  description: "painful twist"
+}
+
+test('Test 8: Write One Vulnerability', () => {
+  return WriteVulnRequest(expectedData8).then((status) => {
+  expect(status).toStrictEqual(201); //201 code for content created
+  });
+}); 
+
+
+//Test 9: Delete One Vulnerability
+test('Test 9: Delete Single Vulnerability', () =>{
+  return DeleteVuln(5).then((status) => {
+    expect(status).toStrictEqual(204); //querying a non-existant entry yield a null in the data field
+  });
+});
+
+//Test 9: Write Multiple Vulnerabilities
+let expectedData9: DBVulnerabilityInput[] = [
+  {
+      cveid: 5253,
+      impact: null,
+      likelihood: null,
+      risk: null,
+      description: "painful twist"
+    },
+    {
+    cveid: 508,
+    impact: null,
+    likelihood: null,
+    risk: null,
+    description: "torn guitar strig"
+    }
+  ]
+  
+  test('Test 10: Write Multiple Vulnerabilities',() =>{
+  return WriteVulnRequest(expectedData9).then((status) => {
+  expect(status).toStrictEqual(201);
+  });
+});
+
+//Delete dummy vulnerabilities created in last step
+  DeleteVuln(5253);
+  DeleteVuln(508);
+    
+//   ];
+// test('Test 8: Write Vulnerabilities', () =>{
+//   return WriteVulnRequest(expectedData8).then((status) => {
+//     expect(status).toStrictEqual(201);
+//   });
+// });
 

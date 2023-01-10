@@ -1,6 +1,5 @@
 //import {sessionID} from '@utils/supabase';
 import { supabase } from "./supabase";
-import { DBPackage } from "./types.utils";
 /****************** SET SESSION ID **********************/
 
  //incorporate filtering, sorting, pagniation
@@ -25,13 +24,14 @@ export async function ReadAllPackage(sessionid:number){
   return packageresult;
 }
 /****************** READ VULNERABILITY **********************/
-export async function ReadMultipleVulnerability(packageid:number){
+ export async function ReadMultipleVulnerability(packageid:number){
   const {data}  = await supabase
-  .from ('vulnerabilities')
-  .select('*')
+  .from ('junction')
+  .select('packageid,vulnerabilities(*)')
   .eq('packageid',packageid)
   return data;
-}
+ }
+
 // Hasn't been unit tested, but follows the same concept so no need
   export async function ReadAllVulnerabilities(){
     let vulnerabilities = await supabase
@@ -41,19 +41,13 @@ export async function ReadMultipleVulnerability(packageid:number){
   }
 
 /****************** WRITE PACKAGE**********************/
-//Function #4: Write Request (Package)
+//Function #4: Write Single or Many Request (Package)
 export async function WritePackageRequest(DBPackage:any){
   let {status} = await supabase
   .from('packages')
   .insert(DBPackage);
   return status; 
 }
-// //Function #5: Write Packages in Bulk
-// export async function WriteAllPackages(DBPackage[]){
-//   let {status} = await supabase
-//   .from('packages')
-//   .insert(DBPackage);
-//}
 
 export async function DeletePackage (packageid:number){
 const { status } = await supabase
@@ -63,21 +57,28 @@ const { status } = await supabase
 return status;
 }
 
-//Function #5: Write packages in bulk
 
-// /****************** WRITE VULNERABILITY **********************/
-// //Function #5: Write Request (Vulnerability)
-// export async function WriteVulnRequest(tablename: string, cveidv: number, descriptions:string, riskv: number, likelihoodv: number, impactv: number){
-//   const {error} = await supabase
-//   .from(tablename)
-//   .insert({cveid: cveidv, description: descriptions, risk: riskv, likelihood : likelihoodv, impact:impactv});
-// }
+/****************** WRITE VULNERABILITY **********************/
+//Function #5: Write Request (Vulnerability) - Single or Multiple
+export async function WriteVulnRequest(DBVulnerabilityInput:any){
+  let {status} = await supabase
+  .from ('vulnerabilities')
+  .insert(DBVulnerabilityInput);
+  return status;
+}
+
+export async function DeleteVuln (cveid:number){
+  let { status } = await supabase
+    .from('vulnerabilities')
+    .delete()
+    .eq('cveid', cveid)
+  return status;
+  }
           
-// // /****************** WRITE JUNCTION **********************/
+/****************** WRITE JUNCTION **********************/
 // // //consider eliminating junction table
           
-// // /****************** PURGE SESSIONID **********************/
-// // //To be reviewed with Z
+/****************** PURGE ALL **********************/
           
 // // /****************** DB QUERY BUILDER INTERFACE **********************/
 // // interface DBQueryBuilder {
@@ -96,3 +97,11 @@ return status;
 // // //Write Package
 // // //Read Vulnerability 
 // // //Write Vulnerability
+
+//Future steps - clean up functions to have 1 read, 1 write, and 1 delete
+// export async function WriteVulnRequest(tablename: string, DBVulnerability?:any, DBPackage?:any ){
+//   const {data,status} = await supabase
+//   .from(tablename)
+//   .insert(DBVulnerability | DBPackage );
+//   return status;
+// } 

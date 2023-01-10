@@ -36,7 +36,7 @@ export interface DBPackage {
   packageid: number; //update from Package interface
   sessionid: number;
   name: string | null
-  packageversion: string | null; //addition from Package interface
+  packageversion?: string | null; //addition from Package interface
   consrisk: number | null; 
   impact: number | null;
   likelihood: number | null;
@@ -46,14 +46,25 @@ export interface DBPackage {
 }
 
 export interface DBVulnerability {
-  cveid: number; //update from Vulnerability interface
-  packageid: number; //update from Vulnerability interface
-  //cvss2: string; 
-  impact: number| null;
-  likelihood: number| null;
-  risk: number| null;
-  description: string| null;
+  packageid: number;
+  vulnerabilities:{
+    cveid: number; //update from Vulnerability interface
+    //cvss2: string; 
+    impact: number| null;
+    likelihood: number| null;
+    risk: number| null;
+    description: string| null;
+  }
 }
+
+export interface DBVulnerabilityInput {
+    cveid: number; //update from Vulnerability interface
+    //cvss2: string; 
+    impact: number| null;
+    likelihood: number| null;
+    risk: number| null;
+    description: string| null;
+  }
 
 export interface DBResponse{
   count: number | null;
@@ -61,5 +72,12 @@ export interface DBResponse{
   error: string | null;
   status: number | null;
   statusText: string | null;     
-
 }
+
+// let expectedResult3: DBResponse ={
+//   count: null,
+//   data: expectedData3,
+//   error: null,
+//   status: 200,
+//   statusText: "OK"
+// } 
