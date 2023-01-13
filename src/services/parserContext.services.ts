@@ -1,5 +1,16 @@
 import { Package, SbomFormat } from '../utils/types.utils';
-import {XMLParser, XMLBuilder} from 'fast-xml-parser';
+import { XMLParser } from 'fast-xml-parser';
+
+export { parse };
+
+/****************** PARSER CONTEXT PUBLIC FUNCTIONS **********************/
+//Parses one SBOM, query, returns list of Vulnerabilities
+function parse(sbom: any, strategy: SbomFormat): Package[] {
+  //Set strategy
+  let parser: ParsingStrategy = parsingStrategies[strategy];
+  //Parse file
+  return parser(sbom);
+}
 
 /****************** PARSING STRATEGY INTERFACE **********************/
 interface ParsingStrategy {
@@ -26,79 +37,85 @@ spdxJsonParser = function (sbom): Package[] {
       consRisk: undefined,
       highestRisk: undefined,
       likelihood: undefined,
-      version: pkg.versionInfo
+      version: pkg.versionInfo,
     };
 
     //Get External Reference locators
     if (pkg.hasOwnProperty('externalRefs')) {
-      for(let extRef of pkg.externalRefs){
+      for (let extRef of pkg.externalRefs) {
         if (extRef.referenceType == 'purl' && p.purl == undefined) {
           p.purl = extRef.referenceLocator;
-          //break here? then we get EITHER cpe or purl
+          break; //stop if EITHER cpe or purl found
         }
         if (extRef.referenceType.includes('cpe') && p.cpeName == undefined) {
           p.cpeName = extRef.referenceLocator;
-          //break here? then we get EITHER cpe or purl
+          break; //stop if EITHER cpe or purl found
         }
-        //break if both are defined?
-    }}
+      }
+    }
     packages.push(p);
-  })
+  });
   return packages;
 };
 
 spdxTagValueParser = function (sbom): Package[] {
   let packages: Package[] = [];
-  let sbomArray = sbom.toString().split(/\n[#]+.*(?:Package).*\n/gm);//split string by packages
+  let sbomArray = sbom.toString().split(/\n[#]+.*(?:Package).*\n/gm); //split string by packages
   sbomArray.shift(); //remove header info before packages
-  for(let str of sbomArray){
-      let tags = str.split('\n');
-      let name:string = '';
-      let id:string = '';
-      let cpe = undefined;
-      let purl = undefined;
-      let version = undefined;
+  for (let str of sbomArray) {
+    let tags = str.split('\n');
+    let name: string = '';
+    let id: string = '';
+    let cpe = undefined;
+    let purl = undefined;
+    let version = undefined;
 
-      for(let line of tags){
-        if(line != ''){
-          const [tag, ...rest] = line.split(':');
-          const value = rest.join(':').trim();
-          if(tag == 'SPDXID'){
-            id = value;
-          }
-          else if(tag == 'PackageName'){
-            name = value;
-          }
-          else if(tag == 'PackageVersion'){
-            version = value;
-          }
-          else if(tag == 'ExternalRef' && value.includes('cpe') && cpe == undefined){
-            cpe = value.split(' ')[2];
-          }
-          else if(tag == 'ExternalRef' && value.includes('purl') && purl == undefined){
-            purl = value.split(' ')[2];
-          }
-          if(tag.includes('#')){break;}//end of package
+    for (let line of tags) {
+      if (line != '') {
+        const [tag, ...rest] = line.split(':');
+        const value = rest.join(':').trim();
+        if (tag == 'SPDXID') {
+          id = value;
+        } else if (tag == 'PackageName') {
+          name = value;
+        } else if (tag == 'PackageVersion') {
+          version = value;
+        } else if (
+          tag == 'ExternalRef' &&
+          value.includes('cpe') &&
+          cpe == undefined
+        ) {
+          cpe = value.split(' ')[2];
+        } else if (
+          tag == 'ExternalRef' &&
+          value.includes('purl') &&
+          purl == undefined
+        ) {
+          purl = value.split(' ')[2];
         }
+        if (tag.includes('#')) {
+          break;
+        } //end of package
       }
-      let p: Package = {
-        name: name,
-        id: id,
-        purl: purl,
-        cpeName: cpe,
-        impact: undefined,
-        consRisk: undefined,
-        highestRisk: undefined,
-        likelihood: undefined,
-        version: version
-      };
-      packages.push(p);
+    }
+    let p: Package = {
+      name: name,
+      id: id,
+      purl: purl,
+      cpeName: cpe,
+      impact: undefined,
+      consRisk: undefined,
+      highestRisk: undefined,
+      likelihood: undefined,
+      version: version,
+    };
+    packages.push(p);
   }
   return packages;
 };
 
 /* Create a list of Packages from JSON package list in CycloneDX format */
-function cyclonedxGetPackages(sbomPackages:any): Package[]{
+function cyclonedxGetPackages(sbomPackages: any): Package[] {
   let packages: Package[] = [];
   sbomPackages.forEach(function (pkg: any) {
     let p: Package = {
@@ -120,13 +137,16 @@ function cyclonedxGetPackages(sbomPackages:any): Package[]{
       p.cpeName = pkg.cpe;
     }
     packages.push(p);
-  })
+  });
   return packages;
-} 
+}
 
 cyclonedxXmlParser = function (sbom): Package[] {
   //Convert xml --> json
-  const parser = new XMLParser({ignoreAttributes :false,  attributeNamePrefix : ""});
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    attributeNamePrefix: '',
+  });
   let sbomObj = parser.parse(sbom);
   //Trim sbom to only package list
   let sbomPackages: any = sbomObj.bom.components.component;
@@ -146,14 +166,3 @@ let parsingStrategies = {
   [SbomFormat.CYCLONEDX_JSON]: cyclonedxJsonParser,
   [SbomFormat.CYCLONEDX_XML]: cyclonedxXmlParser,
 };
-
-/****************** PARSER CONTEXT PUBLIC FUNCTIONS **********************/
-//Parses one SBOM, query, returns list of Vulnerabilities
-function parse(sbom: any, strategy: SbomFormat): Package[] {
-  //Set strategy
-  let parser: ParsingStrategy = parsingStrategies[strategy];
-  //Parse file
-  return parser(sbom);
-}
-
-export {parse}
