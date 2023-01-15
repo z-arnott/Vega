@@ -25,7 +25,8 @@ const cyclonedx_json = fs.readFileSync(
   'utf-8'
 );
 const cyclonedx_xml = fs.readFileSync(
-  path.join(getAppRootDir(), sbom_filepath, 'bom.cyclonedx.xml')
+  path.join(getAppRootDir(), sbom_filepath, 'bom.cyclonedx.xml'),
+  'utf-8'
 );
 
 //SPDX JSON
