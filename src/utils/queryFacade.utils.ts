@@ -1,6 +1,8 @@
 import { Query, VulDatabase } from '@utils/types.utils';
 import { Vulnerability } from '@utils/types.utils';
+import {logger} from '@utils/logger.utils';
 import axios from 'axios';
+
 
 /****************** QUERY FACADE API **********************/
 /**
@@ -41,19 +43,19 @@ async function getVulnerabilities(query: Query) {
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
+        const err = "Query Error: " + JSON.stringify(error.response.status) + " " + JSON.stringify(query.params) +" "+ JSON.stringify(query.body);
+        logger.error(err);
       } else if (error.request) {
         // The request was made but no response was received
         // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
         // http.ClientRequest in node.js
-        console.log(error.request);
+        const err = "Query Error: " + JSON.stringify(error.request);
+        logger.error("Query Error: " + err);
       } else {
         // Something happened in setting up the request that triggered an Error
-        console.log('Error', error.message);
+        const err = "Query Error: " + error.message;
+        logger.error(err);
       }
-      console.log(error.config);
       return error.response.status;
     });
 }
