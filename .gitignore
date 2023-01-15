@@ -2,3 +2,4 @@ authconfig.json
 node_modules/
 dist/
 .env
+docs
