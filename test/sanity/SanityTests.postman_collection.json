@@ -1,252 +1,232 @@
 {
-	"info": {
-		"_postman_id": "be99f463-9b10-4296-b7cb-0c8892006a04",
-		"name": "SanityTests",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "24865917"
-	},
-	"item": [
-		{
-			"name": "home",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status test\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8088/",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8088",
-					"path": [
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "uploadSpdxJson",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status test\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "sbom",
-							"type": "file",
-							"src": "./test/sbom_examples/unit_tests/bom.spdx.json"
-						}
-					]
-				},
-				"url": {
-					"raw": "http://localhost:8088/upload?format={{spdxJson}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8088",
-					"path": [
-						"upload"
-					],
-					"query": [
-						{
-							"key": "format",
-							"value": "{{spdxJson}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "uploadCyclonedxJson",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status test\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "sbom",
-							"type": "file",
-							"src": "./test/sbom_examples/unit_tests/bom.cyclonedx.json"
-						}
-					]
-				},
-				"url": {
-					"raw": "http://localhost:8088/upload?format={{cyclonedxJson}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8088",
-					"path": [
-						"upload"
-					],
-					"query": [
-						{
-							"key": "format",
-							"value": "{{cyclonedxJson}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "uploadSpdx",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status test\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "sbom",
-							"type": "file",
-							"src": "./test/sbom_examples/unit_tests/bom.spdx"
-						}
-					]
-				},
-				"url": {
-					"raw": "http://localhost:8088/upload?format={{spdx}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8088",
-					"path": [
-						"upload"
-					],
-					"query": [
-						{
-							"key": "format",
-							"value": "{{spdx}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "uploadCyclonedxXml",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status test\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "sbom",
-							"type": "file",
-							"src": "./test/sbom_examples/unit_tests/bom.cyclonedx.xml"
-						}
-					]
-				},
-				"url": {
-					"raw": "http://localhost:8088/upload?format={{cyclonedxXml}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8088",
-					"path": [
-						"upload"
-					],
-					"query": [
-						{
-							"key": "format",
-							"value": "{{cyclonedxXml}}"
-						}
-					]
-				}
-			},
-			"response": []
-		}
-	],
-	"variable": [
-		{
-			"key": "spdxJson",
-			"value": "0"
-		},
-		{
-			"key": "cyclonedxJson",
-			"value": "3"
-		},
-		{
-			"key": "spdx",
-			"value": "1"
-		},
-		{
-			"key": "cyclonedxXml",
-			"value": "2"
-		}
-	]
+  "info": {
+    "_postman_id": "be99f463-9b10-4296-b7cb-0c8892006a04",
+    "name": "SanityTests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "24865917"
+  },
+  "item": [
+    {
+      "name": "home",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status test\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8088/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8088",
+          "path": [""]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uploadSpdxJson",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status test\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "sbom",
+              "type": "file",
+              "src": "./test/sbom_examples/unit_tests/bom.spdx.json"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8088/upload?format={{spdxJson}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8088",
+          "path": ["upload"],
+          "query": [
+            {
+              "key": "format",
+              "value": "{{spdxJson}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uploadCyclonedxJson",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status test\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "sbom",
+              "type": "file",
+              "src": "./test/sbom_examples/unit_tests/bom.cyclonedx.json"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8088/upload?format={{cyclonedxJson}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8088",
+          "path": ["upload"],
+          "query": [
+            {
+              "key": "format",
+              "value": "{{cyclonedxJson}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uploadSpdx",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status test\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "sbom",
+              "type": "file",
+              "src": "./test/sbom_examples/unit_tests/bom.spdx"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8088/upload?format={{spdx}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8088",
+          "path": ["upload"],
+          "query": [
+            {
+              "key": "format",
+              "value": "{{spdx}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "uploadCyclonedxXml",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status test\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "sbom",
+              "type": "file",
+              "src": "./test/sbom_examples/unit_tests/bom.cyclonedx.xml"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8088/upload?format={{cyclonedxXml}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8088",
+          "path": ["upload"],
+          "query": [
+            {
+              "key": "format",
+              "value": "{{cyclonedxXml}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "spdxJson",
+      "value": "0"
+    },
+    {
+      "key": "cyclonedxJson",
+      "value": "3"
+    },
+    {
+      "key": "spdx",
+      "value": "1"
+    },
+    {
+      "key": "cyclonedxXml",
+      "value": "2"
+    }
+  ]
 }
