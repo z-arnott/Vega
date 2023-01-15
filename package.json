@@ -8,7 +8,8 @@
     "start": "node ./dist/src/index.js",
     "sanityTests": "newman run ./test/sanity/SanityTests.postman_collection.json",
     "test": "jest; npm run sanityTests",
-    "prettier": "npx prettier --write ."
+    "prettier": "npx prettier --write .",
+    "doc": "npx typedoc"
   },
   "repository": {
     "type": "git",
