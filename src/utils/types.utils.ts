@@ -1,9 +1,15 @@
+/**
+ * @enum Represents URLs of supported vulnerability databases
+ */
 export enum VulDatabase {
   NVD = 'https://services.nvd.nist.gov/rest/json/cves/2.0',
   SONATYPE = 'https://ossindex.SONATYPE.org/api/v3/authorized/component-report',
   /*Add supported DBs here */
 }
 
+/**
+ * @enum Supported SBOM formats
+ */
 export enum SbomFormat {
   SPDX_JSON,
   SPDX_TAGVALUE,
@@ -12,6 +18,9 @@ export enum SbomFormat {
   /*Add supported sbom formats here */
 }
 
+/**
+ * Generic query type used to config vulnerability search to external databases
+ */
 export interface Query {
   database: VulDatabase;
   method: string;
@@ -20,6 +29,9 @@ export interface Query {
   body: any | null;
 }
 
+/**
+ * Represents a software package
+ */
 export interface Package {
   id: string;
   name: string;
@@ -32,6 +44,9 @@ export interface Package {
   version: string | undefined;
 }
 
+/**
+ * Represents a cve vulnerability
+ */
 export interface Vulnerability {
   cveId: string;
   packgaeId: number;
