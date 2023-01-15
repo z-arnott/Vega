@@ -8,12 +8,15 @@ const colorize = winston.format.colorize;
 const align = winston.format.align;
 const printf = winston.format.printf;
 
+//Format print statement for console log
 const alignedWithColorsAndTime = winston.format.combine(
   colorize(),
   timestamp(),
   align(),
-  printf((info) => {
-    const { timestamp, level, message, ...args } = info;
+  printf((info:any) => {
+    const {
+      timestamp, level, message, ...args
+    } = info;
 
     const ts = timestamp.slice(0, 19).replace('T', ' ');
     return `[${ts} ${level}]: ${message} ${
@@ -22,27 +25,30 @@ const alignedWithColorsAndTime = winston.format.combine(
   })
 );
 
+/**
+ * Log object used to log warnings, errors, and info.
+ */
 const logger = winston.createLogger({
-  level: 'debug',
-  transports: [
-    new winston.transports.File({
-      filename: 'logs/example.log',
-      format: combine(
-        timestamp({
-          format: 'MMM-DD-YYYY HH:mm:ss',
-        }),
-        prettyPrint()
-      ),
-    }),
-    new winston.transports.Console({
-      format: combine(
-        timestamp({
-          format: 'MMM-DD-YYYY HH:mm:ss',
-        }),
-        alignedWithColorsAndTime
-      ),
-    }),
-  ],
-});
-
-export { logger };
+    level: "debug",
+    transports: [
+      new winston.transports.File({ /*JSON output */
+        filename: "logs/example.log",
+        format: combine(
+          timestamp({
+            format: "MMM-DD-YYYY HH:mm:ss",
+          }),
+          prettyPrint()
+        )
+      }),
+      new winston.transports.Console({ /*Console log */
+        format:  combine(
+          timestamp({
+            format: "MMM-DD-YYYY HH:mm:ss",
+          }), 
+          alignedWithColorsAndTime
+        )
+      })
+    ],
+  });
+  
+export {logger};

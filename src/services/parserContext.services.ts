@@ -1,5 +1,16 @@
 import { Package, SbomFormat } from '../utils/types.utils';
-import { XMLParser, XMLBuilder } from 'fast-xml-parser';
+import { XMLParser } from 'fast-xml-parser';
+
+export { parse };
+
+/****************** PARSER CONTEXT PUBLIC FUNCTIONS **********************/
+//Parses one SBOM, query, returns list of Vulnerabilities
+function parse(sbom: any, strategy: SbomFormat): Package[] {
+  //Set strategy
+  let parser: ParsingStrategy = parsingStrategies[strategy];
+  //Parse file
+  return parser(sbom);
+}
 
 /****************** PARSING STRATEGY INTERFACE **********************/
 interface ParsingStrategy {
@@ -34,13 +45,12 @@ spdxJsonParser = function (sbom): Package[] {
       for (let extRef of pkg.externalRefs) {
         if (extRef.referenceType == 'purl' && p.purl == undefined) {
           p.purl = extRef.referenceLocator;
-          //break here? then we get EITHER cpe or purl
+          break; //stop if EITHER cpe or purl found
         }
         if (extRef.referenceType.includes('cpe') && p.cpeName == undefined) {
           p.cpeName = extRef.referenceLocator;
-          //break here? then we get EITHER cpe or purl
+          break; //stop if EITHER cpe or purl found
         }
-        //break if both are defined?
       }
     }
     packages.push(p);
@@ -156,14 +166,3 @@ let parsingStrategies = {
   [SbomFormat.CYCLONEDX_JSON]: cyclonedxJsonParser,
   [SbomFormat.CYCLONEDX_XML]: cyclonedxXmlParser,
 };
-
-/****************** PARSER CONTEXT PUBLIC FUNCTIONS **********************/
-//Parses one SBOM, query, returns list of Vulnerabilities
-function parse(sbom: any, strategy: SbomFormat): Package[] {
-  //Set strategy
-  let parser: ParsingStrategy = parsingStrategies[strategy];
-  //Parse file
-  return parser(sbom);
-}
-
-export { parse };
