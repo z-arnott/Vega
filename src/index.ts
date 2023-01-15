@@ -1,5 +1,10 @@
+import { parse } from '../src/services/parserContext.services';
+import fileUpload from 'express-fileupload';
+
 const express = require('express');
 const app = express();
+app.use(express.json());
+app.use(fileUpload());
 const port = 8088; // default port to listen
 
 //Homepage
@@ -11,17 +16,14 @@ app.get('/', (req: any, res: any) => {
 /*************** Add supported endpoints here ***************/
 
 // define a route handler for the Upload endpoint
-app.get(
-  '/upload',
-  (req: any, res: any, next: any) => {
-    res.send('Upload: Hello world!');
-    //add middleware calls here as needed
-  },
-  //Define middleware
-  (req: any, res: any, next: any) => {
-    console.log("Upload's middleware called!");
-  }
-);
+app.post('/upload', (req: any, res: any, next: any) => {
+  let sbom = req.files.sbom.data.toString('utf8');
+  let sbomType = req.query.format;
+  let packages = parse(sbom, sbomType);
+  console.log(packages);
+  res.send('Upload: parsed ' + packages.length + ' packages');
+  //add middleware calls here as needed
+});
 
 /*************** Start Server ***************/
 // start the Express server
@@ -34,5 +36,5 @@ process.on('SIGTERM', () => {
   console.log('SIGTERM signal received: closing HTTP server');
   app.close(() => {
     console.log('HTTP server closed');
-  })
-})
+  });
+});
