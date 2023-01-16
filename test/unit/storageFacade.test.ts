@@ -1,7 +1,7 @@
 //import { supabase } from @;
 //import { Database };
 
-import { readPackage,readAllPackages,readVulnByPkg,writePackage, deletePackage, writeVuln, DeleteVuln, readVulnBySession } from '@utils/storageFacade.utils'; 
+import { readPackage,readAllPackages,readVulnByPkg,writePackage, deletePackage, writeVuln, DeleteVuln, readVulnBySession,updateVuln,updatePackage } from '@utils/storageFacade.utils'; 
 import { DBPackage, DBResponse, DBVulnerabilitybypid, DBVulnerabilitybysid, DBVulnerabilityInput } from '@utils/types.utils';
 import {expect, jest, test} from '@jest/globals';
 import dotenv from 'dotenv';
@@ -23,6 +23,7 @@ let expectedData1: DBPackage[] = [
         sessionid: 234,
         name: "firstname",
         packageversion: null,
+        packagestring:null,
         consrisk: 3.5, 
         impact: 2.3,
         likelihood: 2.3,
@@ -55,6 +56,7 @@ let expectedData2: DBPackage[] = [
         sessionid: 234,
         name: "firstname",
         packageversion: null,
+        packagestring:null,
         consrisk: 3.5, 
         impact: 2.3,
         likelihood: 2.3,
@@ -67,6 +69,7 @@ let expectedData2: DBPackage[] = [
         sessionid: 234,
         name: "fourthname",
         packageversion: "3.5.4",
+        packagestring:null,
         consrisk: 8.6, 
         impact: 1.3,
         likelihood: 9.4,
@@ -101,6 +104,7 @@ let expectedData3: DBVulnerabilitybypid[] = [
         cveid: 7485,
         impact: null,
         likelihood: null,
+        cveidstring:"CVE-776-876-998",
         risk: null,
         description: "broken window"
         }
@@ -111,6 +115,7 @@ let expectedData3: DBVulnerabilitybypid[] = [
         cveid: 4765,
         impact: null,
         likelihood: null,
+        cveidstring:"CVE-123-456-789",
         risk: null,
         description: "flat tire"
         }
@@ -132,6 +137,7 @@ let expectedData3b = [
         {packageid:1,
           vulnerabilities:{
           cveid: 7485,
+          cveidstring: "CVE-776-876-998",
           impact: null,
           likelihood: null,
           risk: null,
@@ -141,6 +147,7 @@ let expectedData3b = [
         {packageid:1,
           vulnerabilities:{
           cveid: 4765,
+          cveidstring: "CVE-123-456-789",
           impact: null,
           likelihood: null,
           risk: null,
@@ -164,6 +171,7 @@ let expectedData4: DBPackage[] = [{
   sessionid: 348,
   name: "randomtest5",
   packageversion: null,
+  packagestring:null,
   consrisk: 7.4,
   impact: 9.0,
   likelihood: 7.6,
@@ -173,13 +181,6 @@ let expectedData4: DBPackage[] = [{
 }
 ];
 
-let expectedResult4: DBResponse ={
-  count: null,
-  data: expectedData4,
-  error: null,
-  status: 200,
-  statusText: "OK"
-}
 
 test('Test 4: Write One Package', () => {
   //WritePackageRequest(expectedData4);
@@ -201,6 +202,7 @@ let expectedData6: DBPackage[] = [{
   sessionid: 348,
   name: "randomtest5",
   packageversion: null,
+  packagestring:null,
   consrisk: 7.4,
   impact: 9.0,
   likelihood: 7.6,
@@ -213,6 +215,7 @@ let expectedData6: DBPackage[] = [{
   sessionid: 348,
   name: "randomtest6",
   packageversion: null,
+  packagestring:null,
   consrisk: 7.4,
   impact: 9.0,
   likelihood: 7.6,
@@ -292,4 +295,75 @@ test('Test 11: Delete Multiple Vulnerabilities', () =>{
   });
 });
   
+//Test 12: Successfully Overwrite Package with same write function
+let expectedData11 = {
+  name: "overwrittenvalue",
+  consrisk: 739.5
+}
 
+/* Original 
+packageid: 4,
+        sessionid: 234,
+        name: "fourthname",
+        packageversion: "3.5.4",
+        packagestring:null,
+        consrisk: 8.6, 
+        impact: 1.3,
+        likelihood: 9.4,
+        highestrisk: 9.8,
+        purl: "olehello",
+        cpename: "rerunshere"
+      }
+ */
+
+test('Test 12: Successful Package Update',() =>{
+  return updatePackage(4,expectedData11).then((status)=>{
+    expect(status).toStrictEqual(204);
+  });
+});
+
+//restore original 
+let expectedData12 = {
+  name: "fourthname",
+  consrisk: 8.6, 
+}
+test ('Test 13: Restore Package Update',()=>{
+  return updatePackage(4,expectedData12).then((status)=>{
+    expect(status).toStrictEqual(204);
+  })
+})
+
+//Test 14: Successfully Overwrite Vulnerability 
+let expectedData13 = {
+  impact: 9.7,
+  description: "overwrittenvuln"
+}
+
+/* Original 
+vulnerabilities:{
+          cveid: 4765,
+          cveidstring: "CVE-123-456-789",
+          impact: null,
+          likelihood: null,
+          risk: null,
+          description: "flat tire"
+          }
+      }
+ */
+
+test('Test 14: Successful Vulnerability Update',() =>{
+  return updateVuln(4765,expectedData13).then((status)=>{
+    expect(status).toStrictEqual(204);
+  });
+});
+
+//restore original 
+let expectedData14 = {
+  description: "flat tire",
+  impact: null,
+}
+test ('Test 15: Restore Vuln Update',()=>{
+  return updateVuln(4765,expectedData14).then((status)=>{
+    expect(status).toStrictEqual(204);
+  })
+})

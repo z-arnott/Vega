@@ -63,6 +63,7 @@ export interface DBPackage {
   name: string | null
   packageversion?: string | null; //addition from Package interface
   consrisk: number | null; 
+  packagestring: string | null;
   impact: number | null;
   likelihood: number | null;
   highestrisk: number | null;
@@ -75,6 +76,7 @@ export interface DBVulnerabilitybypid {
   vulnerabilities:{
     cveid: number; //update from Vulnerability interface
     //cvss2: string; 
+    cveidstring: string| null;
     impact: number| null;
     likelihood: number| null;
     risk: number| null;
