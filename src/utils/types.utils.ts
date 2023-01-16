@@ -35,13 +35,13 @@ export interface Query {
 export interface Package {
   id: string;
   name: string;
-  purl: string | undefined;
-  cpeName: string | undefined;
-  impact: number | undefined;
-  likelihood: number | undefined;
-  consRisk: number | undefined;
-  highestRisk: number | undefined;
-  version: string | undefined;
+  purl: string | null;
+  cpeName: string | null;
+  impact: number | null;
+  likelihood: number | null;
+  consRisk: number | null;
+  highestRisk: number | null;
+  version: string | null;
 }
 
 /**
@@ -56,59 +56,10 @@ export interface Vulnerability {
   risk: number;
 }
 
-//Task 6: Remove sessionid as a parameter here but can keep querying database with it
-export interface DBPackage {
-  packageid: number; //update from Package interface
-  sessionid: number; //update from Package
-  name: string | null
-  packageversion?: string | null; //addition from Package interface
-  consrisk: number | null; 
-  packagestring: string | null;
-  impact: number | null;
-  likelihood: number | null;
-  highestrisk: number | null;
-  purl: string | null;
-  cpename: string | null;
-}
-
-export interface DBVulnerabilitybypid {
-  packageid: number;
-  vulnerabilities:{
-    cveid: number; //update from Vulnerability interface
-    //cvss2: string; 
-    cveidstring: string| null;
-    impact: number| null;
-    likelihood: number| null;
-    risk: number| null;
-    description: string| null;
-  }
-}
-
-export interface DBVulnerabilitybysid {
-      junction: DBVulnerabilitybypid[]
-}
-  
-export interface DBVulnerabilityInput {
-    cveid: number; //update from Vulnerability interface
-    //cvss2: string; 
-    impact: number| null;
-    likelihood: number| null;
-    risk: number| null;
-    description: string| null;
-  }
-
-export interface DBResponse{
-  count: number | null;
-  data: any;  
-  error: string | null;
-  status: number | null;
-  statusText: string | null;     
-}
-
 // let expectedResult3: DBResponse ={
 //   count: null,
 //   data: expectedData3,
 //   error: null,
 //   status: 200,
 //   statusText: "OK"
-// } 
+// }

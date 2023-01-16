@@ -49,27 +49,31 @@ spdxJsonParser = function (sbom): Package[] {
     let p: Package = {
       name: pkg.name,
       id: pkg.SPDXID,
-      purl: undefined,
-      cpeName: undefined,
-      impact: undefined,
-      consRisk: undefined,
-      highestRisk: undefined,
-      likelihood: undefined,
-      version: pkg.versionInfo,
+      purl: null,
+      cpeName: null,
+      impact: null,
+      consRisk: null,
+      highestRisk: null,
+      likelihood: null,
+      version: null,
     };
 
     //Get External Reference locators
     if (pkg.hasOwnProperty('externalRefs')) {
       for (let extRef of pkg.externalRefs) {
-        if (extRef.referenceType == 'purl' && p.purl == undefined) {
+        if (extRef.referenceType == 'purl' && p.purl == null) {
           p.purl = extRef.referenceLocator;
           break; //stop if EITHER cpe or purl found
         }
-        if (extRef.referenceType.includes('cpe') && p.cpeName == undefined) {
+        if (extRef.referenceType.includes('cpe') && p.cpeName == null) {
           p.cpeName = extRef.referenceLocator;
           break; //stop if EITHER cpe or purl found
         }
       }
+    }
+    //Get Version
+    if (pkg.hasOwnProperty('versionInfo')) {
+      p.version = pkg.versionInfo;
     }
     packages.push(p);
   });
@@ -91,9 +95,9 @@ spdxTagValueParser = function (sbom): Package[] {
     let tags = str.split('\n');
     let name: string = '';
     let id: string = '';
-    let cpe = undefined;
-    let purl = undefined;
-    let version = undefined;
+    let cpe = null;
+    let purl = null;
+    let version = null;
 
     for (let line of tags) {
       if (line != '') {
@@ -108,13 +112,13 @@ spdxTagValueParser = function (sbom): Package[] {
         } else if (
           tag == 'ExternalRef' &&
           value.includes('cpe') &&
-          cpe == undefined
+          cpe == null
         ) {
           cpe = value.split(' ')[2];
         } else if (
           tag == 'ExternalRef' &&
           value.includes('purl') &&
-          purl == undefined
+          purl == null
         ) {
           purl = value.split(' ')[2];
         }
@@ -128,10 +132,10 @@ spdxTagValueParser = function (sbom): Package[] {
       id: id,
       purl: purl,
       cpeName: cpe,
-      impact: undefined,
-      consRisk: undefined,
-      highestRisk: undefined,
-      likelihood: undefined,
+      impact: null,
+      consRisk: null,
+      highestRisk: null,
+      likelihood: null,
       version: version,
     };
     packages.push(p);
@@ -145,12 +149,12 @@ function cyclonedxGetPackages(sbomPackages: any): Package[] {
     let p: Package = {
       name: pkg.name,
       id: pkg['bom-ref'],
-      purl: undefined,
-      cpeName: undefined,
-      impact: undefined,
-      consRisk: undefined,
-      highestRisk: undefined,
-      likelihood: undefined,
+      purl: null,
+      cpeName: null,
+      impact: null,
+      consRisk: null,
+      highestRisk: null,
+      likelihood: null,
       version: pkg.version,
     };
     //Get External Reference locators
