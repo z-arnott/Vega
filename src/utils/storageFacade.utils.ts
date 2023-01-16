@@ -33,8 +33,7 @@ export async function readAllPackages(sessionid:number){
  }
 
 
-//Task #2: Create a new column in the database as CVEID string
-//Task #3: Using the CVEID string as keyword
+//Task #3: create function to process convert CVEID string to cveid number - phase 2
   export async function readVulnBySession(sessionid:number){
     let {data} = await supabase
     .from ('packages')
@@ -42,9 +41,8 @@ export async function readAllPackages(sessionid:number){
     .eq('sessionid', sessionid)
     return data;
   }
-
-  //Task #4: Create new column in package table as package string
-  //Task #5: Ensure sessionID is not one of the function parameters
+//Task 7: Double-check if read function overwrites current entry vs using update (applicable for packages & vulnerabilities)
+  //Task #5: Ensure sessionID is not one of the function parameters - need more clarity on sessionid usage before implementation
 /****************** WRITE PACKAGE**********************/
 //Function #4: Write Single or Many Request (Package)
 export async function writePackage(DBPackage:any){
@@ -62,7 +60,7 @@ const { status } = await supabase
 return status;
 }
 
-//Task 7: Double-check if read function overwrites current entry vs using update (applicable for packages & vulnerabilities)
+
 /****************** WRITE VULNERABILITY **********************/
 //Function #5: Write Request (Vulnerability) - Single or Multiple
 export async function writeVuln(DBVulnerabilityInput:any){
@@ -81,11 +79,31 @@ export async function DeleteVuln (cveid:number){
   }
           
 /****************** WRITE JUNCTION **********************/
-// // //consider eliminating junction table
+//phase 2 - establish system for writing junction tabl
           
 /****************** PURGE ALL **********************/
+//phase 2 - create a purge all function
+
+/****************** UPDATE DATA **********************/
+//Update package by package id
+export async function updatePackage(packageid:number,DBPackage:any){
+  let {status} = await supabase
+  .from('packages')
+  .update(DBPackage)
+  .eq('packageid',packageid);
+  return status; 
+}
+
+//Update vulnerability by cveid
+export async function updateVuln(cveid:number,DBVulnerabilityInput:any){
+  let {status} = await supabase
+  .from ('vulnerabilities')
+  .update(DBVulnerabilityInput)
+  .eq('cveid',cveid);
+  return status;
+}
           
-// // /****************** DB QUERY BUILDER INTERFACE **********************/
+/****************** DB QUERY BUILDER INTERFACE **********************/
 // // interface DBQueryBuilder {
 // //   (SessionID: number,Token: string, Param: string[]): (data:any);
 // // }
@@ -102,11 +120,3 @@ export async function DeleteVuln (cveid:number){
 // // //Write Package
 // // //Read Vulnerability 
 // // //Write Vulnerability
-
-//Future steps - clean up functions to have 1 read, 1 write, and 1 delete
-// export async function WriteVulnRequest(tablename: string, DBVulnerability?:any, DBPackage?:any ){
-//   const {data,status} = await supabase
-//   .from(tablename)
-//   .insert(DBVulnerability | DBPackage );
-//   return status;
-// } 
