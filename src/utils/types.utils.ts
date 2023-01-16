@@ -33,7 +33,7 @@ export interface Query {
  * Represents a software package
  */
 export interface Package {
-  id: string;
+  ref: string;
   name: string;
   purl: string | null;
   cpeName: string | null;
