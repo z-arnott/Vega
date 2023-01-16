@@ -4,4 +4,4 @@ dist/
 .env
 docs/
 logs/
-launch.json
+.vscode/
