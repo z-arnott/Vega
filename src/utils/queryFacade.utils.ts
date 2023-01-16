@@ -4,8 +4,25 @@ import {logger} from '@utils/logger.utils';
 import axios from 'axios';
 
 
+/****************** QUERY FACADE API **********************/
+/**
+ * Search an external vulnerability database
+ * @param query specifying vulnerability database and search method
+ * @returns a list of vulnerabilities found in database
+ */
+async function sendQuery(query: Query) {
+  return getVulnerabilities(query).then((response) => {
+    //Handle error
+    if (!isNaN(response)) {
+      //To-do error handleide
+      return [];
+    }
+    return cleaningStrategy[query.database](response);
+  });
+}
+
 /***************** GET VULNERABILITIES FROM EXT DATABASES ****************************/
-export async function getVulnerabilities(query: Query) {
+async function getVulnerabilities(query: Query) {
   let config: any = {
     method: query.method,
     url: query.database,
@@ -121,19 +138,6 @@ let cleaningStrategy = {
   [VulDatabase.SONATYPE]: sonatypeCleaner,
   [VulDatabase.NVD]: nvdCleaner,
 };
-
-/****************** QUERY FACADE API **********************/
-//Sends one query, returns list of Vulnerabilities
-async function sendQuery(query: Query) {
-  return getVulnerabilities(query).then((response) => {
-    //Handle error
-    if (!isNaN(response)) {
-      //To-do error handleide
-      return [];
-    }
-    return cleaningStrategy[query.database](response);
-  });
-}
 
 /** Module Exports */
 export { sendQuery };
