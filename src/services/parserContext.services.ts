@@ -4,8 +4,13 @@ import { XMLParser } from 'fast-xml-parser';
 export { parse };
 
 /****************** PARSER CONTEXT PUBLIC FUNCTIONS **********************/
-//Parses one SBOM, query, returns list of Vulnerabilities
-function parse(sbom: any, strategy: SbomFormat): Package[] {
+/**
+ * Parse one SBOM, query, returns list of Vulnerabilities
+ * @param sbom a software bill of materials (SBOM)
+ * @param strategy the parsing strategy taken on sbom
+ * @returns  a list of packages contained in sbom
+ */
+function parse(sbom: string, strategy: SbomFormat): Package[] {
   //Set strategy
   let parser: ParsingStrategy = parsingStrategies[strategy];
   //Parse file
@@ -13,6 +18,13 @@ function parse(sbom: any, strategy: SbomFormat): Package[] {
 }
 
 /****************** PARSING STRATEGY INTERFACE **********************/
+/**
+ * A parsing strategy is the strategy taken to extract packages from
+ * a Software Bill of Materials (SBOM),
+ * dependant on SBOM format
+ *
+ * @interface ParsingStrategy
+ */
 interface ParsingStrategy {
   (sbom: string): Package[];
 }
@@ -23,7 +35,13 @@ let spdxTagValueParser: ParsingStrategy;
 let cyclonedxJsonParser: ParsingStrategy;
 let cyclonedxXmlParser: ParsingStrategy;
 
-//Cleaner implementaions
+/**
+ * Parsing Strategy implementation used to parse
+ * a Software Bill of Materials (SBOM)
+ * with SPDX specifications, in JSON format
+ * @param sbom the SBOM string
+ * @returns list of packages contained in sbom
+ */
 spdxJsonParser = function (sbom): Package[] {
   let packages: Package[] = [];
   let sbomPackages: any = JSON.parse(sbom).packages; //get all packages
@@ -58,6 +76,13 @@ spdxJsonParser = function (sbom): Package[] {
   return packages;
 };
 
+/**
+ * Parsing Strategy implementation used to parse
+ * a Software Bill of Materials (SBOM)
+ * with SPDX specifications, in TAG/VALUE format
+ * @param sbom the SBOM string
+ * @returns list of packages contained in sbom
+ */
 spdxTagValueParser = function (sbom): Package[] {
   let packages: Package[] = [];
   let sbomArray = sbom.toString().split(/\n[#]+.*(?:Package).*\n/gm); //split string by packages
@@ -114,7 +139,6 @@ spdxTagValueParser = function (sbom): Package[] {
   return packages;
 };
 
-/* Create a list of Packages from JSON package list in CycloneDX format */
 function cyclonedxGetPackages(sbomPackages: any): Package[] {
   let packages: Package[] = [];
   sbomPackages.forEach(function (pkg: any) {
@@ -141,6 +165,13 @@ function cyclonedxGetPackages(sbomPackages: any): Package[] {
   return packages;
 }
 
+/**
+ * Parsing Strategy implementation used to parse
+ * a Software Bill of Materials (SBOM)
+ * with CYCLONEDX specifications, in XML format
+ * @param sbom the SBOM string
+ * @returns list of packages contained in sbom
+ */
 cyclonedxXmlParser = function (sbom): Package[] {
   //Convert xml --> json
   const parser = new XMLParser({
@@ -153,6 +184,13 @@ cyclonedxXmlParser = function (sbom): Package[] {
   return cyclonedxGetPackages(sbomPackages);
 };
 
+/**
+ * Parsing Strategy implementation used to parse
+ * a Software Bill of Materials (SBOM)
+ * with CYCLONEDX specifications, in JSON format
+ * @param sbom the SBOM string
+ * @returns list of packages contained in sbom
+ */
 cyclonedxJsonParser = function (sbom): Package[] {
   //Trim sbom to only package list
   let sbomPackages: any = JSON.parse(sbom).components;
