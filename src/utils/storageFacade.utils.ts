@@ -7,7 +7,7 @@ import { supabase } from "./supabase";
    // .order('packageID', {ascending:false}) 
     //Step #4: Incorporate pagination - see classdiagrams.drawio
 /****************** READ PACKAGES **********************/
-export async function ReadSpecificPackage(sessionid:number | null ,packageid:number){
+export async function readPackage(sessionid:number | null ,packageid:number){
   let {data} = await supabase //common syntax on JS: const {data,error} = await...
     .from('packages') 
     .select('*') //values are outputted first in, last out
@@ -16,7 +16,7 @@ export async function ReadSpecificPackage(sessionid:number | null ,packageid:num
   return data;
 }
 
-export async function ReadAllPackage(sessionid:number){
+export async function readAllPackages(sessionid:number){
   let packageresult = await supabase //common syntax on JS: const {data,error} = await...
     .from('packages') 
     .select('*') //values are outputted first in, last out
@@ -24,7 +24,7 @@ export async function ReadAllPackage(sessionid:number){
   return packageresult;
 }
 /****************** READ VULNERABILITY **********************/
- export async function ReadMultipleVulnerability(packageid:number){
+ export async function readVulnByPkg(packageid:number){
   const {data}  = await supabase
   .from ('junction')
   .select('packageid,vulnerabilities(*)')
@@ -32,24 +32,29 @@ export async function ReadAllPackage(sessionid:number){
   return data;
  }
 
-// Hasn't been unit tested, but follows the same concept so no need
-  export async function ReadAllVulnerabilities(){
-    let vulnerabilities = await supabase
-    .from ('vulnerabilities')
-    .select('*')
-    return vulnerabilities;
+
+//Task #2: Create a new column in the database as CVEID string
+//Task #3: Using the CVEID string as keyword
+  export async function readVulnBySession(sessionid:number){
+    let {data} = await supabase
+    .from ('packages')
+    .select('junction!inner(packageid,vulnerabilities!inner(*))')
+    .eq('sessionid', sessionid)
+    return data;
   }
 
+  //Task #4: Create new column in package table as package string
+  //Task #5: Ensure sessionID is not one of the function parameters
 /****************** WRITE PACKAGE**********************/
 //Function #4: Write Single or Many Request (Package)
-export async function WritePackageRequest(DBPackage:any){
+export async function writePackage(DBPackage:any){
   let {status} = await supabase
   .from('packages')
   .insert(DBPackage);
   return status; 
 }
 
-export async function DeletePackage (packageid:number){
+export async function deletePackage (packageid:number){
 const { status } = await supabase
   .from('packages')
   .delete()
@@ -57,10 +62,10 @@ const { status } = await supabase
 return status;
 }
 
-
+//Task 7: Double-check if read function overwrites current entry vs using update (applicable for packages & vulnerabilities)
 /****************** WRITE VULNERABILITY **********************/
 //Function #5: Write Request (Vulnerability) - Single or Multiple
-export async function WriteVulnRequest(DBVulnerabilityInput:any){
+export async function writeVuln(DBVulnerabilityInput:any){
   let {status} = await supabase
   .from ('vulnerabilities')
   .insert(DBVulnerabilityInput);

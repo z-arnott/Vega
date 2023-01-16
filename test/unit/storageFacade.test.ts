@@ -1,8 +1,8 @@
 //import { supabase } from @;
 //import { Database };
 
-import { ReadSpecificPackage,ReadAllPackage,ReadMultipleVulnerability,WritePackageRequest, DeletePackage, WriteVulnRequest, DeleteVuln } from '@utils/storageFacade.utils'; 
-import { DBPackage, DBResponse, DBVulnerability, DBVulnerabilityInput } from '@utils/types.utils';
+import { readPackage,readAllPackages,readVulnByPkg,writePackage, deletePackage, writeVuln, DeleteVuln, readVulnBySession } from '@utils/storageFacade.utils'; 
+import { DBPackage, DBResponse, DBVulnerabilitybypid, DBVulnerabilitybysid, DBVulnerabilityInput } from '@utils/types.utils';
 import {expect, jest, test} from '@jest/globals';
 import dotenv from 'dotenv';
 
@@ -42,7 +42,7 @@ let expectedData1: DBPackage[] = [
 // } 
 
 test('Test 1: Read Specific PackageInfo Given SessionID and PackageID', () => {
-  return ReadSpecificPackage(234,1).then((data) => {
+  return readPackage(234,1).then((data) => {
     expect(data).toStrictEqual(expectedData1);
   });
 });
@@ -86,7 +86,7 @@ let expectedResult2: DBResponse={
 } 
 
 test('Test 2: Read All PackageInfo Given SessionID', () => {
-  return ReadAllPackage(234).then((data) => {
+  return readAllPackages(234).then((data) => {
     expect(data).toStrictEqual(expectedResult2);
   });
 });
@@ -94,7 +94,7 @@ test('Test 2: Read All PackageInfo Given SessionID', () => {
 //Test 3: Read Multiple Vulnerabilities Given PackageID
 
 
-let expectedData3: DBVulnerability[] = [
+let expectedData3: DBVulnerabilitybypid[] = [
     {
       packageid:1,
       vulnerabilities:{
@@ -117,11 +117,44 @@ let expectedData3: DBVulnerability[] = [
     }];
 
 
-test('Test 3: Read Multiple Vulnerabilities Given PackageID no sorting', () => {
-  return ReadMultipleVulnerability(1).then((data) => {
+test('Test 3: Read Vulnerabilities Given PackageID no sorting', () => {
+  return readVulnByPkg(1).then((data) => {
     //expect(data).toEqual(expect.arrayContaining(expectedData3));
     expect(data).toEqual(expect.arrayContaining(expectedData3)); //good to use here instead of .toEqual or .toStrictEqual 
   });
+});
+
+//Test 3b: Read Vulnerabilities Given sessionID 
+
+let expectedData3b = [
+  {
+    junction:[
+        {packageid:1,
+          vulnerabilities:{
+          cveid: 7485,
+          impact: null,
+          likelihood: null,
+          risk: null,
+          description: "broken window"
+          }
+        },
+        {packageid:1,
+          vulnerabilities:{
+          cveid: 4765,
+          impact: null,
+          likelihood: null,
+          risk: null,
+          description: "flat tire"
+          }
+    }
+      ]
+    }
+];
+
+test('Test 3b: Read vulnrabilities given sessionid no sorting',() =>{
+  return readVulnBySession(234).then((data) => {
+    expect(data).toEqual(expect.arrayContaining(expectedData3b));
+  })
 });
 
 //Test 4: Write One package
@@ -138,7 +171,7 @@ let expectedData4: DBPackage[] = [{
   purl: null,
   cpename: null
 }
-]
+];
 
 let expectedResult4: DBResponse ={
   count: null,
@@ -150,14 +183,14 @@ let expectedResult4: DBResponse ={
 
 test('Test 4: Write One Package', () => {
   //WritePackageRequest(expectedData4);
-  return WritePackageRequest(expectedData4).then((status) => {
+  return writePackage(expectedData4).then((status) => {
   expect(status).toStrictEqual(201); //201 code for content created
   });
 }); 
 
 //Test 5: Delete One Package Given Packageid
 test('Test 5: Delete One Package', () =>{
-  return DeletePackage(5).then((status) => {
+  return deletePackage(5).then((status) => {
     expect(status).toStrictEqual(204); //204 code for success, no content to return
   });
 });
@@ -191,15 +224,15 @@ let expectedData6: DBPackage[] = [{
 
 test('Test 6: Write Packages in Bulk', () => {
   //WritePackageRequest(expectedData4);
-  return WritePackageRequest(expectedData6).then((status) => {
+  return writePackage(expectedData6).then((status) => {
   expect(status).toStrictEqual(201); //201 code for content created
   });
 }); 
 
 test('Test 7: Delete Multiple Packages', () =>{
-  DeletePackage(5);
-  DeletePackage(6);
-  return ReadSpecificPackage(null,6).then((data) => {
+  deletePackage(5);
+  deletePackage(6);
+  return readPackage(null,6).then((data) => {
     expect(data).toStrictEqual(null); //querying a non-existant entry yield a null in the data field
   });
 });
@@ -214,7 +247,7 @@ let expectedData8: DBVulnerabilityInput = {
 }
 
 test('Test 8: Write One Vulnerability', () => {
-  return WriteVulnRequest(expectedData8).then((status) => {
+  return writeVuln(expectedData8).then((status) => {
   expect(status).toStrictEqual(201); //201 code for content created
   });
 }); 
@@ -246,7 +279,7 @@ let expectedData9: DBVulnerabilityInput[] = [
   ]
   
   test('Test 10: Write Multiple Vulnerabilities',() =>{
-  return WriteVulnRequest(expectedData9).then((status) => {
+  return writeVuln(expectedData9).then((status) => {
   expect(status).toStrictEqual(201);
   });
 });

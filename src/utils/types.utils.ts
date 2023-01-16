@@ -32,9 +32,10 @@ export interface Vulnerability {
   risk: number;
 }
 
+//Task 6: Remove sessionid as a parameter here but can keep querying database with it
 export interface DBPackage {
   packageid: number; //update from Package interface
-  sessionid: number;
+  sessionid: number; //update from Package
   name: string | null
   packageversion?: string | null; //addition from Package interface
   consrisk: number | null; 
@@ -45,7 +46,7 @@ export interface DBPackage {
   cpename: string | null;
 }
 
-export interface DBVulnerability {
+export interface DBVulnerabilitybypid {
   packageid: number;
   vulnerabilities:{
     cveid: number; //update from Vulnerability interface
@@ -57,6 +58,10 @@ export interface DBVulnerability {
   }
 }
 
+export interface DBVulnerabilitybysid {
+      junction: DBVulnerabilitybypid[]
+}
+  
 export interface DBVulnerabilityInput {
     cveid: number; //update from Vulnerability interface
     //cvss2: string; 
