@@ -55,11 +55,3 @@ export interface Vulnerability {
   likelihood: number;
   risk: number;
 }
-
-// let expectedResult3: DBResponse ={
-//   count: null,
-//   data: expectedData3,
-//   error: null,
-//   status: 200,
-//   statusText: "OK"
-// }
