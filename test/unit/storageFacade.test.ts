@@ -1,8 +1,12 @@
 import { expect, jest, test } from '@jest/globals';
 import dotenv from 'dotenv';
 import { supabase } from '@utils/supabase';
-import {Package} from '@utils/types.utils';
-import {writePackage, readPackage, readAllPackages} from '@utils/storageFacade.utils'
+import { Package, Vulnerability } from '@utils/types.utils';
+import {
+  writePackage,
+  readPackage,
+  readAllPackages,
+} from '@utils/storageFacade.utils';
 //Setup
 dotenv.config();
 const supabaseUrl = process.env.SUPABASE_URL as string;
@@ -116,34 +120,33 @@ let vulnerabilities: Vulnerability[] = [
   },
 ];
 
-async function clear_test_data(){
-  for(let pkg of packages){
+async function clear_test_data() {
+  for (let pkg of packages) {
     const { error } = await supabase
       .from('packages')
       .delete()
       .eq('package_ref', pkg.ref)
-      .eq('sessionid', sessionId );
-}}
+      .eq('sessionid', sessionId);
+  }
+}
 
 clear_test_data();
 
 //Test 1: Can Write and read one package
-test('Test 1: Write and read one package', async() => {
+test('Test 1: Write and read one package', async () => {
   await writePackage(packages[0], sessionId);
-  return readPackage(packages[0].ref, sessionId)
-    .then((pkg) => {
-      expect(pkg).toStrictEqual(packages[0]);
+  return readPackage(packages[0].ref, sessionId).then((pkg) => {
+    expect(pkg).toStrictEqual(packages[0]);
   });
 });
 
 //Test 2: Can read all packages from a session
-test('Test 2: Read all packages from a session', async() => {
-  for(let pkg of packages){
+test('Test 2: Read all packages from a session', async () => {
+  for (let pkg of packages) {
     await writePackage(pkg, sessionId);
   }
-  return readAllPackages(sessionId)
-    .then((pkgs) => {
-      expect(pkgs).toStrictEqual(packages);
+  return readAllPackages(sessionId).then((pkgs) => {
+    expect(pkgs).toStrictEqual(packages);
   });
 });
 
@@ -160,21 +163,19 @@ let updatedPkg = {
 };
 
 //Test 3: Update existing package (does NOT duplicate)
-test('Test 3: Read all packages from a session', async() => {
+test('Test 3: Read all packages from a session', async () => {
   await writePackage(updatedPkg, sessionId);
-  return readAllPackages(sessionId)
-    .then((pkgs) => {
-      expect(pkgs).toContainEqual(updatedPkg);
-      expect(pkgs).not.toContainEqual(packages[0]);
+  return readAllPackages(sessionId).then((pkgs) => {
+    expect(pkgs).toContainEqual(updatedPkg);
+    expect(pkgs).not.toContainEqual(packages[0]);
   });
 });
 
 //Test 4: Can Write and read one Vulnerability
-test('Test 3: Read all packages from a session', async() => {
+test('Test 4: Read all vulnerabilites from a package', async () => {
   await writePackage(updatedPkg, sessionId);
-  return readAllPackages(sessionId)
-    .then((pkgs) => {
-      expect(pkgs).toContainEqual(updatedPkg);
-      expect(pkgs).not.toContainEqual(packages[0]);
+  return readAllPackages(sessionId).then((pkgs) => {
+    expect(pkgs).toContainEqual(updatedPkg);
+    expect(pkgs).not.toContainEqual(packages[0]);
   });
 });
