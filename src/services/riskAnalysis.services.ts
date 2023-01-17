@@ -270,7 +270,7 @@ function systemRisk(packages: Package[]): number {
   let highest = 0;
   for (let p of packages) {
     if (p.highestRisk == null) {
-      logger.warn('System Risk Analysis: ' + p.id + ' risk null');
+      logger.warn('System Risk Analysis: ' + p.ref + ' risk null');
     } else {
       highest = Math.max(highest, p.highestRisk);
     }

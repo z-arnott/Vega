@@ -48,7 +48,7 @@ spdxJsonParser = function (sbom): Package[] {
   sbomPackages.forEach(function (pkg: any) {
     let p: Package = {
       name: pkg.name,
-      id: pkg.SPDXID,
+      ref: pkg.SPDXID,
       purl: null,
       cpeName: null,
       impact: null,
@@ -129,7 +129,7 @@ spdxTagValueParser = function (sbom): Package[] {
     }
     let p: Package = {
       name: name,
-      id: id,
+      ref: id,
       purl: purl,
       cpeName: cpe,
       impact: null,
@@ -148,7 +148,7 @@ function cyclonedxGetPackages(sbomPackages: any): Package[] {
   sbomPackages.forEach(function (pkg: any) {
     let p: Package = {
       name: pkg.name,
-      id: pkg['bom-ref'],
+      ref: pkg['bom-ref'],
       purl: null,
       cpeName: null,
       impact: null,
