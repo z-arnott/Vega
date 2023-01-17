@@ -21,7 +21,7 @@ let expectedResult1: Vulnerability[] = [
   {
     cveId: 'CVE-2021-20089',
     cvss2: 'AV:N/AC:L/Au:S/C:P/I:P/A:P',
-    packgaeId: -1,
+    packageRef: '-1',
     impact: -1,
     likelihood: -1,
     risk: -1,
@@ -50,7 +50,7 @@ let expectedResult2: Vulnerability[] = [
   {
     cveId: 'CVE-2020-16268',
     cvss2: 'AV:N/AC:L/Au:S/C:P/I:P/A:P',
-    packgaeId: -1,
+    packageRef: '-1',
     impact: -1,
     likelihood: -1,
     risk: -1,
@@ -58,7 +58,7 @@ let expectedResult2: Vulnerability[] = [
   {
     cveId: 'CVE-2020-27643',
     cvss2: 'AV:N/AC:L/Au:S/C:N/I:P/A:N',
-    packgaeId: -1,
+    packageRef: '-1',
     impact: -1,
     likelihood: -1,
     risk: -1,
@@ -84,7 +84,7 @@ let expectedResult3: Vulnerability[] = [
   {
     cveId: 'CVE-2019-8331',
     cvss2: 'AV:N/AC:M/Au:N/C:N/I:P/A:N',
-    packgaeId: -1,
+    packageRef: '-1',
     impact: -1,
     likelihood: -1,
     risk: -1,
@@ -151,7 +151,7 @@ let expectedResult6: Vulnerability[] = [
     cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H',
     impact: -1,
     likelihood: -1,
-    packgaeId: -1,
+    packageRef: '-1',
     risk: -1,
   },
   {
@@ -159,7 +159,7 @@ let expectedResult6: Vulnerability[] = [
     cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H',
     impact: -1,
     likelihood: -1,
-    packgaeId: -1,
+    packageRef: '-1',
     risk: -1,
   },
   {
@@ -167,7 +167,7 @@ let expectedResult6: Vulnerability[] = [
     cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
     impact: -1,
     likelihood: -1,
-    packgaeId: -1,
+    packageRef: '-1',
     risk: -1,
   },
   {
@@ -175,7 +175,7 @@ let expectedResult6: Vulnerability[] = [
     cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
     impact: -1,
     likelihood: -1,
-    packgaeId: -1,
+    packageRef: -1,
     risk: -1,
   },
   {
@@ -183,7 +183,7 @@ let expectedResult6: Vulnerability[] = [
     cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
     impact: -1,
     likelihood: -1,
-    packgaeId: -1,
+    packageRef: '-1',
     risk: -1,
   },
   {
@@ -191,7 +191,7 @@ let expectedResult6: Vulnerability[] = [
     cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H',
     impact: -1,
     likelihood: -1,
-    packgaeId: -1,
+    packageRef: '-1',
     risk: -1,
   },
   {
@@ -199,7 +199,7 @@ let expectedResult6: Vulnerability[] = [
     cvss2: 'CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H',
     impact: -1,
     likelihood: -1,
-    packgaeId: -1,
+    packageRef: '-1',
     risk: -1,
   },
 ];
