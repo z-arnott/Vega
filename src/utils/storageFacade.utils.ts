@@ -1,104 +1,227 @@
-//import {sessionID} from '@utils/supabase';
 import { supabase } from './supabase';
-//Task 6: Remove sessionid as a parameter here but can keep querying database with it
-export interface DBPackage {
-  packageid: number; //update from Package interface
-  sessionid: number; //update from Package
-  name: string | null;
-  packageversion?: string | null; //addition from Package interface
-  consrisk: number | null;
-  packagestring: string | null;
-  impact: number | null;
-  likelihood: number | null;
-  highestrisk: number | null;
-  purl: string | null;
-  cpename: string | null;
+import { Package, Vulnerability } from './types.utils';
+import { logger } from '@utils/logger.utils';
+
+
+/****************** PUBLIC API **********************/
+//Read all packages in a session
+export async function readAllPackages(sessionid: number) {
+  let {data, error} = await supabase //common syntax on JS: const {data,error} = await...
+    .from('packages')
+    .select('*') //values are outputted first in, last out
+    .eq('sessionid', sessionid);
+  let packages:Package[] = [];
+  
+  if(data){
+    for(let pkg of data){
+      packages.push(dbPkgToPkg(pkg));
+    }
+  }else{
+    logger.error(error);
+  }
+  console.log(packages);
+  return packages;
 }
 
-export interface DBVulnerabilitybypid {
-  packageid: number;
-  vulnerabilities: {
-    cveid: number; //update from Vulnerability interface
-    //cvss2: string;
-    cveidstring: string | null;
-    impact: number | null;
-    likelihood: number | null;
-    risk: number | null;
-    description: string | null;
-  };
+//Read a package by package reference
+export async function readPackage(packageRef: string, sessionID: number){
+  let {data, error} = await supabase
+    .from('packages')
+    .select('*') //values are outputted first in, last out
+    .eq('sessionid', sessionID)
+    .eq('package_ref', packageRef);
+  
+  if(data){
+    return dbPkgToPkg(data[0]);
+  }else if(error){
+    logger.error(error.message);
+    return error;
+  }
 }
 
-export interface DBVulnerabilitybysid {
-  junction: DBVulnerabilitybypid[];
+//Write Package, updates if entry exists in database, inserts otherwise
+export async function writePackage(pkg: Package, sessionId: number) {
+  let {data, error} = await supabase
+    .from('packages')
+    .select('*')
+    .eq('sessionid', sessionId)
+    .eq('package_ref', pkg.ref);
+  
+    if(data){
+      if(data.length == 0){//INSERT
+        let { status, error } = await supabase
+        .from('packages')
+        .insert({//append necessary housekeeping info for database
+          name: pkg.name,
+          packageversion: pkg.version,
+          consrisk: pkg.consRisk,
+          impact: pkg.impact,
+          likelihood: pkg.likelihood,
+          highestrisk: pkg.highestRisk,
+          purl: pkg.purl,
+          cpename: pkg.cpeName,
+          sessionid: sessionId,
+          package_ref: pkg.ref
+        })
+        if(error){logger.error(error.message);}
+        return status;
+      }
+      else{//UPDATE
+        let { status, error } = await supabase
+        .from('packages')
+        .update({//append necessary housekeeping info for database
+          name: pkg.name,
+          packageversion: pkg.version,
+          consrisk: pkg.consRisk,
+          impact: pkg.impact,
+          likelihood: pkg.likelihood,
+          highestrisk: pkg.highestRisk,
+          purl: pkg.purl,
+          cpename: pkg.cpeName,
+        })
+        .eq('sessionid', sessionId)
+        .eq('package_ref', pkg.ref);
+        if(error){logger.error(error.message);}
+        return status;
+      }
+  }
+  if(error){logger.error(error.message);}
 }
 
-export interface DBVulnerabilityInput {
-  cveid: number; //update from Vulnerability interface
-  //cvss2: string;
-  impact: number | null;
-  likelihood: number | null;
-  risk: number | null;
-  description: string | null;
+//Read all vulnerabilities in one session
+export async function readVulnBySession(sessionId: number) {
+  let { data, error } = await supabase
+    .from('vulnerabilities')
+    .select('*,junction!inner(packageid,packages!inner(package_ref))')
+    .eq('junction.packages.sessionid', sessionId);  
+
+    let cves: Vulnerability[] = [];
+    if(data){
+      for(let v of data){
+        cves.push(//map database result to Vulnerability object
+          {
+            cveId: v.cveidstring,
+            packageRef: v.junction.packages.package_ref,
+            impact: v.impact,
+            likelihood: v.likelihood,
+            risk: v.risk,
+            cvss2: v.cvss_vector
+          }
+        );
+      }
+    return cves;
+  }else if(error){
+    logger.error(error.message);
+    return error;
+  }
 }
 
-export interface DBResponse {
-  count: number | null;
-  data: any;
-  error: string | null;
-  status: number | null;
-  statusText: string | null;
+//Read all vulnerabilites in one package
+export async function readCvesByPkgID(packageRef: string, sessionId: number){
+  const {data, error } = await supabase
+    .from('vulnerabilities')
+    .select('*,junction!inner(packageid,packages!inner(package_ref))')
+    .eq('junction.packages.package_ref', packageRef);  
+    let cves: Vulnerability[] = [];
+    if(data){
+      for(let v of data){
+        cves.push(//map database result to Vulnerability object
+          {
+            cveId: v.cveidstring,
+            packageRef: v.junction.packages.package_ref,
+            impact: v.impact,
+            likelihood: v.likelihood,
+            risk: v.risk,
+            cvss2: v.cvss_vector
+          }
+        );
+      }
+      return cves;
+  }else if(error){
+    logger.error(error.message);
+    return error;
+  }
 }
 
-/****************** SET SESSION ID **********************/
+//Write Vulnerability
+export async function writeCve(cve: Vulnerability) {
+  let {data, error} = await supabase
+    .from('vulnerabilities')
+    .select('*')
+    .eq('cveidstring', cve.cveId);
 
-//incorporate filtering, sorting, pagniation
-//Step #3: Incorporate sorting
-// .order('packageID', {ascending:false})
-//Step #4: Incorporate pagination - see classdiagrams.drawio
+    if(data){
+      if(data.length == 0){//INSERT
+        let { status, error } = await supabase
+        .from('vulnerabilities')
+        .insert({//append necessary housekeeping info for database
+          risk:cve.risk,
+          likelihood:cve.likelihood,
+          impact:cve.impact,
+          cveidstring: cve.cveId
+        })
+        if(error){logger.error(error.message);}
+        return status;
+      }
+      else{//UPDATE
+        let { status, error } = await supabase
+        .from('vulnerabilities')
+        .update({//append necessary housekeeping info for database
+          risk:cve.risk,
+          likelihood:cve.likelihood,
+          impact:cve.impact,
+        })
+        .eq('cveidstring', cve.cveId);
+        if(error){logger.error(error.message);}
+        return status;
+      }
+  }
+  if(error){logger.error(error.message);}
+}
+
 /****************** READ PACKAGES **********************/
-export async function readPackage(sessionid: number | null, packageid: number) {
-  let { data } = await supabase //common syntax on JS: const {data,error} = await...
+//Convert database data into Package object
+function dbPkgToPkg(pkg:any):Package{
+  let p = {
+    ref: pkg.package_ref,
+    name: pkg.name,
+    version: pkg.packageversion,
+    highestRisk: pkg.highestrisk,
+    purl: pkg.purl,
+    cpeName: pkg.cpename,
+    impact: pkg.impact,
+    consRisk: pkg.consrisk,
+    likelihood: pkg.likelihood
+  }
+  return p;
+}
+
+async function readPackageById(sessionid: number, packageid: number){
+  let {data, error} = await supabase //common syntax on JS: const {data,error} = await...
     .from('packages')
     .select('*') //values are outputted first in, last out
     .eq('sessionid', sessionid)
     .eq('packageid', packageid);
-  return data;
+  if(data){
+    return dbPkgToPkg(data);
+  }else if(error){
+    logger.error(error.message);
+    return error;
+  }
 }
 
-export async function readAllPackages(sessionid: number) {
-  let packageresult = await supabase //common syntax on JS: const {data,error} = await...
-    .from('packages')
-    .select('*') //values are outputted first in, last out
-    .eq('sessionid', sessionid);
-  return packageresult;
-}
-/****************** READ VULNERABILITY **********************/
-export async function readVulnByPkg(packageid: number) {
-  const { data } = await supabase
-    .from('junction')
-    .select('packageid,vulnerabilities(*)')
-    .eq('packageid', packageid);
-  return data;
-}
 
-//Task #3: create function to process convert CVEID string to cveid number - phase 2
-export async function readVulnBySession(sessionid: number) {
-  let { data } = await supabase
-    .from('packages')
-    .select('junction!inner(packageid,vulnerabilities!inner(*))')
-    .eq('sessionid', sessionid);
-  return data;
-}
-//Task 7: Double-check if read function overwrites current entry vs using update (applicable for packages & vulnerabilities)
-//Task #5: Ensure sessionID is not one of the function parameters - need more clarity on sessionid usage before implementation
+/****************** VULNERABILITY HELPERS **********************/
+
+
 /****************** WRITE PACKAGE**********************/
 //Function #4: Write Single or Many Request (Package)
-export async function writePackage(DBPackage: any) {
+async function writePackageByVulType(DBPackage: any) {
   let { status } = await supabase.from('packages').insert(DBPackage);
   return status;
 }
 
-export async function deletePackage(packageid: number) {
+async function deletePackage(packageid: number) {
   const { status } = await supabase
     .from('packages')
     .delete()
@@ -108,14 +231,14 @@ export async function deletePackage(packageid: number) {
 
 /****************** WRITE VULNERABILITY **********************/
 //Function #5: Write Request (Vulnerability) - Single or Multiple
-export async function writeVuln(DBVulnerabilityInput: any) {
+async function writeVuln(DBVulnerabilityInput: any) {
   let { status } = await supabase
     .from('vulnerabilities')
     .insert(DBVulnerabilityInput);
   return status;
 }
 
-export async function DeleteVuln(cveid: number) {
+async function DeleteVuln(cveid: number) {
   let { status } = await supabase
     .from('vulnerabilities')
     .delete()
@@ -131,7 +254,7 @@ export async function DeleteVuln(cveid: number) {
 
 /****************** UPDATE DATA **********************/
 //Update package by package id
-export async function updatePackage(packageid: number, DBPackage: any) {
+async function updatePackage(packageid: number, DBPackage: any) {
   let { status } = await supabase
     .from('packages')
     .update(DBPackage)
@@ -140,7 +263,7 @@ export async function updatePackage(packageid: number, DBPackage: any) {
 }
 
 //Update vulnerability by cveid
-export async function updateVuln(cveid: number, DBVulnerabilityInput: any) {
+async function updateVuln(cveid: number, DBVulnerabilityInput: any) {
   let { status } = await supabase
     .from('vulnerabilities')
     .update(DBVulnerabilityInput)
@@ -148,19 +271,3 @@ export async function updateVuln(cveid: number, DBVulnerabilityInput: any) {
   return status;
 }
 
-/****************** DB QUERY BUILDER INTERFACE **********************/
-// // interface DBQueryBuilder {
-// //   (SessionID: number,Token: string, Param: string[]): (data:any);
-// // }
-
-// // //query instance
-// // let SQLQueryBuilder: DBQueryBuilder;
-
-// // //query implementation
-// // SQLQueryBuilder = function (SessionID, Token, Param): data
-
-// // /****************** STORAGE FACADE API **********************/
-// // //Read Package
-// // //Write Package
-// // //Read Vulnerability
-// // //Write Vulnerability
