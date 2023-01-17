@@ -175,7 +175,7 @@ let expectedResult6: Vulnerability[] = [
     cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
     impact: -1,
     likelihood: -1,
-    packageRef: -1,
+    packageRef: '-1',
     risk: -1,
   },
   {
