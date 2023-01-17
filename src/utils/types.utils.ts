@@ -49,7 +49,7 @@ export interface Package {
  */
 export interface Vulnerability {
   cveId: string;
-  packgaeId: number;
+  packageRef: string;
   cvss2: string;
   impact: number;
   likelihood: number;

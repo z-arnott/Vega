@@ -83,7 +83,7 @@ nvdCleaner = function (rawResponse): Vulnerability[] {
   rawVulns.forEach(function (cve: any) {
     let v: Vulnerability = {
       cveId: cve['cve'].id,
-      packgaeId: -1,
+      packageRef: '-1',
       impact: -1,
       likelihood: -1,
       risk: -1,
@@ -112,7 +112,7 @@ sonatypeCleaner = function (rawResponse): Vulnerability[] {
   rawVulns.forEach(function (cve: any) {
     let v: Vulnerability = {
       cveId: cve.id,
-      packgaeId: -1,
+      packageRef: '-1',
       impact: -1,
       likelihood: -1,
       risk: -1,
