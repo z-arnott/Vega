@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { Package, Vulnerability } from './types.utils';
-import { logger } from '@utils/logger.utils';
+import { logger } from './logger.utils';
 
 /****************** PUBLIC API **********************/
 /**
