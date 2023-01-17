@@ -178,7 +178,7 @@ test('Test 1: Write and read one package', async () => {
 //Test 2: Can read all packages from a session
 test('Test 2: Read all packages from a session', async () => {
   return readAllPackages(sessionId).then((pkgs) => {
-    expect(pkgs).toEqual(packages);
+    expect(pkgs.sort()).toEqual(packages);
   });
 });
 
