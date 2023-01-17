@@ -1,16 +1,14 @@
 import { expect, jest, test } from '@jest/globals';
-import dotenv from 'dotenv';
 import { supabase } from '@utils/supabase';
 import { Package, Vulnerability } from '@utils/types.utils';
 import {
   writePackage,
   readPackage,
   readAllPackages,
+  writeVuln,
+  readVulnsBySession,
+  readVulnsByPkg,
 } from '@utils/storageFacade.utils';
-//Setup
-dotenv.config();
-const supabaseUrl = process.env.SUPABASE_URL as string;
-const supabaseKey = process.env.SUPABASE_KEY as string;
 
 //Set up test data
 let sessionId = 9927;
@@ -67,7 +65,7 @@ let vulnerabilities: Vulnerability[] = [
     cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H',
     impact: -1,
     likelihood: -1,
-    packageRef: '-1',
+    packageRef: 'SPDXRef-Package',
     risk: -1,
   },
   {
@@ -75,7 +73,7 @@ let vulnerabilities: Vulnerability[] = [
     cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H',
     impact: -1,
     likelihood: -1,
-    packageRef: '-1',
+    packageRef: 'SPDXRef-Package',
     risk: -1,
   },
   {
@@ -83,7 +81,7 @@ let vulnerabilities: Vulnerability[] = [
     cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
     impact: -1,
     likelihood: -1,
-    packageRef: '-1',
+    packageRef: 'SPDXRef-fromDoap-1',
     risk: -1,
   },
   {
@@ -91,7 +89,7 @@ let vulnerabilities: Vulnerability[] = [
     cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
     impact: -1,
     likelihood: -1,
-    packageRef: '-1',
+    packageRef: 'SPDXRef-fromDoap-0',
     risk: -1,
   },
   {
@@ -99,7 +97,7 @@ let vulnerabilities: Vulnerability[] = [
     cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
     impact: -1,
     likelihood: -1,
-    packageRef: '-1',
+    packageRef: 'SPDXRef-fromDoap-0',
     risk: -1,
   },
   {
@@ -107,7 +105,7 @@ let vulnerabilities: Vulnerability[] = [
     cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H',
     impact: -1,
     likelihood: -1,
-    packageRef: '-1',
+    packageRef: 'SPDXRef-Package',
     risk: -1,
   },
   {
@@ -115,12 +113,12 @@ let vulnerabilities: Vulnerability[] = [
     cvss2: 'CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H',
     impact: -1,
     likelihood: -1,
-    packageRef: '-1',
+    packageRef: 'SPDXRef-fromDoap-0',
     risk: -1,
   },
 ];
 
-async function clear_test_data() {
+async function clear_test_packages() {
   for (let pkg of packages) {
     const { error } = await supabase
       .from('packages')
@@ -130,11 +128,48 @@ async function clear_test_data() {
   }
 }
 
-clear_test_data();
+async function clear_test_vulnerabilites() {
+  for (let v of vulnerabilities) {
+    const { error } = await supabase
+      .from('vulnerabilities')
+      .delete()
+      .eq('cveidstring', v.cveId);
+  }
+}
+
+async function clear_test_junction() {
+  const { error } = await supabase
+    .from('junction')
+    .delete()
+    .eq('sessionid', sessionId);
+}
+
+async function cleanup() {
+  clear_test_packages();
+  clear_test_vulnerabilites();
+  clear_test_junction();
+}
+
+async function setup() {
+  await cleanup();
+  for (let pkg of packages) {
+    await writePackage(pkg, sessionId);
+  }
+  for (let v of vulnerabilities) {
+    await writeVuln(v, sessionId);
+  }
+}
+
+beforeAll(async () => {
+  return setup();
+});
+
+afterAll(async () => {
+  return cleanup();
+});
 
 //Test 1: Can Write and read one package
 test('Test 1: Write and read one package', async () => {
-  await writePackage(packages[0], sessionId);
   return readPackage(packages[0].ref, sessionId).then((pkg) => {
     expect(pkg).toStrictEqual(packages[0]);
   });
@@ -142,11 +177,8 @@ test('Test 1: Write and read one package', async () => {
 
 //Test 2: Can read all packages from a session
 test('Test 2: Read all packages from a session', async () => {
-  for (let pkg of packages) {
-    await writePackage(pkg, sessionId);
-  }
   return readAllPackages(sessionId).then((pkgs) => {
-    expect(pkgs).toStrictEqual(packages);
+    expect(pkgs).toEqual(packages);
   });
 });
 
@@ -163,7 +195,7 @@ let updatedPkg = {
 };
 
 //Test 3: Update existing package (does NOT duplicate)
-test('Test 3: Read all packages from a session', async () => {
+test('Test 3: Update existing package (does NOT duplicate)', async () => {
   await writePackage(updatedPkg, sessionId);
   return readAllPackages(sessionId).then((pkgs) => {
     expect(pkgs).toContainEqual(updatedPkg);
@@ -171,11 +203,75 @@ test('Test 3: Read all packages from a session', async () => {
   });
 });
 
-//Test 4: Can Write and read one Vulnerability
-test('Test 4: Read all vulnerabilites from a package', async () => {
-  await writePackage(updatedPkg, sessionId);
-  return readAllPackages(sessionId).then((pkgs) => {
-    expect(pkgs).toContainEqual(updatedPkg);
-    expect(pkgs).not.toContainEqual(packages[0]);
+//Test 4: Try to read package that does not exist in DB
+test('Test 4: Read package that does not exist in DB', async () => {
+  return readPackage('unknown', sessionId).then((pkgs) => {
+    expect(pkgs).toEqual(null);
+  });
+});
+
+//Test 5: Try to read all packages for sessionId that does not exist in DB
+test('Test 5: Read packages by sessionId not in DB', async () => {
+  return readAllPackages(1027).then((pkgs) => {
+    expect(pkgs).toEqual([]);
+  });
+});
+
+//Test 7: Can read one cve
+test('Test 7: Read one cve', async () => {
+  return readVulnsByPkg(vulnerabilities[0].packageRef, sessionId).then(
+    (cves) => {
+      expect(cves).toContainEqual(vulnerabilities[0]);
+    }
+  );
+});
+
+//Test 8: Can read multiple cves by package
+test('Test 8: Can read all vulnerabilities for a package', async () => {
+  for (let v of vulnerabilities) {
+    await writeVuln(v, sessionId);
+  }
+  return readVulnsByPkg(vulnerabilities[0].packageRef, sessionId).then(
+    (cves) => {
+      expect(cves.length).toEqual(3);
+    }
+  );
+});
+
+//Test 9: Can read multiple cves by session
+test('Test 8: Can read all vulnerabilities for a session', async () => {
+  return readVulnsBySession(sessionId).then((cves) => {
+    expect(cves.length).toEqual(vulnerabilities.length);
+  });
+});
+
+let updatedCve = {
+  cveId: 'CVE-2022-25857',
+  cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H',
+  impact: 25,
+  likelihood: 0.66,
+  packageRef: 'SPDXRef-Package',
+  risk: 89,
+};
+//Test 9: Update existing package (does NOT duplicate)
+test('Test 9: Updated existing cve (no duplicates)', async () => {
+  await writeVuln(updatedCve, sessionId);
+  return readVulnsBySession(sessionId).then((cves) => {
+    expect(cves).toContainEqual(updatedCve);
+    expect(cves).not.toContainEqual(vulnerabilities[1]);
+  });
+});
+
+//Test 10: Read vulnerabilities not present in database
+test('Test 10: Read vulnerabilities not present in database', async () => {
+  return readVulnsBySession(1027).then((cves) => {
+    expect(cves).toEqual([]);
+  });
+});
+
+//Test 11: Read vulnerabilities not present in database
+test('Test 11: Read vulnerabilities not present in database', async () => {
+  return readVulnsByPkg('unknown', sessionId).then((cves) => {
+    expect(cves).toEqual([]);
   });
 });
