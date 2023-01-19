@@ -4,7 +4,7 @@ import winston from 'winston';
 const combine = winston.format.combine;
 const timestamp = winston.format.timestamp;
 const prettyPrint = winston.format.prettyPrint;
-const colorize =  winston.format.colorize;
+const colorize = winston.format.colorize;
 const align = winston.format.align;
 const printf = winston.format.printf;
 
@@ -19,8 +19,10 @@ const alignedWithColorsAndTime = winston.format.combine(
     } = info;
 
     const ts = timestamp.slice(0, 19).replace('T', ' ');
-    return `[${ts} ${level}]: ${message} ${Object.keys(args).length ? JSON.stringify(args, null, 2) : ''}`;
-  }),
+    return `[${ts} ${level}]: ${message} ${
+      Object.keys(args).length ? JSON.stringify(args, null, 2) : ''
+    }`;
+  })
 );
 
 /**
