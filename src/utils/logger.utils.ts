@@ -27,26 +27,27 @@ const alignedWithColorsAndTime = winston.format.combine(
  * Log object used to log warnings, errors, and info.
  */
 const logger = winston.createLogger({
-    level: "debug",
-    transports: [
-      new winston.transports.File({ /*JSON output */
-        filename: "logs/example.log",
-        format: combine(
-          timestamp({
-            format: "MMM-DD-YYYY HH:mm:ss",
-          }),
-          prettyPrint()
-        )
-      }),
-      new winston.transports.Console({ /*Console log */
-        format:  combine(
-          timestamp({
-            format: "MMM-DD-YYYY HH:mm:ss",
-          }), 
-          alignedWithColorsAndTime
-        )
-      })
-    ],
-  });
-  
-export {logger};
+  level: 'debug',
+  transports: [
+    new winston.transports.File({
+      /*JSON output */ filename: 'logs/example.log',
+      format: combine(
+        timestamp({
+          format: 'MMM-DD-YYYY HH:mm:ss',
+        }),
+        prettyPrint()
+      ),
+    }),
+    new winston.transports.Console({
+      /*Console log */
+      format: combine(
+        timestamp({
+          format: 'MMM-DD-YYYY HH:mm:ss',
+        }),
+        alignedWithColorsAndTime
+      ),
+    }),
+  ],
+});
+
+export { logger };

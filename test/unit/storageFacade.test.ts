@@ -165,7 +165,9 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  return cleanup();
+  cleanup();
+  const flushPromises = () => new Promise(setImmediate);
+  return flushPromises;
 });
 
 //Test 1: Can Write and read one package
@@ -178,7 +180,11 @@ test('Test 1: Write and read one package', async () => {
 //Test 2: Can read all packages from a session
 test('Test 2: Read all packages from a session', async () => {
   return readAllPackages(sessionId).then((pkgs) => {
-    expect(pkgs.sort()).toEqual(packages);
+    expect(pkgs.length).toEqual(packages.length);
+    expect(pkgs).toContainEqual(packages[0]);
+    expect(pkgs).toContainEqual(packages[1]);
+    expect(pkgs).toContainEqual(packages[2]);
+    expect(pkgs).toContainEqual(packages[3]);
   });
 });
 

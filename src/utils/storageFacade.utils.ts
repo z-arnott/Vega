@@ -318,7 +318,6 @@ async function createJunctionEntry(
       //Link CVE to its package in junction table
       let { status, error } = await supabase.from('junction').insert({
         packageid: data[0].packageid,
-        sessionid: sessionId,
         cveid: cveTableId,
       });
     }

@@ -140,7 +140,6 @@ function decodeCvssVector(cvssStr: string): Cvss {
         case 'L': {
           cvss.AV = 0.4;
           break;
-
         }
         case 'A': {
           cvss.AV = 0.6;
