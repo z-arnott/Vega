@@ -1,7 +1,69 @@
 import { Package, Vulnerability } from '../utils/types.utils';
 import { logger } from '@utils/logger.utils';
 
-/*********** Vulnerabiltiy Analysis ************/
+const maxImpact = 100;
+const maxLikelihood = 1;
+
+/************* Public Functions **************/
+/**
+ * Object representing the results of a system analysis
+ */
+interface AnalysisInfo {
+  sessionID: number;
+  packagesAnalyzed: number;
+  systemRisk: number;
+}
+
+/**
+ * Find the risk of one a software system based on the risk of the system's packages
+ * @param packages list of packages in one software system
+ * @returns the highest risk of the system
+ */
+function analyzeSystem(packages: Package[]): number {
+  let highest = 0;
+  for (let p of packages) {
+    if (p.highestRisk == undefined) {
+      logger.warn('System Risk Analysis: ' + p.id + ' risk undefined');
+    } else {
+      highest = Math.max(highest, p.highestRisk);
+    }
+  }
+  return highest;
+}
+/**
+ * Find the consolodated risk and highest risk of a package based on the package's vulnerabilities
+ * @param pkg to analyze
+ * @param cves list of vulnerabilities in pkg
+ */
+function analyzePackage(pkg: Package, cves: Vulnerability[]) {
+  for (let v of cves) {
+    analyzeVulnerability(v);
+  }
+  pkg.consRisk = consolidatedRisk(cves);
+  pkg.highestRisk = highestRisk(cves);
+}
+
+/**
+ * Update a Vulnerability with impact, likelihood, and risk values
+ * @param cve to analyze
+ */
+function analyzeVulnerability(cve: Vulnerability) {
+  if (cve.cvss2) {
+    cve.impact = cveImpact(cve.cvss2);
+    cve.likelihood = cveLikelihood(cve.cvss2);
+    cve.risk = cveRisk(cve.impact, cve.likelihood);
+  } else {
+    //CVEs without cvss data from NVD assigned maximum values
+    cve.impact = maxImpact;
+    cve.likelihood = maxLikelihood;
+    cve.risk = cveRisk(cve.impact, cve.likelihood);
+  }
+}
+
+export { AnalysisInfo, analyzeSystem, analyzePackage, analyzeVulnerability };
+
+/*********** Private Vulnerabiltiy Analysis Fns ************/
+//Interface representing the metrics within a CVSS V2 string
 interface Cvss {
   AV: number;
   AC: number;
@@ -10,7 +72,13 @@ interface Cvss {
   I: number;
   A: number;
 }
-function cvss3to2(cvss3Str: string): string {
+
+/**
+ * Convert a cvss3 vector string to a cvss2 vector string
+ * @param cvss3Str cvss vector string in Version 3 format
+ * @returns cvss vector string in Version 2 format
+ */
+export function cvss3to2(cvss3Str: string): string {
   let cvss2Str = '';
   let metrics = cvss3Str.split('/');
   for (let metric of metrics) {
@@ -72,6 +140,7 @@ function decodeCvssVector(cvssStr: string): Cvss {
         case 'L': {
           cvss.AV = 0.4;
           break;
+
         }
         case 'A': {
           cvss.AV = 0.6;
@@ -178,13 +247,8 @@ function cveRisk(impact: number, likelihood: number) {
   return impact * likelihood;
 }
 
-function analyzeVulnerability(v: Vulnerability) {
-  v.impact = cveImpact(v.cvss2);
-  v.likelihood = cveLikelihood(v.cvss2);
-  v.risk = cveRisk(v.impact, v.likelihood);
-}
-
-/********** Pacakge Highest Risk ************/
+/************ Private Package Analysis Fns *************/
+//Pacakge Highest Risk
 function highestRisk(cves: Vulnerability[]): number {
   let highest = 0;
   for (let v of cves) {
@@ -192,7 +256,17 @@ function highestRisk(cves: Vulnerability[]): number {
   }
   return highest;
 }
-/******* Pacakge Consolidated Risk *********/
+//Pacakge Consolidated Risk
+function consolidatedRisk(cves: Vulnerability[]): number {
+  let sampleSpace: SampleElement[] = contstructSampleSpace(cves);
+  let consolidatedRisk = 0;
+  for (let e of sampleSpace) {
+    let likelihood = likelihoodElement(e);
+    let impact = impactElement(e);
+    consolidatedRisk += impact * likelihood;
+  }
+  return consolidatedRisk;
+}
 //One element in a sample set
 interface SampleElement {
   exploited: Vulnerability[];
@@ -206,7 +280,7 @@ function impactElement(e: SampleElement): number {
   for (let i = 0; i < e.exploited.length; i++) {
     sumImpacts += e.exploited[i].impact;
   }
-  return Math.min(100, sumImpacts);
+  return Math.min(maxImpact, sumImpacts);
 }
 
 //Compute the likelihood of one element in a sample set
@@ -229,7 +303,6 @@ function likelihoodElement(e: SampleElement): number {
 function contstructSampleSpace(cves: Vulnerability[]): SampleElement[] {
   let sampleSpace: SampleElement[] = [];
   let sampleSpaceSize = Math.pow(2, cves.length);
-
   //Construct each element in sample space
   for (let i = 0; i < sampleSpaceSize; i++) {
     let element: SampleElement = {
@@ -253,34 +326,3 @@ function contstructSampleSpace(cves: Vulnerability[]): SampleElement[] {
   }
   return sampleSpace;
 }
-
-function consolidatedRisk(cves: Vulnerability[]): number {
-  let sampleSpace: SampleElement[] = contstructSampleSpace(cves);
-  let consolidatedRisk = 0;
-  for (let e of sampleSpace) {
-    let likelihood = likelihoodElement(e);
-    let impact = impactElement(e);
-    consolidatedRisk += impact * likelihood;
-  }
-  return consolidatedRisk;
-}
-
-/********** System Risk ************/
-function systemRisk(packages: Package[]): number {
-  let highest = 0;
-  for (let p of packages) {
-    if (p.highestRisk == null) {
-      logger.warn('System Risk Analysis: ' + p.ref + ' risk null');
-    } else {
-      highest = Math.max(highest, p.highestRisk);
-    }
-  }
-  return highest;
-}
-export {
-  systemRisk,
-  consolidatedRisk,
-  highestRisk,
-  analyzeVulnerability,
-  cvss3to2,
-};

@@ -1,4 +1,6 @@
+import { Package, SbomFormat } from '../src/utils/types.utils';
 import { parse } from '../src/services/parserContext.services';
+import { AnalysisInfo } from '../src/services/riskAnalysis.services';
 import fileUpload from 'express-fileupload';
 
 const express = require('express');
@@ -25,6 +27,9 @@ app.post('/upload', (req: any, res: any, next: any) => {
   //add middleware calls here as needed
 });
 
+app.get('/riskanalysis', (req: any, res: any, next: any) => {
+  res.send('Risk Analysis reached');
+});
 /*************** Start Server ***************/
 // start the Express server
 app.listen(port, () => {
