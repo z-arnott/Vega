@@ -22,8 +22,8 @@ interface AnalysisInfo {
 function analyzeSystem(packages: Package[]): number {
   let highest = 0;
   for (let p of packages) {
-    if (p.highestRisk == undefined) {
-      logger.warn('System Risk Analysis: ' + p.id + ' risk undefined');
+    if (p.highestRisk == null) {
+      logger.warn('System Risk Analysis: ' + p.ref + ' risk undefined');
     } else {
       highest = Math.max(highest, p.highestRisk);
     }
