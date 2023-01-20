@@ -232,12 +232,6 @@ async function updatePackage(pkg: Package, sessionId: number) {
   return status;
 }
 
-//Function #4: Write Single or Many Request (Package)
-async function writePackageByVulType(DBPackage: any) {
-  let { status } = await supabase.from('packages').insert(DBPackage);
-  return status;
-}
-
 async function deletePackage(packageid: number) {
   const { status } = await supabase
     .from('packages')
