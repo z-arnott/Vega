@@ -138,36 +138,41 @@ async function clear_test_vulnerabilites() {
 }
 
 async function clear_test_junction() {
-  const { error } = await supabase
-    .from('junction')
-    .delete()
+  const { data } = await supabase
+    .from('packages')
+    .select('packageid')
     .eq('sessionid', sessionId);
+  if (data) {
+    let arr = Object.values(data);
+    const { error } = await supabase
+      .from('junction')
+      .delete()
+      .in('packageid', arr);
+  }
 }
 
 async function cleanup() {
-  clear_test_packages();
-  clear_test_vulnerabilites();
-  clear_test_junction();
+  return clear_test_junction().then(async () => {
+    return clear_test_packages().then(async () => {
+      return clear_test_vulnerabilites();
+    });
+  });
 }
 
 async function setup() {
-  await cleanup();
-  for (let pkg of packages) {
-    await writePackage(pkg, sessionId);
-  }
-  for (let v of vulnerabilities) {
-    await writeVuln(v, sessionId);
-  }
+  let finished = await cleanup();
+  return cleanup().then(async () => {
+    for (let pkg of packages) {
+      writePackage(pkg, sessionId);
+    }
+    for (let v of vulnerabilities) {
+      writeVuln(v, sessionId);
+    }
+  });
 }
 
 beforeAll(async () => {
   return setup();
-});
-
-afterAll(async () => {
-  cleanup();
-  const flushPromises = () => new Promise(setImmediate);
-  return flushPromises;
 });
 
 //Test 1: Can Write and read one package
@@ -261,10 +266,11 @@ let updatedCve = {
 };
 //Test 9: Update existing package (does NOT duplicate)
 test('Test 9: Updated existing cve (no duplicates)', async () => {
-  await writeVuln(updatedCve, sessionId);
-  return readVulnsBySession(sessionId).then((cves) => {
-    expect(cves).toContainEqual(updatedCve);
-    expect(cves).not.toContainEqual(vulnerabilities[1]);
+  return writeVuln(updatedCve, sessionId).then(async () => {
+    return readVulnsBySession(sessionId).then((cves) => {
+      expect(cves).toContainEqual(updatedCve);
+      expect(cves).not.toContainEqual(vulnerabilities[1]);
+    });
   });
 });
 
