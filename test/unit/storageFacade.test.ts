@@ -152,15 +152,14 @@ async function clear_test_junction() {
 }
 
 async function cleanup() {
-  return clear_test_junction().then(async () => {
-    return clear_test_packages().then(async () => {
-      return clear_test_vulnerabilites();
-    });
-  });
+  return {
+    result1: await clear_test_junction(),
+    result2: clear_test_packages(),
+    result3: clear_test_vulnerabilites()
+  }
 }
 
 async function setup() {
-  let finished = await cleanup();
   return cleanup().then(async () => {
     for (let pkg of packages) {
       writePackage(pkg, sessionId);
