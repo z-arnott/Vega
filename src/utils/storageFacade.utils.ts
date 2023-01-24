@@ -98,7 +98,9 @@ export async function writePackage(pkg: Package, sessionId: number) {
 export async function readVulnsBySession(sessionId: number) {
   let { data, error } = await supabase
     .from('vulnerabilities')
-    .select('*,junction!inner(packageid,packages!inner(package_ref))')
+    .select(
+      '*,junction!inner(packageid,packages!inner(sessionid, package_ref))'
+    )
     .eq('junction.packages.sessionid', sessionId);
 
   let cves: Vulnerability[] = [];
@@ -129,11 +131,14 @@ export async function readVulnsBySession(sessionId: number) {
  * @param sessionId associated with one user
  * @returns list of packages, empty list if none matching are present in DB
  */
-export async function readVulnsByPkg(packageRef: string, sessionId: number) {
+export async function readVulnsByPkg(ref: string, sessionId: number) {
   const { data, error } = await supabase
     .from('vulnerabilities')
-    .select('*,junction!inner(packageid,packages!inner(package_ref))')
-    .eq('junction.packages.package_ref', packageRef);
+    .select(
+      '*,junction!inner(packageid,packages!inner(package_ref, sessionid))'
+    )
+    .eq('junction.packages.package_ref', ref)
+    .eq('junction.packages.sessionid', sessionId);
   let cves: Vulnerability[] = [];
 
   if (error) {
@@ -144,7 +149,7 @@ export async function readVulnsByPkg(packageRef: string, sessionId: number) {
         //map database result to Vulnerability object
         {
           cveId: v.cveidstring,
-          packageRef: v.junction[0].packages.package_ref,
+          packageRef: ref,
           impact: v.impact,
           likelihood: v.likelihood,
           risk: v.risk,
@@ -227,12 +232,6 @@ async function updatePackage(pkg: Package, sessionId: number) {
   return status;
 }
 
-//Function #4: Write Single or Many Request (Package)
-async function writePackageByVulType(DBPackage: any) {
-  let { status } = await supabase.from('packages').insert(DBPackage);
-  return status;
-}
-
 async function deletePackage(packageid: number) {
   const { status } = await supabase
     .from('packages')
@@ -289,7 +288,7 @@ async function insertVuln(cve: Vulnerability, sessionId: number) {
     logger.error(error.message);
   }
   if (data) {
-    let vulnerabilityTableId = data[0].id; //row ID in database
+    let vulnerabilityTableId = data[0].id; //vulnerability PRIMARY key in vulnerability table
     return createJunctionEntry(vulnerabilityTableId, cve.packageRef, sessionId);
   }
   return status;
@@ -318,7 +317,6 @@ async function createJunctionEntry(
       //Link CVE to its package in junction table
       let { status, error } = await supabase.from('junction').insert({
         packageid: data[0].packageid,
-        sessionid: sessionId,
         cveid: cveTableId,
       });
     }

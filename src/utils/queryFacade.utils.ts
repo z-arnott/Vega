@@ -19,7 +19,6 @@ async function sendQuery(query: Query) {
     return cleaningStrategy[query.database](response);
   });
 }
-
 /***************** GET VULNERABILITIES FROM EXT DATABASES ****************************/
 async function getVulnerabilities(query: Query) {
   let config: any = {
