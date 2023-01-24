@@ -1,6 +1,11 @@
 import { expect, jest, test } from '@jest/globals';
 import { supabase } from '@utils/supabase';
-import { Package, Vulnerability } from '@utils/types.utils';
+import {
+  Package,
+  Vulnerability,
+  PackageViewParam,
+  VulnerabilityViewParam,
+} from '@utils/types.utils';
 import {
   writePackage,
   readPackage,
@@ -8,6 +13,8 @@ import {
   writeVuln,
   readVulnsBySession,
   readVulnsByPkg,
+  readPacakgesSorted,
+  readVulnerabilitiesSorted,
 } from '@utils/storageFacade.utils';
 
 //Set up test data
@@ -155,17 +162,17 @@ async function cleanup() {
   return {
     result1: await clear_test_junction(),
     result2: clear_test_packages(),
-    result3: clear_test_vulnerabilites()
-  }
+    result3: clear_test_vulnerabilites(),
+  };
 }
 
 async function setup() {
   return cleanup().then(async () => {
     for (let pkg of packages) {
-      writePackage(pkg, sessionId);
+      await writePackage(pkg, sessionId);
     }
     for (let v of vulnerabilities) {
-      writeVuln(v, sessionId);
+      await writeVuln(v, sessionId);
     }
   });
 }
@@ -184,6 +191,7 @@ test('Test 1: Write and read one package', async () => {
 //Test 2: Can read all packages from a session
 test('Test 2: Read all packages from a session', async () => {
   return readAllPackages(sessionId).then((pkgs) => {
+    console.log(pkgs);
     expect(pkgs.length).toEqual(packages.length);
     expect(pkgs).toContainEqual(packages[0]);
     expect(pkgs).toContainEqual(packages[1]);
@@ -284,5 +292,22 @@ test('Test 10: Read vulnerabilities not present in database', async () => {
 test('Test 11: Read vulnerabilities not present in database', async () => {
   return readVulnsByPkg('unknown', sessionId).then((cves) => {
     expect(cves).toEqual([]);
+  });
+});
+
+//Test 12: Dashboard fn
+test('Test 12: Sorted Dashboard Data', async () => {
+  return readPacakgesSorted(sessionId, PackageViewParam.NAME).then((pkgs) => {
+    console.log(JSON.stringify(pkgs, null, 2));
+  });
+});
+
+//Test 13: Dashboard fn
+test('Test 13: Sorted Dashboard Data (cves)', async () => {
+  return readVulnerabilitiesSorted(
+    sessionId,
+    VulnerabilityViewParam.IMPACT
+  ).then((cves) => {
+    console.log(JSON.stringify(cves, null, 2));
   });
 });
