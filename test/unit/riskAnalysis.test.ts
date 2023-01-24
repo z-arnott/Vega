@@ -9,7 +9,7 @@ import { Package, Vulnerability } from '@utils/types.utils';
 let inputCVEs: Vulnerability[] = [
   {
     cveId: 'CVE-2021-20089',
-    packgaeId: 1,
+    packageRef: '1',
     cvss2: 'AV:N/AC:L/Au:N/C:C/I:C/A:C',
     impact: 0,
     likelihood: -1,
@@ -17,7 +17,7 @@ let inputCVEs: Vulnerability[] = [
   },
   {
     cveId: 'CVE-2021-20090',
-    packgaeId: 1,
+    packageRef: '1',
     cvss2: 'AV:N/AC:L/Au:S/C:N/I:P/A:C',
     impact: -1,
     likelihood: -1,
@@ -25,7 +25,7 @@ let inputCVEs: Vulnerability[] = [
   },
   {
     cveId: 'CVE-2021-20091',
-    packgaeId: 1,
+    packageRef: '1',
     cvss2: 'AV:L/AC:L/Au:N/C:P/I:P/A:P',
     impact: -1,
     likelihood: 0,
@@ -36,7 +36,7 @@ let inputCVEs: Vulnerability[] = [
 let expectedCVEs: Vulnerability[] = [
   {
     cveId: 'CVE-2021-20089',
-    packgaeId: 1,
+    packageRef: '1',
     cvss2: 'AV:N/AC:L/Au:N/C:C/I:C/A:C',
     impact: 100,
     likelihood: 1,
@@ -44,7 +44,7 @@ let expectedCVEs: Vulnerability[] = [
   },
   {
     cveId: 'CVE-2021-20090',
-    packgaeId: 1,
+    packageRef: '1',
     cvss2: 'AV:N/AC:L/Au:S/C:N/I:P/A:C',
     impact: 50,
     likelihood: 0.6,
@@ -52,7 +52,7 @@ let expectedCVEs: Vulnerability[] = [
   },
   {
     cveId: 'CVE-2021-20091',
-    packgaeId: 1,
+    packageRef: '1',
     cvss2: 'AV:L/AC:L/Au:N/C:P/I:P/A:P',
     impact: 50,
     likelihood: 0.4,
@@ -70,25 +70,25 @@ test('Test 1: analyze vulnerabilites', () => {
 //Test 2: Analyze Package
 let inputPackage: Package = {
   name: 'polyfill-intl-normalizer',
-  id: '1',
+  ref: '1',
   purl: 'pkg:composer/symfony/polyfill-intl-normalizer@1.23.0',
-  cpeName: undefined,
-  impact: undefined,
-  consRisk: undefined,
-  highestRisk: undefined,
-  likelihood: undefined,
+  cpeName: null,
+  impact: null,
+  consRisk: null,
+  highestRisk: null,
+  likelihood: null,
   version: '1.23.0',
 };
 
 let expectedPackage: Package = {
   name: 'polyfill-intl-normalizer',
-  id: '1',
+  ref: '1',
   purl: 'pkg:composer/symfony/polyfill-intl-normalizer@1.23.0',
-  cpeName: undefined,
-  impact: undefined,
+  cpeName: null,
+  impact: null,
   consRisk: 76,
   highestRisk: 100,
-  likelihood: undefined,
+  likelihood: null,
   version: '1.23.0',
 };
 analyzePackage(inputPackage, expectedCVEs);
@@ -100,35 +100,35 @@ test('Test 2: analyze packages', () => {
 let packages: Package[] = [
   {
     name: 'polyfill-intl-normalizer',
-    id: '1',
+    ref: '1',
     purl: 'pkg:composer/symfony/polyfill-intl-normalizer@1.23.0',
-    cpeName: undefined,
-    impact: undefined,
+    cpeName: null,
+    impact: null,
     consRisk: 76,
     highestRisk: 89,
-    likelihood: undefined,
+    likelihood: null,
     version: '1.23.0',
   },
   {
     name: 'polyfill-intl-normalizer',
-    id: '1',
+    ref: '1',
     purl: 'pkg:composer/symfony/polyfill-intl-normalizer@1.23.0',
-    cpeName: undefined,
-    impact: undefined,
+    cpeName: null,
+    impact: null,
     consRisk: 76,
     highestRisk: 0.2,
-    likelihood: undefined,
+    likelihood: null,
     version: '1.23.0',
   },
   {
     name: 'polyfill-intl-normalizer',
-    id: '1',
+    ref: '1',
     purl: 'pkg:composer/symfony/polyfill-intl-normalizer@1.23.0',
-    cpeName: undefined,
-    impact: undefined,
+    cpeName: null,
+    impact: null,
     consRisk: 76,
     highestRisk: 58,
-    likelihood: undefined,
+    likelihood: null,
     version: '1.23.0',
   },
 ];

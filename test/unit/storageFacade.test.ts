@@ -1,369 +1,288 @@
-//import { supabase } from @;
-//import { Database };
+import { expect, jest, test } from '@jest/globals';
+import { supabase } from '@utils/supabase';
+import { Package, Vulnerability } from '@utils/types.utils';
+import {
+  writePackage,
+  readPackage,
+  readAllPackages,
+  writeVuln,
+  readVulnsBySession,
+  readVulnsByPkg,
+} from '@utils/storageFacade.utils';
 
-import { readPackage,readAllPackages,readVulnByPkg,writePackage, deletePackage, writeVuln, DeleteVuln, readVulnBySession,updateVuln,updatePackage } from '@utils/storageFacade.utils'; 
-import { DBPackage, DBResponse, DBVulnerabilitybypid, DBVulnerabilitybysid, DBVulnerabilityInput } from '@utils/types.utils';
-import {expect, jest, test} from '@jest/globals';
-import dotenv from 'dotenv';
-
-//Setup
-dotenv.config();
-const supabaseUrl = process.env.SUPABASE_URL as string;
-const supabaseKey = process.env.SUPABASE_KEY as string;
-jest.setTimeout(20000);
-
-//Test 1: Can Read Specific Package
-//Error: these let statements wont work so I'm manually inputting the values in the test function
-let sessionid: 234;
-let packageid: 1;
-
-let expectedData1: DBPackage[] = [
-    {
-        packageid: 1,
-        sessionid: 234,
-        name: "firstname",
-        packageversion: null,
-        packagestring:null,
-        consrisk: 3.5, 
-        impact: 2.3,
-        likelihood: 2.3,
-        highestrisk: 2.4,
-        purl: "hellopurl",
-        cpename: "hellocpename"
-      }
-    ];
-
-// let expectedResult1: DBResponse={
-//   count: null,
-//   data: expectedData1,
-//   error: null,
-//   status: 200,
-//   statusText: "OK"
-
-// } 
-
-test('Test 1: Read Specific PackageInfo Given SessionID and PackageID', () => {
-  return readPackage(234,1).then((data) => {
-    expect(data).toStrictEqual(expectedData1);
-  });
-});
-
-//Test 2: Can Read All Package
-
-let expectedData2: DBPackage[] = [
-    {
-        packageid: 1,
-        sessionid: 234,
-        name: "firstname",
-        packageversion: null,
-        packagestring:null,
-        consrisk: 3.5, 
-        impact: 2.3,
-        likelihood: 2.3,
-        highestrisk: 2.4,
-        purl: "hellopurl",
-        cpename: "hellocpename"
-      },
-      {
-        packageid: 4,
-        sessionid: 234,
-        name: "fourthname",
-        packageversion: "3.5.4",
-        packagestring:null,
-        consrisk: 8.6, 
-        impact: 1.3,
-        likelihood: 9.4,
-        highestrisk: 9.8,
-        purl: "olehello",
-        cpename: "rerunshere"
-      }
-    ];
-
-let expectedResult2: DBResponse={
-  count: null,
-  data: expectedData2,
-  error: null,
-  status: 200,
-  statusText: "OK"
-
-} 
-
-test('Test 2: Read All PackageInfo Given SessionID', () => {
-  return readAllPackages(234).then((data) => {
-    expect(data).toStrictEqual(expectedResult2);
-  });
-});
-
-//Test 3: Read Multiple Vulnerabilities Given PackageID
-
-
-let expectedData3: DBVulnerabilitybypid[] = [
-    {
-      packageid:1,
-      vulnerabilities:{
-        cveid: 7485,
-        impact: null,
-        likelihood: null,
-        cveidstring:"CVE-776-876-998",
-        risk: null,
-        description: "broken window"
-        }
-      },
-      {
-      packageid: 1,
-      vulnerabilities:{
-        cveid: 4765,
-        impact: null,
-        likelihood: null,
-        cveidstring:"CVE-123-456-789",
-        risk: null,
-        description: "flat tire"
-        }
-    }];
-
-
-test('Test 3: Read Vulnerabilities Given PackageID no sorting', () => {
-  return readVulnByPkg(1).then((data) => {
-    //expect(data).toEqual(expect.arrayContaining(expectedData3));
-    expect(data).toEqual(expect.arrayContaining(expectedData3)); //good to use here instead of .toEqual or .toStrictEqual 
-  });
-});
-
-//Test 3b: Read Vulnerabilities Given sessionID 
-
-let expectedData3b = [
+//Set up test data
+let sessionId = 9927;
+let packages: Package[] = [
   {
-    junction:[
-        {packageid:1,
-          vulnerabilities:{
-          cveid: 7485,
-          cveidstring: "CVE-776-876-998",
-          impact: null,
-          likelihood: null,
-          risk: null,
-          description: "broken window"
-          }
-        },
-        {packageid:1,
-          vulnerabilities:{
-          cveid: 4765,
-          cveidstring: "CVE-123-456-789",
-          impact: null,
-          likelihood: null,
-          risk: null,
-          description: "flat tire"
-          }
-    }
-      ]
-    }
-];
-
-test('Test 3b: Read vulnrabilities given sessionid no sorting',() =>{
-  return readVulnBySession(234).then((data) => {
-    expect(data).toEqual(expect.arrayContaining(expectedData3b));
-  })
-});
-
-//Test 4: Write One package
-
-let expectedData4: DBPackage[] = [{
-  packageid: 5,
-  sessionid: 348,
-  name: "randomtest5",
-  packageversion: null,
-  packagestring:null,
-  consrisk: 7.4,
-  impact: 9.0,
-  likelihood: 7.6,
-  highestrisk: 9.4,
-  purl: null,
-  cpename: null
-}
-];
-
-
-test('Test 4: Write One Package', () => {
-  //WritePackageRequest(expectedData4);
-  return writePackage(expectedData4).then((status) => {
-  expect(status).toStrictEqual(201); //201 code for content created
-  });
-}); 
-
-//Test 5: Delete One Package Given Packageid
-test('Test 5: Delete One Package', () =>{
-  return deletePackage(5).then((status) => {
-    expect(status).toStrictEqual(204); //204 code for success, no content to return
-  });
-});
-
-//Test 6: Write Packages in Bulk
-let expectedData6: DBPackage[] = [{
-  packageid: 5,
-  sessionid: 348,
-  name: "randomtest5",
-  packageversion: null,
-  packagestring:null,
-  consrisk: 7.4,
-  impact: 9.0,
-  likelihood: 7.6,
-  highestrisk: 9.4,
-  purl: null,
-  cpename: null
-},
-{
-  packageid: 6,
-  sessionid: 348,
-  name: "randomtest6",
-  packageversion: null,
-  packagestring:null,
-  consrisk: 7.4,
-  impact: 9.0,
-  likelihood: 7.6,
-  highestrisk: 9.4,
-  purl: null,
-  cpename: null
-}
-]
-
-test('Test 6: Write Packages in Bulk', () => {
-  //WritePackageRequest(expectedData4);
-  return writePackage(expectedData6).then((status) => {
-  expect(status).toStrictEqual(201); //201 code for content created
-  });
-}); 
-
-test('Test 7: Delete Multiple Packages', () =>{
-  deletePackage(5);
-  deletePackage(6);
-  return readPackage(null,6).then((data) => {
-    expect(data).toStrictEqual(null); //querying a non-existant entry yield a null in the data field
-  });
-});
-
-//Test 8: Write One Vulnerabilities
-let expectedData8: DBVulnerabilityInput = {
-  cveid: 5,
-  impact: 9.0,
-  likelihood: 7.6,
-  risk:7.3,
-  description: "painful twist"
-}
-
-test('Test 8: Write One Vulnerability', () => {
-  return writeVuln(expectedData8).then((status) => {
-  expect(status).toStrictEqual(201); //201 code for content created
-  });
-}); 
-
-
-//Test 9: Delete One Vulnerability
-test('Test 9: Delete Single Vulnerability', () =>{
-  return DeleteVuln(5).then((status) => {
-    expect(status).toStrictEqual(204); //querying a non-existant entry yield a null in the data field
-  });
-});
-
-//Test 9: Write Multiple Vulnerabilities
-let expectedData9: DBVulnerabilityInput[] = [
-  {
-      cveid: 5253,
-      impact: null,
-      likelihood: null,
-      risk: null,
-      description: "painful twist"
-    },
-    {
-    cveid: 508,
+    consRisk: null,
+    cpeName: 'cpe:2.3:a:pivotal_software:spring_framework:4.1.0:*:*:*:*:*:*:*',
+    highestRisk: null,
+    ref: 'SPDXRef-Package',
     impact: null,
     likelihood: null,
-    risk: null,
-    description: "torn guitar strig"
+    name: 'glibc',
+    purl: null,
+    version: '2.11.1',
+  },
+  {
+    consRisk: null,
+    cpeName: null,
+    highestRisk: null,
+    ref: 'SPDXRef-fromDoap-1',
+    impact: null,
+    likelihood: null,
+    name: 'Apache Commons Lang',
+    purl: null,
+    version: null,
+  },
+  {
+    consRisk: null,
+    cpeName: null,
+    highestRisk: null,
+    ref: 'SPDXRef-fromDoap-0',
+    impact: null,
+    likelihood: null,
+    name: 'Jena',
+    purl: null,
+    version: null,
+  },
+  {
+    consRisk: null,
+    cpeName: null,
+    highestRisk: null,
+    ref: 'SPDXRef-Saxon',
+    impact: null,
+    likelihood: null,
+    name: 'Saxon',
+    purl: null,
+    version: '8.8',
+  },
+];
+
+let vulnerabilities: Vulnerability[] = [
+  {
+    cveId: 'CVE-2022-1471',
+    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H',
+    impact: -1,
+    likelihood: -1,
+    packageRef: 'SPDXRef-Package',
+    risk: -1,
+  },
+  {
+    cveId: 'CVE-2022-25857',
+    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H',
+    impact: -1,
+    likelihood: -1,
+    packageRef: 'SPDXRef-Package',
+    risk: -1,
+  },
+  {
+    cveId: 'CVE-2022-38749',
+    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
+    impact: -1,
+    likelihood: -1,
+    packageRef: 'SPDXRef-fromDoap-1',
+    risk: -1,
+  },
+  {
+    cveId: 'CVE-2022-38751',
+    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
+    impact: -1,
+    likelihood: -1,
+    packageRef: 'SPDXRef-fromDoap-0',
+    risk: -1,
+  },
+  {
+    cveId: 'CVE-2022-38752',
+    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
+    impact: -1,
+    likelihood: -1,
+    packageRef: 'SPDXRef-fromDoap-0',
+    risk: -1,
+  },
+  {
+    cveId: 'CVE-2022-41854',
+    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H',
+    impact: -1,
+    likelihood: -1,
+    packageRef: 'SPDXRef-Package',
+    risk: -1,
+  },
+  {
+    cveId: 'CVE-2022-38750',
+    cvss2: 'CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H',
+    impact: -1,
+    likelihood: -1,
+    packageRef: 'SPDXRef-fromDoap-0',
+    risk: -1,
+  },
+];
+
+async function clear_test_packages() {
+  for (let pkg of packages) {
+    const { error } = await supabase
+      .from('packages')
+      .delete()
+      .eq('package_ref', pkg.ref)
+      .eq('sessionid', sessionId);
+  }
+}
+
+async function clear_test_vulnerabilites() {
+  for (let v of vulnerabilities) {
+    const { error } = await supabase
+      .from('vulnerabilities')
+      .delete()
+      .eq('cveidstring', v.cveId);
+  }
+}
+
+async function clear_test_junction() {
+  const { data } = await supabase
+    .from('packages')
+    .select('packageid')
+    .eq('sessionid', sessionId);
+  if (data) {
+    let arr = Object.values(data);
+    const { error } = await supabase
+      .from('junction')
+      .delete()
+      .in('packageid', arr);
+  }
+}
+
+async function cleanup() {
+  return {
+    result1: await clear_test_junction(),
+    result2: clear_test_packages(),
+    result3: clear_test_vulnerabilites()
+  }
+}
+
+async function setup() {
+  return cleanup().then(async () => {
+    for (let pkg of packages) {
+      writePackage(pkg, sessionId);
     }
-  ]
-  
-  test('Test 10: Write Multiple Vulnerabilities',() =>{
-  return writeVuln(expectedData9).then((status) => {
-  expect(status).toStrictEqual(201);
+    for (let v of vulnerabilities) {
+      writeVuln(v, sessionId);
+    }
+  });
+}
+
+beforeAll(async () => {
+  return setup();
+});
+
+//Test 1: Can Write and read one package
+test('Test 1: Write and read one package', async () => {
+  return readPackage(packages[0].ref, sessionId).then((pkg) => {
+    expect(pkg).toStrictEqual(packages[0]);
   });
 });
 
-//Delete dummy vulnerabilities created in last step
-test('Test 11: Delete Multiple Vulnerabilities', () =>{
-  DeleteVuln(5253);
-  return DeleteVuln(508).then((status) => {
-    expect(status).toStrictEqual(204); //querying a non-existant entry yield a null in the data field
-  });
-});
-  
-//Test 12: Successfully Overwrite Package with same write function
-let expectedData11 = {
-  name: "overwrittenvalue",
-  consrisk: 739.5
-}
-
-/* Original 
-packageid: 4,
-        sessionid: 234,
-        name: "fourthname",
-        packageversion: "3.5.4",
-        packagestring:null,
-        consrisk: 8.6, 
-        impact: 1.3,
-        likelihood: 9.4,
-        highestrisk: 9.8,
-        purl: "olehello",
-        cpename: "rerunshere"
-      }
- */
-
-test('Test 12: Successful Package Update',() =>{
-  return updatePackage(4,expectedData11).then((status)=>{
-    expect(status).toStrictEqual(204);
+//Test 2: Can read all packages from a session
+test('Test 2: Read all packages from a session', async () => {
+  return readAllPackages(sessionId).then((pkgs) => {
+    expect(pkgs.length).toEqual(packages.length);
+    expect(pkgs).toContainEqual(packages[0]);
+    expect(pkgs).toContainEqual(packages[1]);
+    expect(pkgs).toContainEqual(packages[2]);
+    expect(pkgs).toContainEqual(packages[3]);
   });
 });
 
-//restore original 
-let expectedData12 = {
-  name: "fourthname",
-  consrisk: 8.6, 
-}
-test ('Test 13: Restore Package Update',()=>{
-  return updatePackage(4,expectedData12).then((status)=>{
-    expect(status).toStrictEqual(204);
-  })
-})
+let updatedPkg = {
+  consRisk: 55,
+  cpeName: 'cpe:2.3:a:pivotal_software:spring_framework:4.1.0:*:*:*:*:*:*:*',
+  highestRisk: null,
+  ref: 'SPDXRef-Package',
+  impact: 39,
+  likelihood: 0.8,
+  name: 'glibc',
+  purl: null,
+  version: '2.11.1',
+};
 
-//Test 14: Successfully Overwrite Vulnerability 
-let expectedData13 = {
-  impact: 9.7,
-  description: "overwrittenvuln"
-}
-
-/* Original 
-vulnerabilities:{
-          cveid: 4765,
-          cveidstring: "CVE-123-456-789",
-          impact: null,
-          likelihood: null,
-          risk: null,
-          description: "flat tire"
-          }
-      }
- */
-
-test('Test 14: Successful Vulnerability Update',() =>{
-  return updateVuln(4765,expectedData13).then((status)=>{
-    expect(status).toStrictEqual(204);
+//Test 3: Update existing package (does NOT duplicate)
+test('Test 3: Update existing package (does NOT duplicate)', async () => {
+  await writePackage(updatedPkg, sessionId);
+  return readAllPackages(sessionId).then((pkgs) => {
+    expect(pkgs).toContainEqual(updatedPkg);
+    expect(pkgs).not.toContainEqual(packages[0]);
   });
 });
 
-//restore original 
-let expectedData14 = {
-  description: "flat tire",
-  impact: null,
-}
-test ('Test 15: Restore Vuln Update',()=>{
-  return updateVuln(4765,expectedData14).then((status)=>{
-    expect(status).toStrictEqual(204);
-  })
-})
+//Test 4: Try to read package that does not exist in DB
+test('Test 4: Read package that does not exist in DB', async () => {
+  return readPackage('unknown', sessionId).then((pkgs) => {
+    expect(pkgs).toEqual(null);
+  });
+});
+
+//Test 5: Try to read all packages for sessionId that does not exist in DB
+test('Test 5: Read packages by sessionId not in DB', async () => {
+  return readAllPackages(1027).then((pkgs) => {
+    expect(pkgs).toEqual([]);
+  });
+});
+
+//Test 7: Can read one cve
+test('Test 7: Read one cve', async () => {
+  return readVulnsByPkg(vulnerabilities[0].packageRef, sessionId).then(
+    (cves) => {
+      expect(cves).toContainEqual(vulnerabilities[0]);
+    }
+  );
+});
+
+//Test 8: Can read multiple cves by package
+test('Test 8: Can read all vulnerabilities for a package', async () => {
+  for (let v of vulnerabilities) {
+    await writeVuln(v, sessionId);
+  }
+  return readVulnsByPkg(vulnerabilities[0].packageRef, sessionId).then(
+    (cves) => {
+      expect(cves.length).toEqual(3);
+    }
+  );
+});
+
+//Test 9: Can read multiple cves by session
+test('Test 8: Can read all vulnerabilities for a session', async () => {
+  return readVulnsBySession(sessionId).then((cves) => {
+    expect(cves.length).toEqual(vulnerabilities.length);
+  });
+});
+
+let updatedCve = {
+  cveId: 'CVE-2022-25857',
+  cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H',
+  impact: 25,
+  likelihood: 0.66,
+  packageRef: 'SPDXRef-Package',
+  risk: 89,
+};
+//Test 9: Update existing package (does NOT duplicate)
+test('Test 9: Updated existing cve (no duplicates)', async () => {
+  return writeVuln(updatedCve, sessionId).then(async () => {
+    return readVulnsBySession(sessionId).then((cves) => {
+      expect(cves).toContainEqual(updatedCve);
+      expect(cves).not.toContainEqual(vulnerabilities[1]);
+    });
+  });
+});
+
+//Test 10: Read vulnerabilities not present in database
+test('Test 10: Read vulnerabilities not present in database', async () => {
+  return readVulnsBySession(1027).then((cves) => {
+    expect(cves).toEqual([]);
+  });
+});
+
+//Test 11: Read vulnerabilities not present in database
+test('Test 11: Read vulnerabilities not present in database', async () => {
+  return readVulnsByPkg('unknown', sessionId).then((cves) => {
+    expect(cves).toEqual([]);
+  });
+});
