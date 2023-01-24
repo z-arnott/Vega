@@ -80,3 +80,11 @@ export interface DisplayPackage {
   Consolidated_Risk: number;
   Vulnerabilities: Vulnerability[]; // insert as many vulnerabilities as necessary
 }
+
+export const SEVERITY_TO_RISK_CONVERSION:number = 10;
+export enum severityRating {
+  LOW = 0,
+  MEDIUM = 4.0,
+  HIGH = 7.0,
+  CRITICAL = 9.0
+}

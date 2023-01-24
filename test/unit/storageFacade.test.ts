@@ -5,6 +5,7 @@ import {
   Vulnerability,
   PackageViewParam,
   VulnerabilityViewParam,
+  severityRating
 } from '@utils/types.utils';
 import {
   writePackage,
@@ -15,6 +16,7 @@ import {
   readVulnsByPkg,
   readPacakgesSorted,
   readVulnerabilitiesSorted,
+  readVulnerabilitiesFiltered
 } from '@utils/storageFacade.utils';
 
 //Set up test data
@@ -73,7 +75,7 @@ let vulnerabilities: Vulnerability[] = [
     impact: -1,
     likelihood: -1,
     packageRef: 'SPDXRef-Package',
-    risk: -1,
+    risk: 1,
   },
   {
     cveId: 'CVE-2022-25857',
@@ -81,7 +83,7 @@ let vulnerabilities: Vulnerability[] = [
     impact: -1,
     likelihood: -1,
     packageRef: 'SPDXRef-Package',
-    risk: -1,
+    risk: 0,
   },
   {
     cveId: 'CVE-2022-38749',
@@ -89,7 +91,7 @@ let vulnerabilities: Vulnerability[] = [
     impact: -1,
     likelihood: -1,
     packageRef: 'SPDXRef-fromDoap-1',
-    risk: -1,
+    risk: 1,
   },
   {
     cveId: 'CVE-2022-38751',
@@ -97,31 +99,31 @@ let vulnerabilities: Vulnerability[] = [
     impact: -1,
     likelihood: -1,
     packageRef: 'SPDXRef-fromDoap-0',
-    risk: -1,
+    risk: 1,
   },
   {
     cveId: 'CVE-2022-38752',
     cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
-    impact: -1,
-    likelihood: -1,
+    impact: 78,
+    likelihood: 0.9,
     packageRef: 'SPDXRef-fromDoap-0',
-    risk: -1,
+    risk: 70.2,
   },
   {
     cveId: 'CVE-2022-41854',
     cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H',
-    impact: -1,
-    likelihood: -1,
+    impact: 10,
+    likelihood: 0.1,
     packageRef: 'SPDXRef-Package',
-    risk: -1,
+    risk: 1,
   },
   {
     cveId: 'CVE-2022-38750',
     cvss2: 'CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H',
-    impact: -1,
-    likelihood: -1,
+    impact: 20,
+    likelihood: 0.3,
     packageRef: 'SPDXRef-fromDoap-0',
-    risk: -1,
+    risk: 6.0,
   },
 ];
 
@@ -307,6 +309,19 @@ test('Test 13: Sorted Dashboard Data (cves)', async () => {
   return readVulnerabilitiesSorted(
     sessionId,
     VulnerabilityViewParam.IMPACT
+  ).then((cves) => {
+    console.log(JSON.stringify(cves, null, 2));
+  });
+});
+
+//Test 14: Dashboard fn
+test('Test 14: Sorted Dashboard Data (cves)', async () => {
+  return readVulnerabilitiesFiltered(
+    sessionId,
+    VulnerabilityViewParam.IMPACT,
+    VulnerabilityViewParam.RISK,
+    severityRating.LOW,
+    severityRating.MEDIUM
   ).then((cves) => {
     console.log(JSON.stringify(cves, null, 2));
   });
