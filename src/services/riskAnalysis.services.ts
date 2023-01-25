@@ -1,32 +1,47 @@
 import { Package, Vulnerability } from '../utils/types.utils';
-import { logger } from '@utils/logger.utils';
+import { logger } from '../utils/logger.utils';
+import {
+  readAllPackages,
+  readVulnsByPkg,
+  writePackage,
+  writeVuln,
+} from '../utils/storageFacade.utils';
 
 const maxImpact = 100;
 const maxLikelihood = 1;
 
 /************* Public Functions **************/
 /**
- * Object representing the results of a system analysis
- */
-interface AnalysisInfo {
-  sessionID: number;
-  packagesAnalyzed: number;
-  systemRisk: number;
-}
-
-/**
  * Find the risk of one a software system based on the risk of the system's packages
- * @param packages list of packages in one software system
+ * @param sessionId list of packages in one software system
  * @returns the highest risk of the system
  */
-function analyzeSystem(packages: Package[]): number {
+export async function analyzeSystem(sessionId: number) {
+  let packages = await readAllPackages(sessionId);
   let highest = 0;
+  //Package Level
   for (let p of packages) {
+    let cves = await readVulnsByPkg(p.ref, sessionId);
+    //Vulnerability Level
+    for (let v of cves) {
+      analyzeVulnerability(v);
+      await writeVuln(v, sessionId);
+    }
+
+    analyzePackage(p, cves);
+    console.log(
+      'Package Analyzed:\n' +
+        JSON.stringify(p, null, 2) +
+        '\nCVEs Analyzed:\n' +
+        JSON.stringify(cves, null, 2)
+    );
+    //System Risk
     if (p.highestRisk == null) {
       logger.warn('System Risk Analysis: ' + p.ref + ' risk undefined');
     } else {
       highest = Math.max(highest, p.highestRisk);
     }
+    await writePackage(p, sessionId);
   }
   return highest;
 }
@@ -35,7 +50,7 @@ function analyzeSystem(packages: Package[]): number {
  * @param pkg to analyze
  * @param cves list of vulnerabilities in pkg
  */
-function analyzePackage(pkg: Package, cves: Vulnerability[]) {
+export function analyzePackage(pkg: Package, cves: Vulnerability[]) {
   for (let v of cves) {
     analyzeVulnerability(v);
   }
@@ -47,7 +62,7 @@ function analyzePackage(pkg: Package, cves: Vulnerability[]) {
  * Update a Vulnerability with impact, likelihood, and risk values
  * @param cve to analyze
  */
-function analyzeVulnerability(cve: Vulnerability) {
+export function analyzeVulnerability(cve: Vulnerability) {
   if (cve.cvss2) {
     cve.impact = cveImpact(cve.cvss2);
     cve.likelihood = cveLikelihood(cve.cvss2);
@@ -59,8 +74,6 @@ function analyzeVulnerability(cve: Vulnerability) {
     cve.risk = cveRisk(cve.impact, cve.likelihood);
   }
 }
-
-export { AnalysisInfo, analyzeSystem, analyzePackage, analyzeVulnerability };
 
 /*********** Private Vulnerabiltiy Analysis Fns ************/
 //Interface representing the metrics within a CVSS V2 string

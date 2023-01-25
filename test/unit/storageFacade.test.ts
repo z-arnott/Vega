@@ -62,7 +62,7 @@ let packages: Package[] = [
 let vulnerabilities: Vulnerability[] = [
   {
     cveId: 'CVE-2022-1471',
-    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H',
+    cvss2: 'AV:N/AC:L/Au:S/C:N/I:P/A:N',
     impact: -1,
     likelihood: -1,
     packageRef: 'SPDXRef-Package',
@@ -70,7 +70,7 @@ let vulnerabilities: Vulnerability[] = [
   },
   {
     cveId: 'CVE-2022-25857',
-    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H',
+    cvss2: 'AV:N/AC:L/Au:S/C:P/I:P/A:P',
     impact: -1,
     likelihood: -1,
     packageRef: 'SPDXRef-Package',
@@ -78,7 +78,7 @@ let vulnerabilities: Vulnerability[] = [
   },
   {
     cveId: 'CVE-2022-38749',
-    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
+    cvss2: 'AV:N/AC:M/Au:N/C:N/I:P/A:N',
     impact: -1,
     likelihood: -1,
     packageRef: 'SPDXRef-fromDoap-1',
@@ -86,7 +86,7 @@ let vulnerabilities: Vulnerability[] = [
   },
   {
     cveId: 'CVE-2022-38751',
-    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
+    cvss2: 'AV:N/AC:L/Au:S/C:N/I:P/A:N',
     impact: -1,
     likelihood: -1,
     packageRef: 'SPDXRef-fromDoap-0',
@@ -94,7 +94,7 @@ let vulnerabilities: Vulnerability[] = [
   },
   {
     cveId: 'CVE-2022-38752',
-    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
+    cvss2: 'AV:N/AC:M/Au:S/C:C/I:P/A:N',
     impact: -1,
     likelihood: -1,
     packageRef: 'SPDXRef-fromDoap-0',
@@ -102,7 +102,7 @@ let vulnerabilities: Vulnerability[] = [
   },
   {
     cveId: 'CVE-2022-41854',
-    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H',
+    cvss2: 'AV:N/AC:M/Au:N/C:N/I:P/A:N',
     impact: -1,
     likelihood: -1,
     packageRef: 'SPDXRef-Package',
@@ -110,7 +110,7 @@ let vulnerabilities: Vulnerability[] = [
   },
   {
     cveId: 'CVE-2022-38750',
-    cvss2: 'CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H',
+    cvss2: 'AV:N/AC:H/Au:N/C:P/I:P/A:C',
     impact: -1,
     likelihood: -1,
     packageRef: 'SPDXRef-fromDoap-0',
@@ -155,17 +155,17 @@ async function cleanup() {
   return {
     result1: await clear_test_junction(),
     result2: clear_test_packages(),
-    result3: clear_test_vulnerabilites()
-  }
+    result3: clear_test_vulnerabilites(),
+  };
 }
 
 async function setup() {
   return cleanup().then(async () => {
     for (let pkg of packages) {
-      writePackage(pkg, sessionId);
+      await writePackage(pkg, sessionId);
     }
     for (let v of vulnerabilities) {
-      writeVuln(v, sessionId);
+      await writeVuln(v, sessionId);
     }
   });
 }
@@ -257,7 +257,7 @@ test('Test 8: Can read all vulnerabilities for a session', async () => {
 
 let updatedCve = {
   cveId: 'CVE-2022-25857',
-  cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H',
+  cvss2: 'AV:N/AC:L/Au:S/C:P/I:P/A:P',
   impact: 25,
   likelihood: 0.66,
   packageRef: 'SPDXRef-Package',
