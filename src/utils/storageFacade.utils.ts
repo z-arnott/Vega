@@ -8,9 +8,84 @@ import {
   severityRating,
   SEVERITY_TO_RISK_CONVERSION
 } from './types.utils';
-import { logger } from '@utils/logger.utils';
+import { logger } from './logger.utils';
 
 const PAGE_SIZE = 2;
+
+
+/****************** PUBLIC API: SYSTEM **********************/
+export async function countPackages(sessionid: number) {
+  let { count, error } = await supabase //common syntax on JS: const {data,error} = await...
+  .from('packages')
+  .select('*', { count: 'exact'}) //values are outputted first in, last out
+  .eq('sessionid', sessionid);
+  
+  if(error){
+    logger.error(error);
+  }
+  if(count){
+    return count;
+  }else{
+    return 0;
+  }
+}
+
+export async function countVulnerabilities(sessionid: number) {
+  let { count, error } = await supabase
+  .from('vulnerabilities')
+  .select(
+    '*,junction!inner(packageid,packages!inner(sessionid, package_ref))', { count: 'exact'}
+  )
+  .eq('junction.packages.sessionid', sessionid);
+  if(error){
+    logger.error(error);
+  }
+  if(count){
+    return count;
+  }else{
+    return 0;
+  }
+}
+
+export async function countHighSeverityCves(sessionid: number) {
+  let { count, error } = await supabase
+  .from('vulnerabilities')
+  .select(
+    '*,junction!inner(packageid,packages!inner(sessionid, package_ref))', { count: 'exact'}
+  )
+  .eq('junction.packages.sessionid', sessionid)
+  .gte('severity', severityRating.HIGH);
+  
+  if(error){
+    logger.error(error);
+  }
+  if(count){
+    return count;
+  }else{
+    return 0;
+  }
+}
+
+export async function countHighRiskCves(sessionid: number) {
+  let { count, error } = await supabase
+  .from('vulnerabilities')
+  .select(
+    '*,junction!inner(packageid,packages!inner(sessionid, package_ref))', { count: 'exact'}
+  )
+  .eq('junction.packages.sessionid', sessionid)
+  .gte('risk', severityRating.HIGH);
+  if(error){
+    logger.error(error);
+  }
+  if(error){
+    logger.error(error);
+  }
+  if(count){
+    return count;
+  }else{
+    return 0;
+  }
+}
 
 /****************** PUBLIC API: PACKAGES **********************/
 /**
@@ -126,7 +201,6 @@ export async function readPackagesDashboard(
   let packages: DisplayPackage[] = [];
   if (error) {
     logger.error(error);
-    return error
   } else if (data) {
     for (let pkg of data) {
       let cves: Vulnerability[] = [];
