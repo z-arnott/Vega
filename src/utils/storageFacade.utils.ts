@@ -10,8 +10,7 @@ import {
 } from './types.utils';
 import { logger } from '@utils/logger.utils';
 
-const DEFAULT_PACAKGE_SORT = PackageViewParam.NAME;
-const DEFAULT_CVE_SORT = VulnerabilityViewParam.CVEID;
+const PAGE_SIZE = 2;
 
 /****************** PUBLIC API: PACKAGES **********************/
 /**
@@ -34,7 +33,6 @@ export async function readAllPackages(sessionid: number) {
       packages.push(dbPkgToPkg(pkg));
     }
   }
-
   return packages;
 }
 
@@ -55,12 +53,12 @@ export async function readPackage(packageRef: string, sessionId: number) {
     logger.error(error.message);
     return null;
   } else if (data) {
-    if (data.length == 0) {
+    if (data.length < 1) {
       //No entry found
       logger.error('Storage Facade: Package "' + packageRef + '" not found');
       return null;
     } else if (data.length > 1) {
-      //Duplicates (how should we handle?)
+      //Duplicates in DB(how should we handle? for now just log it)
       logger.error(
         'Storage Facade: Duplicate packages found for "' +
           packageRef +
@@ -101,32 +99,34 @@ export async function writePackage(pkg: Package, sessionId: number) {
   return status;
 }
 
-
-/**
- * Read packages for Dashboard
- * @param sessionid unique user session number
- * @param sortParam to sort data
- * @returns list of DisplayPackages
- */
- export async function readPacakgesSorted(
-  sessionid: number,
-  sortParam: PackageViewParam
+export async function readPackagesDashboard(
+  sessionId: number,
+  sortParam: PackageViewParam, 
+  filterParam: PackageViewParam,
+  filterLower: severityRating,
+  filterUpper: severityRating,
+  page: number
 ) {
-  let packages: DisplayPackage[] = [];
-
-  let col = mapPkgParamToColumn(sortParam);
-  if (sortParam == PackageViewParam.NUMBER_OF_VULNERABILITIES) {
-    col = 'junction';
-  }
-
+  let sortCol = mapPkgParamToColumn(sortParam);
+  let filterCol = mapPkgParamToColumn(filterParam);
+  filterLower *= SEVERITY_TO_RISK_CONVERSION;
+  filterUpper *= SEVERITY_TO_RISK_CONVERSION;
+  let pageLowerLimit = (page-1) * PAGE_SIZE;
+  let pageUpperLimit = page * PAGE_SIZE - 1;
+  
   let { data, error } = await supabase //common syntax on JS: const {data,error} = await...
     .from('packages')
     .select('*,junction!inner(vulnerabilities!inner(*))')
-    .eq('sessionid', sessionid)
-    .order(col);
+    .eq('sessionid', sessionId)
+    .gte(filterCol, filterLower)
+    .lte(filterCol, filterUpper)
+    .order(sortCol)
+    .range(pageLowerLimit, pageUpperLimit);
 
+  let packages: DisplayPackage[] = [];
   if (error) {
     logger.error(error);
+    return error
   } else if (data) {
     for (let pkg of data) {
       let cves: Vulnerability[] = [];
@@ -153,11 +153,11 @@ export async function writePackage(pkg: Package, sessionId: number) {
         Vulnerabilities: cves,
       });
     }
+    
   }
-  console.log(packages);
   return packages;
+  
 }
-
 /****************** PUBLIC API: VULNERABILITIES **********************/
 /**
  * Read all vulnerabilites in one package
@@ -228,15 +228,32 @@ export async function writeVuln(cve: Vulnerability, sessionId: number) {
  * @returns list of vulnerabilities, empty list if none matching present in DB
  */
  export async function readVulnsBySession(sessionId: number) {
-  return readVulnerabilitiesSorted(sessionId, DEFAULT_CVE_SORT);
-}
+  let { data, error } = await supabase
+    .from('vulnerabilities')
+    .select(
+      '*,junction!inner(packageid,packages!inner(sessionid, package_ref))'
+    )
+    .eq('junction.packages.sessionid', sessionId);
 
-export async function readVulnerabilitiesSorted(
-  sessionId: number,
-  sortParam: VulnerabilityViewParam
-) {
-  
-  return readVulnerabilitiesFiltered(sessionId, sortParam, VulnerabilityViewParam.RISK, severityRating.LOW, severityRating.CRITICAL);
+  let cves: Vulnerability[] = [];
+  if (error) {
+    logger.error(error.message);
+  } else if (data) {
+    for (let v of data) {
+      cves.push(
+        //map database result to Vulnerability object
+        {
+          cveId: v.cveidstring,
+          packageRef: v.junction[0].packages.package_ref,
+          impact: v.impact,
+          likelihood: v.likelihood,
+          risk: v.risk,
+          cvss2: v.cvss_vector,
+        }
+      );
+    }
+  }
+  return cves;
 }
 
 /**
@@ -245,12 +262,13 @@ export async function readVulnerabilitiesSorted(
  * @param sortParam to sort data
  * @returns list of DisplayPackages
  */
- export async function readVulnerabilitiesFiltered(
+ export async function readVulnerabilitiesDashboard(
   sessionId: number,
   sortParam: VulnerabilityViewParam, 
   filterParam: VulnerabilityViewParam,
   lowerLimit:severityRating,
   upperLimit:severityRating,
+  page: number
 ) {
   let sortCol = mapVulnParamToColumn(sortParam);
   let filterCol = mapVulnParamToColumn(filterParam);
@@ -258,6 +276,8 @@ export async function readVulnerabilitiesSorted(
     lowerLimit *= SEVERITY_TO_RISK_CONVERSION;
     upperLimit *= SEVERITY_TO_RISK_CONVERSION;
   }
+  let pageLowerLimit = (page-1) * PAGE_SIZE;
+  let pageUpperLimit = page * PAGE_SIZE - 1;
   let { data, error } = await supabase
     .from('vulnerabilities')
     .select(
@@ -266,7 +286,8 @@ export async function readVulnerabilitiesSorted(
     .eq('junction.packages.sessionid', sessionId)
     .gte(filterCol, lowerLimit)
     .lt(filterCol, upperLimit)
-    .order(sortCol);
+    .order(sortCol)
+    .range(pageLowerLimit, pageUpperLimit);
 
   let cves: Vulnerability[] = [];
   if (error) {
@@ -330,14 +351,6 @@ async function updatePackage(pkg: Package, sessionId: number) {
   if (error) {
     logger.error(error.message);
   }
-  return status;
-}
-
-async function deletePackage(packageid: number) {
-  const { status } = await supabase
-    .from('packages')
-    .delete()
-    .eq('packageid', packageid);
   return status;
 }
 
@@ -463,7 +476,7 @@ function mapPkgParamToColumn(sortParam: PackageViewParam): string {
       break;
     }
     default: {
-      col = 'unknown';
+      col = 'consrisk';
     }
   }
   return col;
@@ -493,7 +506,7 @@ function mapVulnParamToColumn(sortParam: VulnerabilityViewParam): string {
       break;
     }
     default: {
-      col = 'unknown';
+      col = 'severity';
     }
   }
   return col;
@@ -501,3 +514,4 @@ function mapVulnParamToColumn(sortParam: VulnerabilityViewParam): string {
 
 /****************** PURGE ALL **********************/
 //TODO: iteration 3
+

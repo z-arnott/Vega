@@ -14,18 +14,18 @@ import {
   writeVuln,
   readVulnsBySession,
   readVulnsByPkg,
-  readPacakgesSorted,
-  readVulnerabilitiesSorted,
-  readVulnerabilitiesFiltered
+  readVulnerabilitiesDashboard,
+  readPackagesDashboard
 } from '@utils/storageFacade.utils';
 
 //Set up test data
+jest.setTimeout(20000);
 let sessionId = 9927;
 let packages: Package[] = [
   {
-    consRisk: null,
+    consRisk: 0,
     cpeName: 'cpe:2.3:a:pivotal_software:spring_framework:4.1.0:*:*:*:*:*:*:*',
-    highestRisk: null,
+    highestRisk: 0,
     ref: 'SPDXRef-Package',
     impact: null,
     likelihood: null,
@@ -34,9 +34,9 @@ let packages: Package[] = [
     version: '2.11.1',
   },
   {
-    consRisk: null,
+    consRisk: 0,
     cpeName: null,
-    highestRisk: null,
+    highestRisk: 0,
     ref: 'SPDXRef-fromDoap-1',
     impact: null,
     likelihood: null,
@@ -45,9 +45,9 @@ let packages: Package[] = [
     version: null,
   },
   {
-    consRisk: null,
+    consRisk: 0,
     cpeName: null,
-    highestRisk: null,
+    highestRisk: 0,
     ref: 'SPDXRef-fromDoap-0',
     impact: null,
     likelihood: null,
@@ -56,9 +56,9 @@ let packages: Package[] = [
     version: null,
   },
   {
-    consRisk: null,
+    consRisk: 0,
     cpeName: null,
-    highestRisk: null,
+    highestRisk: 0,
     ref: 'SPDXRef-Saxon',
     impact: null,
     likelihood: null,
@@ -66,64 +66,75 @@ let packages: Package[] = [
     purl: null,
     version: '8.8',
   },
+  {
+    consRisk: 0,
+    cpeName: 'cpe:2.3:a:pivotal_software:4.1.0:*:*:*:*:*:*:*',
+    highestRisk: 0,
+    ref: 'SPDXRef-Test',
+    impact: null,
+    likelihood: null,
+    name: 'gTestc',
+    purl: null,
+    version: '2.11.1',
+  },
 ];
 
 let vulnerabilities: Vulnerability[] = [
   {
     cveId: 'CVE-2022-1471',
-    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H',
-    impact: -1,
-    likelihood: -1,
+    cvss2: 'AV:N/AC:L/Au:S/C:N/I:P/A:N',
+    impact: 0,
+    likelihood: 0,
     packageRef: 'SPDXRef-Package',
-    risk: 1,
+    risk: 0,
   },
   {
     cveId: 'CVE-2022-25857',
-    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H',
-    impact: -1,
-    likelihood: -1,
+    cvss2: 'AV:N/AC:L/Au:S/C:P/I:P/A:P',
+    impact: 0,
+    likelihood: 0,
     packageRef: 'SPDXRef-Package',
     risk: 0,
   },
   {
     cveId: 'CVE-2022-38749',
-    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
-    impact: -1,
-    likelihood: -1,
+    cvss2: 'AV:N/AC:M/Au:N/C:N/I:P/A:N',
+    impact: 0,
+    likelihood: 0,
     packageRef: 'SPDXRef-fromDoap-1',
-    risk: 1,
+    risk: 0,
   },
   {
     cveId: 'CVE-2022-38751',
-    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
-    impact: -1,
-    likelihood: -1,
+    cvss2: 'AV:N/AC:L/Au:S/C:N/I:P/A:N',
+    impact: 0,
+    likelihood: 0,
     packageRef: 'SPDXRef-fromDoap-0',
-    risk: 1,
+    risk: 0,
   },
   {
     cveId: 'CVE-2022-38752',
-    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H',
-    impact: 78,
-    likelihood: 0.9,
+    cvss2: 'AV:N/AC:M/Au:S/C:C/I:P/A:N',
+    impact: 0,
+    likelihood: 0,
     packageRef: 'SPDXRef-fromDoap-0',
-    risk: 70.2,
+    risk: 0,
   },
   {
     cveId: 'CVE-2022-41854',
-    cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H',
-    impact: 10,
-    likelihood: 0.1,
+    cvss2: 'AV:N/AC:M/Au:N/C:N/I:P/A:N',
+    impact: 0,
+    likelihood: 0,
     packageRef: 'SPDXRef-Package',
-    risk: 1,
+    risk: 0,
   },
   {
     cveId: 'CVE-2022-38750',
-    cvss2: 'CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H',
-    impact: 20,
-    likelihood: 0.3,
+    cvss2: 'AV:N/AC:H/Au:N/C:P/I:P/A:C',
+    impact: 0,
+    likelihood: 0,
     packageRef: 'SPDXRef-fromDoap-0',
-    risk: 6.0,
+    risk: 0,
   },
 ];
 
@@ -135,6 +146,7 @@ async function clear_test_packages() {
       .eq('package_ref', pkg.ref)
       .eq('sessionid', sessionId);
   }
+ 
 }
 
 async function clear_test_vulnerabilites() {
@@ -158,13 +170,14 @@ async function clear_test_junction() {
       .delete()
       .in('packageid', arr);
   }
+  return data;
 }
 
 async function cleanup() {
   return {
     result1: await clear_test_junction(),
-    result2: clear_test_packages(),
-    result3: clear_test_vulnerabilites(),
+    result2: await clear_test_packages(),
+    result3: await clear_test_vulnerabilites(),
   };
 }
 
@@ -193,7 +206,6 @@ test('Test 1: Write and read one package', async () => {
 //Test 2: Can read all packages from a session
 test('Test 2: Read all packages from a session', async () => {
   return readAllPackages(sessionId).then((pkgs) => {
-    console.log(pkgs);
     expect(pkgs.length).toEqual(packages.length);
     expect(pkgs).toContainEqual(packages[0]);
     expect(pkgs).toContainEqual(packages[1]);
@@ -267,7 +279,7 @@ test('Test 8: Can read all vulnerabilities for a session', async () => {
 
 let updatedCve = {
   cveId: 'CVE-2022-25857',
-  cvss2: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H',
+  cvss2: 'AV:N/AC:L/Au:S/C:P/I:P/A:P',
   impact: 25,
   likelihood: 0.66,
   packageRef: 'SPDXRef-Package',
@@ -297,32 +309,31 @@ test('Test 11: Read vulnerabilities not present in database', async () => {
   });
 });
 
-//Test 12: Dashboard fn
-test('Test 12: Sorted Dashboard Data', async () => {
-  return readPacakgesSorted(sessionId, PackageViewParam.NAME).then((pkgs) => {
-    console.log(JSON.stringify(pkgs, null, 2));
-  });
-});
 
-//Test 13: Dashboard fn
-test('Test 13: Sorted Dashboard Data (cves)', async () => {
-  return readVulnerabilitiesSorted(
-    sessionId,
-    VulnerabilityViewParam.IMPACT
-  ).then((cves) => {
-    console.log(JSON.stringify(cves, null, 2));
-  });
-});
-
-//Test 14: Dashboard fn
-test('Test 14: Sorted Dashboard Data (cves)', async () => {
-  return readVulnerabilitiesFiltered(
+//Test 12: Vulnerabilities dashboard
+test('Test 12: Sorted Dashboard Data (cves)', async () => {
+  return readVulnerabilitiesDashboard(
     sessionId,
     VulnerabilityViewParam.IMPACT,
     VulnerabilityViewParam.RISK,
     severityRating.LOW,
-    severityRating.MEDIUM
+    severityRating.CRITICAL,
+    1
   ).then((cves) => {
-    console.log(JSON.stringify(cves, null, 2));
+    console.log('Test 12 output:\n', JSON.stringify(cves, null, 2));
+  });
+});
+
+//Test 13: Dashboard fn
+test('Test 13: Sorted Dashboard Data (packages)', async () => {
+  return readPackagesDashboard(
+    sessionId,
+    PackageViewParam.COMPONENT_REF,
+    PackageViewParam.HIGHEST_RISK,
+    severityRating.LOW,
+    severityRating.CRITICAL,
+    1
+  ).then((cves) => {
+    console.log('Test 13 output:\n', JSON.stringify(cves, null, 2));
   });
 });
