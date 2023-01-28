@@ -10,7 +10,7 @@ import {
 } from './types.utils';
 import { logger } from './logger.utils';
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 25;
 
 /****************** PUBLIC API: SYSTEM **********************/
 export async function countPackages(sessionid: number) {
