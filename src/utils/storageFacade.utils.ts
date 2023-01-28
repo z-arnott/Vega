@@ -6,83 +6,85 @@ import {
   VulnerabilityViewParam,
   DisplayPackage,
   severityRating,
-  SEVERITY_TO_RISK_CONVERSION
+  SEVERITY_TO_RISK_CONVERSION,
 } from './types.utils';
 import { logger } from './logger.utils';
 
 const PAGE_SIZE = 2;
 
-
 /****************** PUBLIC API: SYSTEM **********************/
 export async function countPackages(sessionid: number) {
   let { count, error } = await supabase //common syntax on JS: const {data,error} = await...
-  .from('packages')
-  .select('*', { count: 'exact'}) //values are outputted first in, last out
-  .eq('sessionid', sessionid);
-  
-  if(error){
+    .from('packages')
+    .select('*', { count: 'exact' }) //values are outputted first in, last out
+    .eq('sessionid', sessionid);
+
+  if (error) {
     logger.error(error);
   }
-  if(count){
+  if (count) {
     return count;
-  }else{
+  } else {
     return 0;
   }
 }
 
 export async function countVulnerabilities(sessionid: number) {
   let { count, error } = await supabase
-  .from('vulnerabilities')
-  .select(
-    '*,junction!inner(packageid,packages!inner(sessionid, package_ref))', { count: 'exact'}
-  )
-  .eq('junction.packages.sessionid', sessionid);
-  if(error){
+    .from('vulnerabilities')
+    .select(
+      '*,junction!inner(packageid,packages!inner(sessionid, package_ref))',
+      { count: 'exact' }
+    )
+    .eq('junction.packages.sessionid', sessionid);
+  if (error) {
     logger.error(error);
   }
-  if(count){
+  if (count) {
     return count;
-  }else{
+  } else {
     return 0;
   }
 }
 
 export async function countHighSeverityCves(sessionid: number) {
   let { count, error } = await supabase
-  .from('vulnerabilities')
-  .select(
-    '*,junction!inner(packageid,packages!inner(sessionid, package_ref))', { count: 'exact'}
-  )
-  .eq('junction.packages.sessionid', sessionid)
-  .gte('severity', severityRating.HIGH);
-  
-  if(error){
+    .from('vulnerabilities')
+    .select(
+      '*,junction!inner(packageid,packages!inner(sessionid, package_ref))',
+      { count: 'exact' }
+    )
+    .eq('junction.packages.sessionid', sessionid)
+    .gte('severity', severityRating.HIGH);
+
+  if (error) {
     logger.error(error);
   }
-  if(count){
+  if (count) {
     return count;
-  }else{
+  } else {
     return 0;
   }
 }
 
 export async function countHighRiskCves(sessionid: number) {
   let { count, error } = await supabase
-  .from('vulnerabilities')
-  .select(
-    '*,junction!inner(packageid,packages!inner(sessionid, package_ref))', { count: 'exact'}
-  )
-  .eq('junction.packages.sessionid', sessionid)
-  .gte('risk', severityRating.HIGH);
-  if(error){
+    .from('vulnerabilities')
+    .select(
+      '*,junction!inner(packageid,packages!inner(sessionid, package_ref))',
+      { count: 'exact' }
+    )
+    .eq('junction.packages.sessionid', sessionid)
+    .gte('risk', severityRating.HIGH);
+  if (error) {
     logger.error(error);
   }
-  if(error){
+  if (error) {
     logger.error(error);
   }
-  if(count){
+  if (count) {
     return count;
-  }else{
+  } else {
     return 0;
   }
 }
@@ -176,7 +178,7 @@ export async function writePackage(pkg: Package, sessionId: number) {
 
 export async function readPackagesDashboard(
   sessionId: number,
-  sortParam: PackageViewParam, 
+  sortParam: PackageViewParam,
   filterParam: PackageViewParam,
   filterLower: severityRating,
   filterUpper: severityRating,
@@ -186,9 +188,9 @@ export async function readPackagesDashboard(
   let filterCol = mapPkgParamToColumn(filterParam);
   filterLower *= SEVERITY_TO_RISK_CONVERSION;
   filterUpper *= SEVERITY_TO_RISK_CONVERSION;
-  let pageLowerLimit = (page-1) * PAGE_SIZE;
+  let pageLowerLimit = (page - 1) * PAGE_SIZE;
   let pageUpperLimit = page * PAGE_SIZE - 1;
-  
+
   let { data, error } = await supabase //common syntax on JS: const {data,error} = await...
     .from('packages')
     .select('*,junction!inner(vulnerabilities!inner(*))')
@@ -227,10 +229,8 @@ export async function readPackagesDashboard(
         Vulnerabilities: cves,
       });
     }
-    
   }
   return packages;
-  
 }
 /****************** PUBLIC API: VULNERABILITIES **********************/
 /**
@@ -301,7 +301,7 @@ export async function writeVuln(cve: Vulnerability, sessionId: number) {
  * @param sessionId associated with one user
  * @returns list of vulnerabilities, empty list if none matching present in DB
  */
- export async function readVulnsBySession(sessionId: number) {
+export async function readVulnsBySession(sessionId: number) {
   let { data, error } = await supabase
     .from('vulnerabilities')
     .select(
@@ -336,21 +336,21 @@ export async function writeVuln(cve: Vulnerability, sessionId: number) {
  * @param sortParam to sort data
  * @returns list of DisplayPackages
  */
- export async function readVulnerabilitiesDashboard(
+export async function readVulnerabilitiesDashboard(
   sessionId: number,
-  sortParam: VulnerabilityViewParam, 
+  sortParam: VulnerabilityViewParam,
   filterParam: VulnerabilityViewParam,
-  lowerLimit:severityRating,
-  upperLimit:severityRating,
+  lowerLimit: severityRating,
+  upperLimit: severityRating,
   page: number
 ) {
   let sortCol = mapVulnParamToColumn(sortParam);
   let filterCol = mapVulnParamToColumn(filterParam);
-  if(filterParam == VulnerabilityViewParam.RISK){
+  if (filterParam == VulnerabilityViewParam.RISK) {
     lowerLimit *= SEVERITY_TO_RISK_CONVERSION;
     upperLimit *= SEVERITY_TO_RISK_CONVERSION;
   }
-  let pageLowerLimit = (page-1) * PAGE_SIZE;
+  let pageLowerLimit = (page - 1) * PAGE_SIZE;
   let pageUpperLimit = page * PAGE_SIZE - 1;
   let { data, error } = await supabase
     .from('vulnerabilities')
@@ -588,4 +588,3 @@ function mapVulnParamToColumn(sortParam: VulnerabilityViewParam): string {
 
 /****************** PURGE ALL **********************/
 //TODO: iteration 3
-

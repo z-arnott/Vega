@@ -5,7 +5,7 @@ import {
   Vulnerability,
   PackageViewParam,
   VulnerabilityViewParam,
-  severityRating
+  severityRating,
 } from '@utils/types.utils';
 import {
   writePackage,
@@ -15,7 +15,7 @@ import {
   readVulnsBySession,
   readVulnsByPkg,
   readVulnerabilitiesDashboard,
-  readPackagesDashboard
+  readPackagesDashboard,
 } from '@utils/storageFacade.utils';
 
 //Set up test data
@@ -146,7 +146,6 @@ async function clear_test_packages() {
       .eq('package_ref', pkg.ref)
       .eq('sessionid', sessionId);
   }
- 
 }
 
 async function clear_test_vulnerabilites() {
@@ -308,7 +307,6 @@ test('Test 11: Read vulnerabilities not present in database', async () => {
     expect(cves).toEqual([]);
   });
 });
-
 
 //Test 12: Vulnerabilities dashboard
 test('Test 12: Sorted Dashboard Data (cves)', async () => {
