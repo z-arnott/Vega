@@ -179,8 +179,12 @@ export async function readPackagesDashboard(
   sessionId: number,
   sortParam: PackageViewParam,
   riskFilters: string[],
-  page: number
+  page: number,
+  PAGE_SIZE?: number | undefined
 ) {
+  if (PAGE_SIZE==undefined){
+    PAGE_SIZE =25;
+  }
   let sortCol = mapPkgParamToColumn(sortParam);
   let pageLowerLimit = (page - 1) * PAGE_SIZE;
   let pageUpperLimit = page * PAGE_SIZE - 1;
@@ -354,7 +358,7 @@ export async function readVulnerabilitiesDashboard(
   sortParam: VulnerabilityViewParam,
   severityFilters: string[],
   riskFilters: string[],
-  page: number
+  page: number,
 ) {
   let sortCol = mapVulnParamToColumn(sortParam);
   let pageLowerLimit = (page - 1) * PAGE_SIZE;
