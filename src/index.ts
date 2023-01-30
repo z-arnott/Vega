@@ -4,6 +4,9 @@ import {
   DashboardRequest,
   getView,
 } from '../src/services/viewFormatter.services';
+
+import { analyzeSystem } from '../src/services/riskAnalysis.services';
+import { writePackage } from '../src/utils/storageFacade.utils';
 import fileUpload from 'express-fileupload';
 
 const express = require('express');
@@ -24,14 +27,22 @@ app.get('/', (req: any, res: any) => {
 app.post('/upload', (req: any, res: any, next: any) => {
   let sbom = req.files.sbom.data.toString('utf8');
   let sbomType = req.query.format;
+  let sessionId = req.query.sessionId;
   let packages = parse(sbom, sbomType);
+  for (let pkg of packages) {
+    writePackage(pkg, sessionId);
+  }
   console.log(packages);
   res.send('Upload: parsed ' + packages.length + ' packages');
   //add middleware calls here as needed
 });
 
 app.get('/riskanalysis', (req: any, res: any, next: any) => {
-  res.send('Risk Analysis reached');
+  let sessionId = req.query.sessionId;
+  analyzeSystem(sessionId).then((risk) => {
+    console.log('System Risk ' + risk);
+  });
+  res.send('Analysis in progress');
 });
 
 app.get('/dashboard', (req: any, res: any, next: any) => {
