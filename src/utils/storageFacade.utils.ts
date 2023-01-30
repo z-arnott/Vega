@@ -188,13 +188,17 @@ export async function readPackagesDashboard(
   for (let s of riskFilters) {
     let riskArr = severityToRange(s);
     filterString +=
-      'and(risk.gte.' + riskArr[0] * 10 + ',risk.lt.' + riskArr[1] * 10 + '),';
+      'and(consrisk.gte.' + (riskArr[0] * 10) + ',consrisk.lt.' + (riskArr[1] * 10) + '),';
+    filterString +=
+      'and(highestrisk.gte.' + (riskArr[0] * 10) + ',highestrisk.lt.' + (riskArr[1] * 10) + '),';
   }
+  filterString = filterString.substring(0, filterString.length - 1);
   let { data, error } = await supabase //common syntax on JS: const {data,error} = await...
     .from('packages')
     .select('*,junction!inner(vulnerabilities!inner(*))')
     .eq('sessionid', sessionId)
     .order(sortCol)
+    .or(filterString)
     .range(pageLowerLimit, pageUpperLimit);
 
   let packages: DisplayPackage[] = [];
@@ -221,7 +225,7 @@ export async function readPackagesDashboard(
         Componenent_name: pkg.name,
         Component_ref: pkg.package_ref,
         Number_of_Vulnerabilities: pkg.junction.length,
-        Highest_Risk: pkg.highestRisk,
+        Highest_Risk: pkg.highestrisk,
         Consolidated_Risk: pkg.consrisk,
         Vulnerabilities: cves,
       });
