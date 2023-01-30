@@ -414,8 +414,6 @@ async function insertPackage(pkg: Package, sessionId: number) {
     name: pkg.name,
     packageversion: pkg.version,
     consrisk: pkg.consRisk,
-    impact: pkg.impact,
-    likelihood: pkg.likelihood,
     highestrisk: pkg.highestRisk,
     purl: pkg.purl,
     cpename: pkg.cpeName,
@@ -436,8 +434,6 @@ async function updatePackage(pkg: Package, sessionId: number) {
       name: pkg.name,
       packageversion: pkg.version,
       consrisk: pkg.consRisk,
-      impact: pkg.impact,
-      likelihood: pkg.likelihood,
       highestrisk: pkg.highestRisk,
       purl: pkg.purl,
       cpename: pkg.cpeName,
@@ -459,9 +455,7 @@ function dbPkgToPkg(pkg: any): Package {
     highestRisk: pkg.highestrisk,
     purl: pkg.purl,
     cpeName: pkg.cpename,
-    impact: pkg.impact,
     consRisk: pkg.consrisk,
-    likelihood: pkg.likelihood,
   };
   return p;
 }
