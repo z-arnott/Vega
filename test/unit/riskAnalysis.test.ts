@@ -132,7 +132,3 @@ let packages: Package[] = [
     version: '1.23.0',
   },
 ];
-
-test('Test 3: analyze system', () => {
-  expect(analyzeSystem(packages)).toEqual(89);
-});

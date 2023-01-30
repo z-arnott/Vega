@@ -1,7 +1,7 @@
 import { Package, SbomFormat } from '../src/utils/types.utils';
 import { parse } from '../src/services/parserContext.services';
+import { analyzeSystem } from '../src/services/riskAnalysis.services';
 import { writePackage } from '../src/utils/storageFacade.utils';
-import { AnalysisInfo } from '../src/services/riskAnalysis.services';
 import fileUpload from 'express-fileupload';
 
 const express = require('express');
@@ -33,7 +33,11 @@ app.post('/upload', (req: any, res: any, next: any) => {
 });
 
 app.get('/riskanalysis', (req: any, res: any, next: any) => {
-  res.send('Risk Analysis reached');
+  let sessionId = req.query.sessionId;
+  analyzeSystem(sessionId).then((risk) => {
+    console.log('System Risk ' + risk);
+  });
+  res.send('Analysis in progress');
 });
 /*************** Start Server ***************/
 // start the Express server
