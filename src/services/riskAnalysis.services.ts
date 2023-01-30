@@ -51,9 +51,6 @@ export async function analyzeSystem(sessionId: number) {
  * @param cves list of vulnerabilities in pkg
  */
 export function analyzePackage(pkg: Package, cves: Vulnerability[]) {
-  for (let v of cves) {
-    analyzeVulnerability(v);
-  }
   pkg.consRisk = consolidatedRisk(cves);
   pkg.highestRisk = highestRisk(cves);
 }
