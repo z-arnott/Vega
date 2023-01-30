@@ -6,7 +6,6 @@ import {
   VulnerabilityViewParam,
   DisplayPackage,
   severityRating,
-  SEVERITY_TO_RISK_CONVERSION,
 } from './types.utils';
 import { logger } from './logger.utils';
 
@@ -179,24 +178,22 @@ export async function writePackage(pkg: Package, sessionId: number) {
 export async function readPackagesDashboard(
   sessionId: number,
   sortParam: PackageViewParam,
-  filterParam: PackageViewParam,
-  filterLower: severityRating,
-  filterUpper: severityRating,
+  riskFilters: string[],
   page: number
 ) {
   let sortCol = mapPkgParamToColumn(sortParam);
-  let filterCol = mapPkgParamToColumn(filterParam);
-  filterLower *= SEVERITY_TO_RISK_CONVERSION;
-  filterUpper *= SEVERITY_TO_RISK_CONVERSION;
   let pageLowerLimit = (page - 1) * PAGE_SIZE;
   let pageUpperLimit = page * PAGE_SIZE - 1;
-
+  let filterString = '';
+  for (let s of riskFilters) {
+    let riskArr = severityToRange(s);
+    filterString +=
+      'and(risk.gte.' + riskArr[0] * 10 + ',risk.lt.' + riskArr[1] * 10 + '),';
+  }
   let { data, error } = await supabase //common syntax on JS: const {data,error} = await...
     .from('packages')
     .select('*,junction!inner(vulnerabilities!inner(*))')
     .eq('sessionid', sessionId)
-    .gte(filterCol, filterLower)
-    .lte(filterCol, filterUpper)
     .order(sortCol)
     .range(pageLowerLimit, pageUpperLimit);
 
@@ -330,6 +327,18 @@ export async function readVulnsBySession(sessionId: number) {
   return cves;
 }
 
+function severityToRange(s: string): number[] {
+  //defaults
+  let upperBound = 10;
+  let lowerBound = 0;
+  if (s in severityRating) {
+    lowerBound = severityRating[s as keyof typeof severityRating];
+    upperBound = Math.round(
+      severityRating[s as keyof typeof severityRating] * 0.6739 + 4.13
+    );
+  }
+  return [lowerBound, upperBound];
+}
 /**
  * Read packages for Dashboard
  * @param sessionid unique user session number
@@ -339,27 +348,32 @@ export async function readVulnsBySession(sessionId: number) {
 export async function readVulnerabilitiesDashboard(
   sessionId: number,
   sortParam: VulnerabilityViewParam,
-  filterParam: VulnerabilityViewParam,
-  lowerLimit: severityRating,
-  upperLimit: severityRating,
+  severityFilters: string[],
+  riskFilters: string[],
   page: number
 ) {
   let sortCol = mapVulnParamToColumn(sortParam);
-  let filterCol = mapVulnParamToColumn(filterParam);
-  if (filterParam == VulnerabilityViewParam.RISK) {
-    lowerLimit *= SEVERITY_TO_RISK_CONVERSION;
-    upperLimit *= SEVERITY_TO_RISK_CONVERSION;
-  }
   let pageLowerLimit = (page - 1) * PAGE_SIZE;
   let pageUpperLimit = page * PAGE_SIZE - 1;
+  let filterString = '';
+  for (let s of severityFilters) {
+    let severityArr = severityToRange(s);
+    filterString +=
+      'and(risk.gte.' + severityArr[0] + ',risk.lt.' + severityArr[1] + '),';
+  }
+  for (let s of riskFilters) {
+    let riskArr = severityToRange(s);
+    filterString +=
+      'and(risk.gte.' + riskArr[0] * 10 + ',risk.lt.' + riskArr[1] * 10 + '),';
+  }
+  filterString = filterString.substring(0, filterString.length - 1);
   let { data, error } = await supabase
     .from('vulnerabilities')
     .select(
       '*,junction!inner(packageid,packages!inner(sessionid, package_ref))'
     )
     .eq('junction.packages.sessionid', sessionId)
-    .gte(filterCol, lowerLimit)
-    .lt(filterCol, upperLimit)
+    .or(filterString)
     .order(sortCol)
     .range(pageLowerLimit, pageUpperLimit);
 

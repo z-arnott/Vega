@@ -13,6 +13,7 @@ import {
   DisplayPackage,
   PackageViewParam,
   VulnerabilityViewParam,
+  severityRating,
 } from '../utils/types.utils';
 
 enum ViewType {
@@ -22,20 +23,20 @@ enum ViewType {
 
 interface DashboardView {
   type: ViewType;
-  Components_Detected: number;
-  High_Severity_Vulnerabilities: number;
-  High_Risk_Vulnerabilities: number;
+  stats: {
+    Components_Detected: number;
+    Vulnerabilities_Identified: number;
+    High_Severity_Vulnerabilities: number;
+    High_Risk_Vulnerabilities: number;
+  };
   data: Vulnerability[] | DisplayPackage[];
 }
 
 export interface DashboardRequest {
   viewType: ViewType;
   sessionId: number;
-  filter: {
-    param: string;
-    lower: number;
-    upper: number;
-  };
+  riskFilters: string[];
+  severityFilters: string[];
   page: number;
   sortParam: string;
 }
@@ -60,31 +61,16 @@ interface JsonFormatter {
 }
 
 function decodePackageViewParam(s: string): PackageViewParam {
-  if (s == PackageViewParam.COMPONENT_REF) {
-    return PackageViewParam.COMPONENT_REF;
-  } else if (s == PackageViewParam.CONSOLIDATED_RISK) {
-    return PackageViewParam.CONSOLIDATED_RISK;
-  } else if (s == PackageViewParam.HIGHEST_RISK) {
-    return PackageViewParam.HIGHEST_RISK;
-  } else if (s == PackageViewParam.NAME) {
-    return PackageViewParam.NAME;
+  if (s in PackageViewParam) {
+    return PackageViewParam[s as keyof typeof PackageViewParam];
   } else {
-    //default
     return PackageViewParam.HIGHEST_RISK;
   }
 }
 
 function decodeVulnerabilityViewParam(s: string): VulnerabilityViewParam {
-  if (s == VulnerabilityViewParam.CVEID) {
-    return VulnerabilityViewParam.CVEID;
-  } else if (s == VulnerabilityViewParam.SEVERITY) {
-    return VulnerabilityViewParam.SEVERITY;
-  } else if (s == VulnerabilityViewParam.RISK) {
-    return VulnerabilityViewParam.RISK;
-  } else if (s == VulnerabilityViewParam.IMPACT) {
-    return VulnerabilityViewParam.IMPACT;
-  } else if (s == VulnerabilityViewParam.LIKELIHOOD) {
-    return VulnerabilityViewParam.LIKELIHOOD;
+  if (s in VulnerabilityViewParam) {
+    return VulnerabilityViewParam[s as keyof typeof VulnerabilityViewParam];
   } else {
     //default
     return VulnerabilityViewParam.SEVERITY;
@@ -100,15 +86,16 @@ packageViewFormatter = async function (
 ): Promise<DashboardView> {
   return {
     type: ViewType.PACKAGE,
-    Components_Detected: await countPackages(req.sessionId),
-    High_Risk_Vulnerabilities: await countHighRiskCves(req.sessionId),
-    High_Severity_Vulnerabilities: await countHighSeverityCves(req.sessionId),
+    stats: {
+      Components_Detected: await countPackages(req.sessionId),
+      Vulnerabilities_Identified: await countVulnerabilities(req.sessionId),
+      High_Risk_Vulnerabilities: await countHighRiskCves(req.sessionId),
+      High_Severity_Vulnerabilities: await countHighSeverityCves(req.sessionId),
+    },
     data: await readPackagesDashboard(
       req.sessionId,
       decodePackageViewParam(req.sortParam),
-      decodePackageViewParam(req.filter.param),
-      req.filter.lower,
-      req.filter.upper,
+      req.riskFilters,
       req.page
     ),
   };
@@ -119,15 +106,17 @@ vulnerabilityViewForamtter = async function (
 ): Promise<DashboardView> {
   return {
     type: ViewType.VULNERABILITY,
-    Components_Detected: await countPackages(req.sessionId),
-    High_Risk_Vulnerabilities: await countHighRiskCves(req.sessionId),
-    High_Severity_Vulnerabilities: await countHighSeverityCves(req.sessionId),
+    stats: {
+      Components_Detected: await countPackages(req.sessionId),
+      Vulnerabilities_Identified: await countVulnerabilities(req.sessionId),
+      High_Risk_Vulnerabilities: await countHighRiskCves(req.sessionId),
+      High_Severity_Vulnerabilities: await countHighSeverityCves(req.sessionId),
+    },
     data: await readVulnerabilitiesDashboard(
       req.sessionId,
       decodeVulnerabilityViewParam(req.sortParam),
-      decodeVulnerabilityViewParam(req.filter.param),
-      req.filter.lower,
-      req.filter.upper,
+      req.riskFilters,
+      req.severityFilters,
       req.page
     ),
   };

@@ -35,16 +35,21 @@ app.get('/riskanalysis', (req: any, res: any, next: any) => {
 });
 
 app.get('/dashboard', (req: any, res: any, next: any) => {
+  let riskFilters = req.query.riskFilters;
+  let severityFilters = req.query.severityFilters;
+  if (!riskFilters) {
+    riskFilters = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+  }
+  if (!severityFilters) {
+    severityFilters = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+  }
   let reqParams: DashboardRequest = {
-    viewType: req.query.view,
-    sessionId: +req.query.sessionId,
-    filter: {
-      param: req.query.filterBy,
-      lower: +req.query.lower,
-      upper: +req.query.upper,
-    },
     page: +req.query.page,
     sortParam: req.query.sortBy,
+    viewType: req.query.view,
+    sessionId: +req.query.sessionId,
+    riskFilters: riskFilters,
+    severityFilters: severityFilters,
   };
   getView(reqParams).then((results) => {
     res.send(results);

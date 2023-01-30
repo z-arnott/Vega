@@ -313,23 +313,22 @@ test('Test 12: Sorted Dashboard Data (cves)', async () => {
   return readVulnerabilitiesDashboard(
     sessionId,
     VulnerabilityViewParam.IMPACT,
-    VulnerabilityViewParam.RISK,
-    severityRating.LOW,
-    severityRating.CRITICAL,
+    ['LOW'],
+    ['LOW', 'CRITICAL'],
     1
   ).then((cves) => {
     console.log('Test 12 output:\n', JSON.stringify(cves, null, 2));
   });
 });
 
+console.log(severityRating['LOW']);
+
 //Test 13: Dashboard fn
 test('Test 13: Sorted Dashboard Data (packages)', async () => {
   return readPackagesDashboard(
     sessionId,
     PackageViewParam.COMPONENT_REF,
-    PackageViewParam.HIGHEST_RISK,
-    severityRating.LOW,
-    severityRating.CRITICAL,
+    ['LOW'],
     1
   ).then((cves) => {
     console.log('Test 13 output:\n', JSON.stringify(cves, null, 2));
