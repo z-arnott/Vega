@@ -73,7 +73,7 @@ app.get('/export',(req: any, res: any, next: any) => {
   exportResults(sessionId).then((file) =>{
     res.send(file);
   })
- } )
+ } );
 /*************** Start Server ***************/
 // start the Express server
 app.listen(port, () => {
