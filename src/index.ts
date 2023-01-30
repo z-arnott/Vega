@@ -8,6 +8,7 @@ import {
 import { analyzeSystem } from '../src/services/riskAnalysis.services';
 import { writePackage } from '../src/utils/storageFacade.utils';
 import fileUpload from 'express-fileupload';
+import { exportResults } from '../src/utils/export.utils';
 
 const express = require('express');
 const app = express();
@@ -66,6 +67,13 @@ app.get('/dashboard', (req: any, res: any, next: any) => {
     res.send(results);
   });
 });
+
+app.get('/export',(req: any, res: any, next: any) => {
+  let sessionId = req.query.sessionId;
+  exportResults(sessionId).then((file) =>{
+    res.send(file);
+  })
+ } )
 /*************** Start Server ***************/
 // start the Express server
 app.listen(port, () => {
