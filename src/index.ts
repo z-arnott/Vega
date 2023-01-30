@@ -1,6 +1,7 @@
 import { Package, SbomFormat } from '../src/utils/types.utils';
 import { parse } from '../src/services/parserContext.services';
 import { analyzeSystem } from '../src/services/riskAnalysis.services';
+import { writePackage } from '../src/utils/storageFacade.utils';
 import fileUpload from 'express-fileupload';
 
 const express = require('express');
@@ -21,7 +22,11 @@ app.get('/', (req: any, res: any) => {
 app.post('/upload', (req: any, res: any, next: any) => {
   let sbom = req.files.sbom.data.toString('utf8');
   let sbomType = req.query.format;
+  let sessionId = req.query.sessionId;
   let packages = parse(sbom, sbomType);
+  for (let pkg of packages) {
+    writePackage(pkg, sessionId);
+  }
   console.log(packages);
   res.send('Upload: parsed ' + packages.length + ' packages');
   //add middleware calls here as needed
