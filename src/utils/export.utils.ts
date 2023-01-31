@@ -17,6 +17,6 @@ export async function exportResults(sessionId:number){
     let file = JSON.stringify(await readPackagesDashboard(sessionId, PackageViewParam.NUMBER_OF_VULNERABILITIES,['LOW','MEDIUM','HIGH','CRITICAL'],1, number));
     return file;
 
-    //current version outputs does not output any packages that do not have associated vulnerabilities
+    //current version does not output any packages that do not have associated vulnerabilities
     //discuss whether that's okay or if packages with no vulnerabilities should still be identified
 }
