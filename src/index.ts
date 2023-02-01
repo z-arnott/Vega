@@ -1,5 +1,10 @@
 import { Package, SbomFormat } from '../src/utils/types.utils';
 import { parse } from '../src/services/parserContext.services';
+import {
+  DashboardRequest,
+  getView,
+} from '../src/services/viewFormatter.services';
+
 import { analyzeSystem } from '../src/services/riskAnalysis.services';
 import { writePackage } from '../src/utils/storageFacade.utils';
 import fileUpload from 'express-fileupload';
@@ -38,6 +43,28 @@ app.get('/riskanalysis', (req: any, res: any, next: any) => {
     console.log('System Risk ' + risk);
   });
   res.send('Analysis in progress');
+});
+
+app.get('/dashboard', (req: any, res: any, next: any) => {
+  let riskFilters = req.query.riskFilters;
+  let severityFilters = req.query.severityFilters;
+  if (!riskFilters) {
+    riskFilters = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+  }
+  if (!severityFilters) {
+    severityFilters = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+  }
+  let reqParams: DashboardRequest = {
+    page: +req.query.page,
+    sortParam: req.query.sortBy,
+    viewType: req.query.view,
+    sessionId: +req.query.sessionId,
+    riskFilters: riskFilters,
+    severityFilters: severityFilters,
+  };
+  getView(reqParams).then((results) => {
+    res.send(results);
+  });
 });
 /*************** Start Server ***************/
 // start the Express server
