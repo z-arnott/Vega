@@ -11,6 +11,8 @@ import fileUpload from 'express-fileupload';
 
 const express = require('express');
 const app = express();
+var cors = require('cors');
+app.use(cors());
 app.use(express.json());
 app.use(fileUpload());
 const port = 8088; // default port to listen
