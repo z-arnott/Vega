@@ -424,7 +424,7 @@ async function insertPackage(pkg: Package, sessionId: number) {
   return status;
 }
 
-async function updatePackage(pkg: Package, sessionId: number) {
+export async function updatePackage(pkg: Package, sessionId: number) {
   let { status, error } = await supabase
     .from('packages')
     .update({

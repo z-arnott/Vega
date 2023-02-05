@@ -3,7 +3,7 @@ import { logger } from '../utils/logger.utils';
 import {
   readAllPackages,
   readVulnsByPkg,
-  writePackage,
+  updatePackage,
   writeVuln,
 } from '../utils/storageFacade.utils';
 
@@ -18,7 +18,6 @@ const maxLikelihood = 1;
  */
 export async function analyzeSystem(sessionId: number) {
   let packages = await readAllPackages(sessionId);
-  let highest = 0;
   //Package Level
   for (let p of packages) {
     let cves = await readVulnsByPkg(p.ref, sessionId);
@@ -35,15 +34,8 @@ export async function analyzeSystem(sessionId: number) {
         '\nCVEs Analyzed:\n' +
         JSON.stringify(cves, null, 2)
     );
-    //System Risk
-    if (p.highestRisk == null) {
-      logger.warn('System Risk Analysis: ' + p.ref + ' risk undefined');
-    } else {
-      highest = Math.max(highest, p.highestRisk);
-    }
-    await writePackage(p, sessionId);
+    updatePackage(p, sessionId);
   }
-  return highest;
 }
 /**
  * Find the consolodated risk and highest risk of a package based on the package's vulnerabilities
