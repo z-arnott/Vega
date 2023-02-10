@@ -6,7 +6,7 @@ import {
 } from '../src/services/viewFormatter.services';
 
 import { analyzeSystem } from '../src/services/riskAnalysis.services';
-import { writePackage } from '../src/utils/storageFacade.utils';
+import { purge_session, writePackage } from '../src/utils/storageFacade.utils';
 import fileUpload from 'express-fileupload';
 
 const express = require('express');
@@ -67,6 +67,12 @@ app.get('/dashboard', (req: any, res: any, next: any) => {
   getView(reqParams).then((results) => {
     res.send(results);
   });
+});
+
+app.get('/purge', (req: any, res: any, next: any) => {
+  let sessionId = req.query.sessionId;
+  purge_session(sessionId);
+  res.send('purged');
 });
 /*************** Start Server ***************/
 // start the Express server
