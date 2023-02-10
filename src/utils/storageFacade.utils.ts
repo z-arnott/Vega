@@ -620,9 +620,6 @@ export async function purge_session(sessionId:number){
     const junctions = Object.values(data).map(object => object.junction[0].id);
     const vulnerabilities = Object.values(data).map(object => object.id);
     const packages = Object.values(data).map(object => object.junction[0].packageid);
-    console.log(junctions);
-    console.log(junctions);
-    console.log(junctions);
     await supabase.from('junction').delete().in('id', junctions);
     await supabase.from('vulnerabilities').delete().in('id', vulnerabilities);
     await supabase.from('packages').delete().in('packageid', packages);
