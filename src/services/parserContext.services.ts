@@ -66,11 +66,14 @@ spdxJsonParser = function (sbom): Package[] {
       for (let extRef of pkg.externalRefs) {
         if (extRef.referenceType == 'purl' && p.purl == null) {
           p.purl = extRef.referenceLocator;
-          break; //stop if EITHER cpe or purl found
+          //break; //stop if EITHER cpe or purl found
         }
         if (extRef.referenceType.includes('cpe') && p.cpeName == null) {
           p.cpeName = extRef.referenceLocator;
-          break; //stop if EITHER cpe or purl found
+          //break; //stop if EITHER cpe or purl found
+        }
+        if(p.purl && p.cpeName){
+          break;
         }
       }
     }
