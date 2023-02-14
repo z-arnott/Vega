@@ -41,10 +41,9 @@ app.post('/upload', (req: any, res: any, next: any) => {
 
 app.get('/riskanalysis', (req: any, res: any, next: any) => {
   let sessionId = req.query.sessionId;
-  analyzeSystem(sessionId).then((risk) => {
-    console.log('System Risk ' + risk);
+  analyzeSystem(sessionId).then( () => {
+    res.send('Analysis complete');
   });
-  res.send('Analysis in progress');
 });
 
 app.get('/dashboard', (req: any, res: any, next: any) => {
