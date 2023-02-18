@@ -9,7 +9,7 @@ import { analyzeSystem } from '../src/services/riskAnalysis.services';
 import { writePackage } from '../src/utils/storageFacade.utils';
 import fileUpload from 'express-fileupload';
 import { exportResults } from '../src/utils/export.utils';
-import { exportResults } from '../src/utils/export.utils';
+
 
 const express = require('express');
 const app = express();
