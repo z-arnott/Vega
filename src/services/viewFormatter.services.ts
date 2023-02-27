@@ -17,8 +17,8 @@ import {
 } from '../utils/types.utils';
 
 enum ViewType {
-  PACKAGE = 'component',
-  VULNERABILITY = 'vulnerability',
+  PACKAGE = 'Component',
+  VULNERABILITY = 'Vulnerability',
 }
 
 interface DashboardView {
