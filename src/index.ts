@@ -18,6 +18,7 @@ import {
   writePackage,
   writeVuln,
 } from '../src/utils/storageFacade.utils';
+import { bulkCreatePackage } from '../src/utils/storageFacade.utils';
 import fileUpload from 'express-fileupload';
 
 import dotenv from 'dotenv';
@@ -49,9 +50,7 @@ app.post('/upload', (req: any, res: any, next: any) => {
   let sbomType = req.query.format;
   let sessionId = req.query.sessionId;
   let packages = parse(sbom, sbomType);
-  for (let pkg of packages) {
-    writePackage(pkg, sessionId);
-  }
+  bulkCreatePackage(packages, sessionId);
   console.log(packages);
   res.send('Upload: parsed ' + packages.length + ' packages');
   //add middleware calls here as needed

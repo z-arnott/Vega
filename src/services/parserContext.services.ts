@@ -1,5 +1,6 @@
 import { Package, SbomFormat } from '../utils/types.utils';
 import { XMLParser } from 'fast-xml-parser';
+import {v4 as uuidv4} from 'uuid';
 
 export { parse };
 
@@ -57,17 +58,22 @@ spdxJsonParser = function (sbom): Package[] {
       likelihood: null,
       version: null,
     };
-
+    if(!pkg.ref){
+      p.ref = pkg.name + uuidv4();
+    }
     //Get External Reference locators
     if (pkg.hasOwnProperty('externalRefs')) {
       for (let extRef of pkg.externalRefs) {
         if (extRef.referenceType == 'purl' && p.purl == null) {
           p.purl = extRef.referenceLocator;
-          break; //stop if EITHER cpe or purl found
+          //break; //stop if EITHER cpe or purl found
         }
         if (extRef.referenceType.includes('cpe') && p.cpeName == null) {
           p.cpeName = extRef.referenceLocator;
-          break; //stop if EITHER cpe or purl found
+          //break; //stop if EITHER cpe or purl found
+        }
+        if(p.purl && p.cpeName){
+          break;
         }
       }
     }
@@ -138,6 +144,9 @@ spdxTagValueParser = function (sbom): Package[] {
       likelihood: null,
       version: version,
     };
+    if(!p.ref){
+      p.ref = p.name + uuidv4();
+    }
     packages.push(p);
   }
   return packages;
@@ -163,6 +172,9 @@ function cyclonedxGetPackages(sbomPackages: any): Package[] {
     }
     if (pkg.hasOwnProperty('cpe')) {
       p.cpeName = pkg.cpe;
+    }
+    if(!p.ref){
+      p.ref = p.name + uuidv4();
     }
     packages.push(p);
   });
