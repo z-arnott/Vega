@@ -17,7 +17,7 @@ const AUTH = process.env.AUTHORIZATION as string;
  */
 function buildQuery(pkg: Package) {
   let query: any = {};
-  if (pkg.purl) {
+  if (false/*pkg.purl*/) {
     //if package has a purl, get vuln by purl
     query = {
       database: VulDatabase.SONATYPE,
@@ -31,7 +31,7 @@ function buildQuery(pkg: Package) {
         coordinates: [pkg.purl],
       },
     };
-  } else if (pkg.cpeName) {
+  } else if (false/*pkg.cpeName*/) {
     //else if package has a cpe name, get vuln by cpe name
     query = {
       database: VulDatabase.NVD,
@@ -48,7 +48,7 @@ function buildQuery(pkg: Package) {
       headers: { authKey: 'apiKey', authValue: API_KEY },
       params: {
         searchKey: 'keywordSearch',
-        searchValue: `${pkg.name} v${pkg.version}`,
+        searchValue: pkg.name/*`${pkg.name} v${pkg.version}`*/,
       },
       body: null,
     };

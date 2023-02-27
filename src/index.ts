@@ -79,16 +79,17 @@ app.get('/query', async (req: any, res: any, next: any) => {
   const pool = workerpool.pool();
   let vulnDict: any = {};
   async function firstTenPackages(vulnDict: any) {
-    for (let i = 150; i < 160; i++) {
+    let count:number = 0;
+    for (let i = 0; i < packages.length; i++) {
       let query: Query = buildQuery(packages[i]);
       console.log('QUERY:', query);
       let vulns: Vulnerability[] = [];
-
       try {
         vulns = await sendQuery(query);
-        vulnDict[query.params.searchValue ? query.params.searchValue : i] =
+        vulnDict[query.params.searchValue ? query.params.searchValue : 'purlSearch_'+i] =
           vulns;
-        console.log('vulnerabilities detected:', i, vulnDict);
+        count += vulns.length;
+        console.log('vulnerabilities detected:', count, vulnDict);
       } catch (err) {
         console.log('error: ', err);
       }
@@ -104,7 +105,7 @@ app.get('/query', async (req: any, res: any, next: any) => {
     }
     return vulnDict;
   }
-  const d = await firstTenPackages();
+  const d = await firstTenPackages(vulnDict);
   console.log('unified vuln db', d);
   res.send(d);
 

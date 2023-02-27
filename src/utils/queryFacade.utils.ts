@@ -15,7 +15,7 @@ async function sendQuery(query: Query) {
       // if (response.resultsPerPage === 0) return ['No vulnerabilities caught'];
       // if (response === undefined) return ['Response was undefined'];
       // if (!isNaN(response)) return []; //Handle error --> To-do error handling
-      if (response.resultsPerPage === 0 || response === undefined) {
+      if (false){//(response.resultsPerPage === 0 || response === undefined) {
         return [
           {
             cveId: 'dummy cve 3',
