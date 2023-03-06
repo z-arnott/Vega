@@ -17,6 +17,7 @@ import {
   readAllPackages,
   writePackage,
   writeVuln,
+  bulkInsertVuln,
 } from '../src/utils/storageFacade.utils';
 import { bulkCreatePackage } from '../src/utils/storageFacade.utils';
 import fileUpload from 'express-fileupload';
@@ -92,14 +93,16 @@ app.get('/query', async (req: any, res: any, next: any) => {
       } catch (err) {
         console.log('error: ', err);
       }
-
-      try {
-        vulns.forEach((vuln: Vulnerability) => {
-          const status = writeVuln(vuln, sessionId);
-          console.log('added to db status:', vuln, status);
-        });
-      } catch (err) {
-        console.log('error: ', err);
+      if(vulns.length > 0){
+        try {
+          vulns.forEach((vuln: Vulnerability) => {
+            vuln.packageRef=packages[i].ref;
+          });
+          let status = bulkInsertVuln(packages[i], vulns, sessionId);
+          console.log('added to db status:', vulns, status);
+        } catch (err) {
+          console.log('error: ', err);
+        }
       }
     }
     return vulnDict;

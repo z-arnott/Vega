@@ -18,9 +18,12 @@ const maxLikelihood = 1;
  */
 export async function analyzeSystem(sessionId: number) {
   let packages = await readAllPackages(sessionId);
+  console.log("Packages read");
   //Package Level
   for (let p of packages) {
+    console.log('reading cves... for ' + p.ref);
     let cves = await readVulnsByPkg(p.ref, sessionId);
+    console.log(cves);
     //Vulnerability Level
     for (let v of cves) {
       analyzeVulnerability(v);
@@ -43,8 +46,14 @@ export async function analyzeSystem(sessionId: number) {
  * @param cves list of vulnerabilities in pkg
  */
 export function analyzePackage(pkg: Package, cves: Vulnerability[]) {
-  pkg.consRisk = consolidatedRisk(cves);
-  pkg.highestRisk = highestRisk(cves);
+  if(cves.length == 0){
+    pkg.consRisk = 0;
+    pkg.highestRisk = 0;
+  }
+  else{
+    pkg.consRisk = consolidatedRisk(cves);
+    pkg.highestRisk = highestRisk(cves);
+  }
 }
 
 /**
@@ -259,12 +268,18 @@ function highestRisk(cves: Vulnerability[]): number {
 }
 //Pacakge Consolidated Risk
 function consolidatedRisk(cves: Vulnerability[]): number {
-  let sampleSpace: SampleElement[] = contstructSampleSpace(cves);
   let consolidatedRisk = 0;
-  for (let e of sampleSpace) {
-    let likelihood = likelihoodElement(e);
-    let impact = impactElement(e);
-    consolidatedRisk += impact * likelihood;
+  if(cves.length>10){
+    consolidatedRisk = 100;
+  }
+  else{
+    let sampleSpace: SampleElement[] = contstructSampleSpace(cves);
+    
+    for (let e of sampleSpace) {
+      let likelihood = likelihoodElement(e);
+      let impact = impactElement(e);
+      consolidatedRisk += impact * likelihood;
+    }
   }
   return consolidatedRisk;
 }
@@ -304,6 +319,7 @@ function likelihoodElement(e: SampleElement): number {
 function contstructSampleSpace(cves: Vulnerability[]): SampleElement[] {
   let sampleSpace: SampleElement[] = [];
   let sampleSpaceSize = Math.pow(2, cves.length);
+  console.log(sampleSpaceSize);
   //Construct each element in sample space
   for (let i = 0; i < sampleSpaceSize; i++) {
     let element: SampleElement = {

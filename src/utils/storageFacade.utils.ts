@@ -222,13 +222,13 @@ export async function readPackagesDashboard(
     filterString +=
       'and(consrisk.gte.' +
       riskArr[0] * 10 +
-      ',consrisk.lt.' +
+      ',consrisk.lte.' +
       riskArr[1] * 10 +
       '),';
     filterString +=
       'and(highestrisk.gte.' +
       riskArr[0] * 10 +
-      ',highestrisk.lt.' +
+      ',highestrisk.lte.' +
       riskArr[1] * 10 +
       '),';
   }
@@ -425,11 +425,12 @@ export async function readVulnerabilitiesDashboard(
   if (error) {
     logger.error(error.message);
   } else if (data) {
+    console.log(JSON.stringify(data, null, 2));
     for (let v of data) {
       cves.push(
         //map database result to Vulnerability object
         {
-          cveId: v.cveidstring,
+          cveId: v.id,
           packageRef: v.junction[0].packages.package_ref,
           impact: v.impact,
           likelihood: v.likelihood,
@@ -538,6 +539,57 @@ async function insertVuln(cve: Vulnerability, sessionId: number) {
     return createJunctionEntry(vulnerabilityTableId, cve.packageRef, sessionId);
   }
   return status;
+}
+
+//Write a batch of cves for one package
+export async function bulkInsertVuln(pkg:Package, cves:Vulnerability[], sessionId:number){
+  //get packageId
+  let { data, error, status } = await supabase
+  .from('packages')
+  .select('packageid')
+  .eq('package_ref', pkg.ref)
+  .eq('sessionid', sessionId);
+ 
+  if (error) {
+    logger.error(error.message);
+  } else if (data) {
+    let packageId = data[0].packageid;
+    if (data.length == 0) {
+      //No associate package (how should we handle?)
+      logger.error('Storage Facade: Package "' + pkg.ref + '" not found');
+      return null;
+    } else {
+      let vulnerabilities= [];
+      for(let cve of cves){
+        vulnerabilities.push({
+          likelihood: cve.likelihood,
+          impact: cve.impact,
+          risk: cve.risk,
+          cveidstring: cve.cveId,
+          cvss_vector: cve.cvss2,
+        })
+      }
+      let { data} = await supabase
+      .from('vulnerabilities')
+      .insert(vulnerabilities)
+      .select('id');
+      if(data){
+        let junctions = [];
+        for(let obj of data){
+          junctions.push({
+            packageid: packageId,
+            cveid: obj.id,
+          });
+        }
+        let { status} = await supabase
+        .from('junction')
+        .insert(junctions);
+      }
+    }
+  }
+ 
+
+
 }
 
 async function createJunctionEntry(
