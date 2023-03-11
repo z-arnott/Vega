@@ -1,4 +1,4 @@
-import { Package, SbomFormat } from '../utils/types.utils';
+import { Package, SbomFormat, Vulnerability } from '../utils/types.utils';
 import { XMLParser } from 'fast-xml-parser';
 import {v4 as uuidv4} from 'uuid';
 
@@ -18,6 +18,19 @@ function parse(sbom: string, strategy: SbomFormat): Package[] {
   return parser(sbom);
 }
 
+/****************** HELPERS **********************/
+function cpeAddVersion(cpe:string, version:string){
+  let arr = cpe.split(":");
+  if(arr.length >= 6){
+    if(arr[5] == '*'){
+      arr[5] = version;
+    }
+  }
+  let ret = arr.join(":");
+  console.log(ret);
+  return ret;
+
+}
 /****************** PARSING STRATEGY INTERFACE **********************/
 /**
  * A parsing strategy is the strategy taken to extract packages from
@@ -80,6 +93,9 @@ spdxJsonParser = function (sbom): Package[] {
     //Get Version
     if (pkg.hasOwnProperty('versionInfo')) {
       p.version = pkg.versionInfo;
+    }
+    if(p.cpeName != null && p.version != null){
+      p.cpeName = cpeAddVersion(p.cpeName, p.version);
     }
     packages.push(p);
   });
@@ -147,6 +163,9 @@ spdxTagValueParser = function (sbom): Package[] {
     if(!p.ref){
       p.ref = p.name + uuidv4();
     }
+    if(p.cpeName != null && p.version != null){
+      p.cpeName = cpeAddVersion(p.cpeName, p.version);
+    }
     packages.push(p);
   }
   return packages;
@@ -175,6 +194,9 @@ function cyclonedxGetPackages(sbomPackages: any): Package[] {
     }
     if(!p.ref){
       p.ref = p.name + uuidv4();
+    }
+    if(pkg.cpeName != null && pkg.version != null){
+      p.cpeName = cpeAddVersion(pkg.cpeName, pkg.version);
     }
     packages.push(p);
   });
