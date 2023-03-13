@@ -13,6 +13,7 @@ import {
 } from '../src/services/viewFormatter.services';
 
 import { analyzeSystem } from '../src/services/riskAnalysis.services';
+import { purge_session, writePackage } from '../src/utils/storageFacade.utils';
 import { bulkCreatePackage } from '../src/utils/storageFacade.utils';
 import {
   readAllPackages,
@@ -128,6 +129,11 @@ app.get('/dashboard', (req: any, res: any, next: any) => {
   });
 });
 
+app.get('/purge', (req: any, res: any, next: any) => {
+  let sessionId = req.query.sessionId;
+  purge_session(sessionId);
+  res.send('purged');
+});
 //export
 app.get('/export',(req: any, res: any, next: any) => {
   let sessionId = req.query.sessionId;

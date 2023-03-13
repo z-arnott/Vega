@@ -647,3 +647,23 @@ function mapVulnParamToColumn(sortParam: VulnerabilityViewParam): string {
 
 /****************** PURGE ALL **********************/
 //TODO: iteration 3
+export async function purge_session(sessionId:number){
+  let { data, error } = await supabase
+    .from('vulnerabilities')
+    .select(
+      '*,junction!inner(id,packageid,packages!inner(sessionid))'
+    )
+    .eq('junction.packages.sessionid', sessionId);
+  
+  if (error) {
+    logger.error(error.message);
+  } else if (data) {
+    const junctions = Object.values(data).map(object => object.junction[0].id);
+    const vulnerabilities = Object.values(data).map(object => object.id);
+    const packages = Object.values(data).map(object => object.junction[0].packageid);
+    await supabase.from('junction').delete().in('id', junctions);
+    await supabase.from('vulnerabilities').delete().in('id', vulnerabilities);
+    await supabase.from('packages').delete().in('packageid', packages);
+  }
+}
+
