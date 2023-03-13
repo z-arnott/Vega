@@ -65,10 +65,8 @@ spdxJsonParser = function (sbom): Package[] {
       ref: pkg.SPDXID,
       purl: null,
       cpeName: null,
-      impact: null,
       consRisk: null,
       highestRisk: null,
-      likelihood: null,
       version: null,
     };
     if(!pkg.ref){
@@ -154,10 +152,8 @@ spdxTagValueParser = function (sbom): Package[] {
       ref: id,
       purl: purl,
       cpeName: cpe,
-      impact: null,
       consRisk: null,
       highestRisk: null,
-      likelihood: null,
       version: version,
     };
     if(!p.ref){
@@ -179,10 +175,8 @@ function cyclonedxGetPackages(sbomPackages: any): Package[] {
       ref: pkg['bom-ref'],
       purl: null,
       cpeName: null,
-      impact: null,
       consRisk: null,
       highestRisk: null,
-      likelihood: null,
       version: pkg.version,
     };
     //Get External Reference locators

@@ -37,8 +37,6 @@ export interface Package {
   name: string;
   purl: string | null;
   cpeName: string | null;
-  impact: number | null;
-  likelihood: number | null;
   consRisk: number | null;
   highestRisk: number | null;
   version: string | null;

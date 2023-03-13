@@ -211,8 +211,12 @@ export async function readPackagesDashboard(
   sessionId: number,
   sortParam: PackageViewParam,
   riskFilters: string[],
-  page: number
+  page: number,
+  PAGE_SIZE?: number | undefined
 ) {
+  if (PAGE_SIZE==undefined){
+    PAGE_SIZE =25;
+  }
   let sortCol = mapPkgParamToColumn(sortParam);
   let pageLowerLimit = (page - 1) * PAGE_SIZE;
   let pageUpperLimit = page * PAGE_SIZE - 1;
@@ -394,7 +398,7 @@ export async function readVulnerabilitiesDashboard(
   sortParam: VulnerabilityViewParam,
   severityFilters: string[],
   riskFilters: string[],
-  page: number
+  page: number,
 ) {
   let sortCol = mapVulnParamToColumn(sortParam);
   let pageLowerLimit = (page - 1) * PAGE_SIZE;
@@ -450,8 +454,6 @@ async function insertPackage(pkg: Package, sessionId: number) {
     name: pkg.name,
     packageversion: pkg.version,
     consrisk: pkg.consRisk,
-    impact: pkg.impact,
-    likelihood: pkg.likelihood,
     highestrisk: pkg.highestRisk,
     purl: pkg.purl,
     cpename: pkg.cpeName,
@@ -472,8 +474,6 @@ export async function updatePackage(pkg: Package, sessionId: number) {
       name: pkg.name,
       packageversion: pkg.version,
       consrisk: pkg.consRisk,
-      impact: pkg.impact,
-      likelihood: pkg.likelihood,
       highestrisk: pkg.highestRisk,
       purl: pkg.purl,
       cpename: pkg.cpeName,
@@ -495,9 +495,7 @@ function dbPkgToPkg(pkg: any): Package {
     highestRisk: pkg.highestrisk,
     purl: pkg.purl,
     cpeName: pkg.cpename,
-    impact: pkg.impact,
     consRisk: pkg.consrisk,
-    likelihood: pkg.likelihood,
   };
   return p;
 }

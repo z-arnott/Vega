@@ -20,6 +20,8 @@ import {
   writeVuln,
 } from '../src/utils/storageFacade.utils';
 import fileUpload from 'express-fileupload';
+import { exportResults } from '../src/utils/export.utils';
+
 
 import dotenv from 'dotenv';
 
@@ -114,6 +116,14 @@ app.get('/dashboard', (req: any, res: any, next: any) => {
     res.send(results);
   });
 });
+
+//export
+app.get('/export',(req: any, res: any, next: any) => {
+  let sessionId = req.query.sessionId;
+  exportResults(sessionId).then((file) =>{
+    res.send(file);
+  })
+ } );
 /*************** Start Server ***************/
 // start the Express server
 app.listen(port, () => {
