@@ -13,6 +13,7 @@ import {
 } from '../src/services/viewFormatter.services';
 
 import { analyzeSystem } from '../src/services/riskAnalysis.services';
+import { bulkCreatePackage } from '../src/utils/storageFacade.utils';
 import {
   readAllPackages,
   writePackage,
@@ -48,9 +49,7 @@ app.post('/upload', (req: any, res: any, next: any) => {
   let sbomType = req.query.format;
   let sessionId = req.query.sessionId;
   let packages = parse(sbom, sbomType);
-  for (let pkg of packages) {
-    writePackage(pkg, sessionId);
-  }
+  bulkCreatePackage(packages, sessionId);
   console.log(packages);
   res.send('Upload: parsed ' + packages.length + ' packages');
   //add middleware calls here as needed
