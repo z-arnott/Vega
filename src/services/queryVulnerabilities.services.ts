@@ -4,7 +4,6 @@ import {
   VulDatabase,
   Vulnerability,
 } from '../utils/types.utils';
-import { sendQuery } from '../utils/queryFacade.utils';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -17,7 +16,7 @@ const AUTH = process.env.AUTHORIZATION as string;
  */
 function buildQuery(pkg: Package) {
   let query: any = {};
-  if (pkg.purl) {
+  if (pkg.purl !== null) {
     //if package has a purl, get vuln by purl
     query = {
       database: VulDatabase.SONATYPE,
@@ -31,7 +30,7 @@ function buildQuery(pkg: Package) {
         coordinates: [pkg.purl],
       },
     };
-  } else if (pkg.cpeName) {
+  } else if (pkg.cpeName !== null) {
     //else if package has a cpe name, get vuln by cpe name
     query = {
       database: VulDatabase.NVD,
@@ -54,16 +53,6 @@ function buildQuery(pkg: Package) {
     };
   }
   return query;
-  return {
-    database: VulDatabase.NVD,
-    method: 'get',
-    headers: { authKey: 'apiKey', authValue: API_KEY },
-    params: {
-      searchKey: 'cpeName',
-      searchValue: 'cpe:2.3:a:1e:client:4.1.0.267:*:*:*:*:windows:*:*',
-    },
-    body: null,
-  };
 }
 
 export { buildQuery };

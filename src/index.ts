@@ -21,7 +21,6 @@ import {
 import fileUpload from 'express-fileupload';
 
 import dotenv from 'dotenv';
-import workerpool from 'workerpool';
 
 dotenv.config();
 const API_KEY = process.env.API_KEY as string;
@@ -59,86 +58,33 @@ app.post('/upload', (req: any, res: any, next: any) => {
 
 app.get('/query', async (req: any, res: any, next: any) => {
   const sessionId = req.query.sessionId;
-  const pkgnum = req.query.pkgnum;
   const packages: Package[] = await readAllPackages(sessionId);
-  console.log('PACKAGES:', packages[0]);
+  console.log('PACKAGES:', packages, '\n');
+  let vulns: Vulnerability[] = [];
+  let j = 0;
 
-  //** PULL ONLY THE SPECIFIED PACKAGE NUMBER */
-  // let query: Query = buildQuery(packages[pkgnum]);
-  // console.log(query);
-  // sendQuery(query)
-  //   .then((data) => {
-  //     res.send(data);
-  //   })
-  //   .catch((err) => {
-  //     console.log('error: ', err);
-  //     res.send(err);
-  //   });
+  for (let i = 0; i < packages.length; i++) {
+    let query: Query = buildQuery(packages[i]);
 
-  //** MANUALLY ITERATE VULNERABILITIES */
-  const pool = workerpool.pool();
-  let vulnDict: any = {};
-  async function firstTenPackages(vulnDict: any) {
-    for (let i = 150; i < 160; i++) {
-      let query: Query = buildQuery(packages[i]);
-      console.log('QUERY:', query);
-      let vulns: Vulnerability[] = [];
+    sendQuery(query)
+      .then((data: Vulnerability[]) => {
+        console.log('DATA RETURNED BY QUERY: ', data);
+        vulns.concat(data);
 
-      try {
-        vulns = await sendQuery(query);
-        vulnDict[query.params.searchValue ? query.params.searchValue : i] =
-          vulns;
-        console.log('vulnerabilities detected:', i, vulnDict);
-      } catch (err) {
-        console.log('error: ', err);
-      }
-
-      try {
-        vulns.forEach((vuln: Vulnerability) => {
-          const status = writeVuln(vuln, sessionId);
-          console.log('added to db status:', vuln, status);
+        data.forEach((vuln: Vulnerability) => {
+          vuln['packageRef'] = packages[i]['ref'];
+          writeVuln(vuln, sessionId)
+            .then((status) => console.log('added to db status:', vuln, status))
+            .catch((err) => console.log('ERROR: ', vuln, err));
         });
-      } catch (err) {
-        console.log('error: ', err);
-      }
-    }
-    return vulnDict;
+      })
+      .catch((err) => {
+        console.log('error in sendQuery: ', err);
+        // res.send(err);
+      });
   }
-  const d = await firstTenPackages();
-  console.log('unified vuln db', d);
-  res.send(d);
 
-  //** ITERATE THROUHG ALL THE PACKAGES */
-  // let vulnDict: any = {};
-  // await packages.every(async (pkg: Package) => {
-  //   let query: Query = buildQuery(pkg);
-  //   sendQuery(query)
-  //     .then((data) => {
-  //       console.log('no error: ', data);
-  //       if (pkg.cpeName) {
-  //         if (typeof data[0] === 'string') {
-  //           console.log('data returned is a string');
-  //           vulnDict[pkg.cpeName] = data[0];
-  //           return false;
-  //         } else {
-  //           vulnDict[pkg.cpeName] = data;
-  //         }
-  //       }
-  //       // res.send(data);
-  //       return true;
-  //     })
-  //     .catch((err) => {
-  //       console.log('error: ', err);
-  //       console.log(vulnDict);
-  //       return false;
-  //     });
-  // });
-  // res.send(vulnDict);
-
-  // vulnerabilities.forEach(async (vuln: Vulnerability) => {
-  //   await writeVuln(vuln, sessionId);
-  // });
-  // });
+  return res.send(vulns);
 });
 
 app.get('/riskanalysis', (req: any, res: any, next: any) => {

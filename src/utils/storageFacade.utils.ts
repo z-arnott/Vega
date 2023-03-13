@@ -188,9 +188,17 @@ export async function readPackagesDashboard(
   for (let s of riskFilters) {
     let riskArr = severityToRange(s);
     filterString +=
-      'and(consrisk.gte.' + (riskArr[0] * 10) + ',consrisk.lt.' + (riskArr[1] * 10) + '),';
+      'and(consrisk.gte.' +
+      riskArr[0] * 10 +
+      ',consrisk.lt.' +
+      riskArr[1] * 10 +
+      '),';
     filterString +=
-      'and(highestrisk.gte.' + (riskArr[0] * 10) + ',highestrisk.lt.' + (riskArr[1] * 10) + '),';
+      'and(highestrisk.gte.' +
+      riskArr[0] * 10 +
+      ',highestrisk.lt.' +
+      riskArr[1] * 10 +
+      '),';
   }
   filterString = filterString.substring(0, filterString.length - 1);
   let { data, error } = await supabase //common syntax on JS: const {data,error} = await...
@@ -495,9 +503,14 @@ async function insertVuln(cve: Vulnerability, sessionId: number) {
   }
   if (data) {
     let vulnerabilityTableId = data[0].id; //vulnerability PRIMARY key in vulnerability table
-    return createJunctionEntry(vulnerabilityTableId, cve.packageRef, sessionId);
+    return await createJunctionEntry(
+      vulnerabilityTableId,
+      cve.packageRef,
+      sessionId
+    );
+  } else {
+    return status;
   }
-  return status;
 }
 
 async function createJunctionEntry(

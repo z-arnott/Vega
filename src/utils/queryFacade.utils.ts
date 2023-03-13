@@ -10,7 +10,7 @@ import rateLimit from 'axios-rate-limit';
  * @returns a list of vulnerabilities found in database
  */
 async function sendQuery(query: Query) {
-  return getVulnerabilities(query)
+  return await getVulnerabilities(query)
     .then((response) => {
       // if (response.resultsPerPage === 0) return ['No vulnerabilities caught'];
       // if (response === undefined) return ['Response was undefined'];
@@ -20,7 +20,7 @@ async function sendQuery(query: Query) {
           {
             cveId: 'dummy cve 3',
             cvss2: 'dummy cvss2 3',
-            packageRef: '5736',
+            packageRef: '-1',
             impact: -1,
             likelihood: -1,
             risk: -1,
@@ -30,6 +30,7 @@ async function sendQuery(query: Query) {
       return cleaningStrategy[query.database](response);
     })
     .catch((err) => {
+      console.log(err);
       // if (err instanceof AxiosError && err.cause) {
       //   // Could retry here ?
       //   return [err.cause.message];
@@ -39,7 +40,7 @@ async function sendQuery(query: Query) {
       //   return [`error response status: ${err.response.status}`];
       // }
       // return ['unknown error'];
-      return [];
+      return [err];
     });
 }
 /***************** GET VULNERABILITIES FROM EXT DATABASES ****************************/
@@ -137,7 +138,7 @@ sonatypeCleaner = function (rawResponse): Vulnerability[] {
   //Create Vulnerability for each cve in response
   rawVulns.forEach(function (cve: any) {
     let v: Vulnerability = {
-      cveId: cve.id,
+      cveId: cve.cve,
       packageRef: '-1',
       impact: -1,
       likelihood: -1,
