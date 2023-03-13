@@ -160,8 +160,6 @@ export async function readPackage(packageRef: string, sessionId: number) {
       name: pkg.name,
       packageversion: pkg.version,
       consrisk: pkg.consRisk,
-      impact: pkg.impact,
-      likelihood: pkg.likelihood,
       highestrisk: pkg.highestRisk,
       purl: pkg.purl,
       cpename: pkg.cpeName,
@@ -226,13 +224,13 @@ export async function readPackagesDashboard(
     filterString +=
       'and(consrisk.gte.' +
       riskArr[0] * 10 +
-      ',consrisk.lt.' +
+      ',consrisk.lte.' +
       riskArr[1] * 10 +
       '),';
     filterString +=
       'and(highestrisk.gte.' +
       riskArr[0] * 10 +
-      ',highestrisk.lt.' +
+      ',highestrisk.lte.' +
       riskArr[1] * 10 +
       '),';
   }
@@ -516,7 +514,7 @@ async function readPackageById(sessionid: number, packageid: number) {
 
 /****************** VULNERABILITY HELPERS **********************/
 //Function #5: Write Request (Vulnerability) - Single or Multiple
-async function insertVuln(cve: Vulnerability, sessionId: number) {
+export async function insertVuln(cve: Vulnerability, sessionId: number) {
   let { data, status, error } = await supabase
     .from('vulnerabilities')
     .insert({
@@ -574,7 +572,7 @@ async function createJunctionEntry(
 }
 
 //Update vulnerability by cveid
-async function updateVuln(cve: Vulnerability, sessionId: number) {
+export async function updateVuln(cve: Vulnerability, sessionId: number) {
   let { status, error } = await supabase
     .from('vulnerabilities')
     .update({
