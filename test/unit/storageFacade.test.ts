@@ -16,6 +16,7 @@ import {
   readVulnsByPkg,
   readVulnerabilitiesDashboard,
   readPackagesDashboard,
+  purge_session
 } from '@utils/storageFacade.utils';
 
 //Set up test data
@@ -321,4 +322,9 @@ test('Test 13: Sorted Dashboard Data (packages)', async () => {
   ).then((cves) => {
     console.log('Test 13 output:\n', JSON.stringify(cves, null, 2));
   });
+});
+
+//Test 14: purge
+test('Test 14: Test Purge', async () => {
+  purge_session(sessionId);
 });
