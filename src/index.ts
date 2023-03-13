@@ -16,8 +16,7 @@ import { analyzeSystem } from '../src/services/riskAnalysis.services';
 import { bulkCreatePackage } from '../src/utils/storageFacade.utils';
 import {
   readAllPackages,
-  writePackage,
-  writeVuln,
+  insertVuln,
 } from '../src/utils/storageFacade.utils';
 import fileUpload from 'express-fileupload';
 import { exportResults } from '../src/utils/export.utils';
@@ -51,18 +50,22 @@ app.post('/upload', (req: any, res: any, next: any) => {
   let sbomType = req.query.format;
   let sessionId = req.query.sessionId;
   let packages = parse(sbom, sbomType);
-  bulkCreatePackage(packages, sessionId);
-  console.log(packages);
-  res.send('Upload: parsed ' + packages.length + ' packages');
+  console.log("upload:"+sessionId);
+  bulkCreatePackage(packages, sessionId).then( () => {
+    console.log(packages);
+    res.send('Upload: parsed ' + packages.length + ' packages');
+  });
   //add middleware calls here as needed
 });
 
 app.get('/query', async (req: any, res: any, next: any) => {
   const sessionId = req.query.sessionId;
+  console.log("query"+sessionId);
   const packages: Package[] = await readAllPackages(sessionId);
   console.log('PACKAGES:', packages, '\n');
   let vulns: Vulnerability[] = [];
-  let j = 0;
+  let j = packages.length;
+  let timeout = 500;
 
   for (let i = 0; i < packages.length; i++) {
     let query: Query = buildQuery(packages[i]);
@@ -74,22 +77,29 @@ app.get('/query', async (req: any, res: any, next: any) => {
 
         data.forEach((vuln: Vulnerability) => {
           vuln['packageRef'] = packages[i]['ref'];
-          writeVuln(vuln, sessionId)
+          insertVuln(vuln, sessionId)
             .then((status) => console.log('added to db status:', vuln, status))
             .catch((err) => console.log('ERROR: ', vuln, err));
         });
+        j--;
       })
       .catch((err) => {
         console.log('error in sendQuery: ', err);
         // res.send(err);
+        j--;
       });
   }
-
+  while(j > 0 && timeout >0){
+    await new Promise(r => setTimeout(r, 200));
+    timeout--;
+    console.log(timeout, j);
+  }
   return res.send(vulns);
 });
 
 app.get('/riskanalysis', (req: any, res: any, next: any) => {
   let sessionId = req.query.sessionId;
+  console.log("risk analysis"+sessionId);
   analyzeSystem(sessionId).then( () => {
     res.send('Analysis complete');
   });
@@ -112,6 +122,7 @@ app.get('/dashboard', (req: any, res: any, next: any) => {
     riskFilters: riskFilters,
     severityFilters: severityFilters,
   };
+  console.log(reqParams.sessionId);
   getView(reqParams).then((results) => {
     res.send(results);
   });
