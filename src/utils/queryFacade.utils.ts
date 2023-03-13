@@ -1,5 +1,6 @@
 import { Query, VulDatabase, Vulnerability } from './types.utils';
 import { logger } from './logger.utils';
+import { cvss3to2 } from '../services/riskAnalysis.services';
 import axios, { AxiosError } from 'axios';
 import rateLimit from 'axios-rate-limit';
 
@@ -18,8 +19,8 @@ async function sendQuery(query: Query) {
       if (response.resultsPerPage === 0 || response === undefined) {
         return [
           {
-            cveId: 'dummy cve 3',
-            cvss2: 'dummy cvss2 3',
+            cveId: 'CVE-2727-1212',
+            cvss2: 'AV:L/AC:L/Au:N/C:C/I:C/A:C',
             packageRef: '-1',
             impact: -1,
             likelihood: -1,
@@ -124,6 +125,7 @@ nvdCleaner = function (rawResponse): Vulnerability[] {
     } else if (cve['cve']['metrics'].hasOwnProperty('cvssMetricV31')) {
       //V3
       //map cvss2 to cvss3
+      v.cvss2 = cvss3to2(cve['cve']['metrics']['cvssMetricV31'][0]['cvssData']['vectorString']);
     }
     vulns.push(v);
   });
@@ -156,7 +158,7 @@ sonatypeCleaner = function (rawResponse): Vulnerability[] {
       } else if (cvssVector.startsWith('CVSS:3')) {
         //V3
         //TO-DO:map cvss2 to cvss3
-        v.cvss2 = cvssVector;
+        v.cvss2 = cvss3to2(cvssVector);
       }
     }
     vulns.push(v);
