@@ -37,8 +37,6 @@ export interface Package {
   name: string;
   purl: string | null;
   cpeName: string | null;
-  impact: number | null;
-  likelihood: number | null;
   consRisk: number | null;
   highestRisk: number | null;
   version: string | null;
@@ -73,8 +71,8 @@ export enum PackageViewParam {
 }
 
 export interface DisplayPackage {
-  Componenent_name: string;
-  Component_ref: string;
+  Component_Name: string;
+  Component_Ref: string;
   Number_of_Vulnerabilities: number;
   Highest_Risk: number;
   Consolidated_Risk: number;

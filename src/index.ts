@@ -1,5 +1,12 @@
-import { Package, SbomFormat } from '../src/utils/types.utils';
+import {
+  Package,
+  Query,
+  Vulnerability,
+  VulDatabase,
+} from '../src/utils/types.utils';
+import { sendQuery } from '../src/utils/queryFacade.utils';
 import { parse } from '../src/services/parserContext.services';
+import { buildQuery } from '../src/services/queryVulnerabilities.services';
 import {
   DashboardRequest,
   getView,
@@ -7,7 +14,21 @@ import {
 
 import { analyzeSystem } from '../src/services/riskAnalysis.services';
 import { purge_session, writePackage } from '../src/utils/storageFacade.utils';
+import { bulkCreatePackage } from '../src/utils/storageFacade.utils';
+import {
+  readAllPackages,
+  writePackage,
+  writeVuln,
+} from '../src/utils/storageFacade.utils';
 import fileUpload from 'express-fileupload';
+import { exportResults } from '../src/utils/export.utils';
+
+
+import dotenv from 'dotenv';
+
+dotenv.config();
+const API_KEY = process.env.API_KEY as string;
+const AUTH = process.env.AUTHORIZATION as string;
 
 const express = require('express');
 const app = express();
@@ -31,20 +52,48 @@ app.post('/upload', (req: any, res: any, next: any) => {
   let sbomType = req.query.format;
   let sessionId = req.query.sessionId;
   let packages = parse(sbom, sbomType);
-  for (let pkg of packages) {
-    writePackage(pkg, sessionId);
-  }
+  bulkCreatePackage(packages, sessionId);
   console.log(packages);
   res.send('Upload: parsed ' + packages.length + ' packages');
   //add middleware calls here as needed
 });
 
+app.get('/query', async (req: any, res: any, next: any) => {
+  const sessionId = req.query.sessionId;
+  const packages: Package[] = await readAllPackages(sessionId);
+  console.log('PACKAGES:', packages, '\n');
+  let vulns: Vulnerability[] = [];
+  let j = 0;
+
+  for (let i = 0; i < packages.length; i++) {
+    let query: Query = buildQuery(packages[i]);
+
+    sendQuery(query)
+      .then((data: Vulnerability[]) => {
+        console.log('DATA RETURNED BY QUERY: ', data);
+        vulns.concat(data);
+
+        data.forEach((vuln: Vulnerability) => {
+          vuln['packageRef'] = packages[i]['ref'];
+          writeVuln(vuln, sessionId)
+            .then((status) => console.log('added to db status:', vuln, status))
+            .catch((err) => console.log('ERROR: ', vuln, err));
+        });
+      })
+      .catch((err) => {
+        console.log('error in sendQuery: ', err);
+        // res.send(err);
+      });
+  }
+
+  return res.send(vulns);
+});
+
 app.get('/riskanalysis', (req: any, res: any, next: any) => {
   let sessionId = req.query.sessionId;
-  analyzeSystem(sessionId).then((risk) => {
-    console.log('System Risk ' + risk);
+  analyzeSystem(sessionId).then( () => {
+    res.send('Analysis complete');
   });
-  res.send('Analysis in progress');
 });
 
 app.get('/dashboard', (req: any, res: any, next: any) => {
@@ -74,6 +123,13 @@ app.get('/purge', (req: any, res: any, next: any) => {
   purge_session(sessionId);
   res.send('purged');
 });
+//export
+app.get('/export',(req: any, res: any, next: any) => {
+  let sessionId = req.query.sessionId;
+  exportResults(sessionId).then((file) =>{
+    res.send(file);
+  })
+ } );
 /*************** Start Server ***************/
 // start the Express server
 app.listen(port, () => {

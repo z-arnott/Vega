@@ -73,10 +73,8 @@ let inputPackage: Package = {
   ref: '1',
   purl: 'pkg:composer/symfony/polyfill-intl-normalizer@1.23.0',
   cpeName: null,
-  impact: null,
   consRisk: null,
   highestRisk: null,
-  likelihood: null,
   version: '1.23.0',
 };
 
@@ -85,10 +83,8 @@ let expectedPackage: Package = {
   ref: '1',
   purl: 'pkg:composer/symfony/polyfill-intl-normalizer@1.23.0',
   cpeName: null,
-  impact: null,
   consRisk: 76,
   highestRisk: 100,
-  likelihood: null,
   version: '1.23.0',
 };
 analyzePackage(inputPackage, expectedCVEs);
@@ -103,10 +99,8 @@ let packages: Package[] = [
     ref: '1',
     purl: 'pkg:composer/symfony/polyfill-intl-normalizer@1.23.0',
     cpeName: null,
-    impact: null,
     consRisk: 76,
     highestRisk: 89,
-    likelihood: null,
     version: '1.23.0',
   },
   {
@@ -114,10 +108,8 @@ let packages: Package[] = [
     ref: '1',
     purl: 'pkg:composer/symfony/polyfill-intl-normalizer@1.23.0',
     cpeName: null,
-    impact: null,
     consRisk: 76,
     highestRisk: 0.2,
-    likelihood: null,
     version: '1.23.0',
   },
   {
@@ -125,10 +117,8 @@ let packages: Package[] = [
     ref: '1',
     purl: 'pkg:composer/symfony/polyfill-intl-normalizer@1.23.0',
     cpeName: null,
-    impact: null,
     consRisk: 76,
     highestRisk: 58,
-    likelihood: null,
     version: '1.23.0',
   },
 ];

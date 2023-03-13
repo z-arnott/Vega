@@ -149,6 +149,37 @@ export async function readPackage(packageRef: string, sessionId: number) {
 }
 
 /**
+ * 
+ * 
+ */
+ export async function bulkCreatePackage(packages:Package[], sessionId: number) {
+  let pkgs = [];
+  for(let pkg of packages){
+    pkgs.push({
+      //append necessary housekeeping info for database
+      name: pkg.name,
+      packageversion: pkg.version,
+      consrisk: pkg.consRisk,
+      impact: pkg.impact,
+      likelihood: pkg.likelihood,
+      highestrisk: pkg.highestRisk,
+      purl: pkg.purl,
+      cpename: pkg.cpeName,
+      sessionid: sessionId,
+      package_ref: pkg.ref,
+    })
+  }
+
+  let { status, error } = await supabase.from('packages').insert(pkgs);
+  if (error) {
+    logger.error(JSON.stringify(error));
+  }
+  console.log(status);
+  return status;
+}
+
+
+/**
  * Write Package, updates if entry exists in database, inserts otherwise
  * @param pkg to write to database
  * @param sessionId associated with one user
@@ -161,8 +192,9 @@ export async function writePackage(pkg: Package, sessionId: number) {
     .eq('sessionid', sessionId)
     .eq('package_ref', pkg.ref);
 
+  console.log(status);
   if (error) {
-    logger.error(error.message);
+    logger.error((JSON.stringify(error) + ' ' + pkg.ref));
   } else if (data) {
     if (data.length == 0) {
       //INSERT
@@ -179,8 +211,12 @@ export async function readPackagesDashboard(
   sessionId: number,
   sortParam: PackageViewParam,
   riskFilters: string[],
-  page: number
+  page: number,
+  PAGE_SIZE?: number | undefined
 ) {
+  if (PAGE_SIZE==undefined){
+    PAGE_SIZE =25;
+  }
   let sortCol = mapPkgParamToColumn(sortParam);
   let pageLowerLimit = (page - 1) * PAGE_SIZE;
   let pageUpperLimit = page * PAGE_SIZE - 1;
@@ -188,9 +224,17 @@ export async function readPackagesDashboard(
   for (let s of riskFilters) {
     let riskArr = severityToRange(s);
     filterString +=
-      'and(consrisk.gte.' + (riskArr[0] * 10) + ',consrisk.lt.' + (riskArr[1] * 10) + '),';
+      'and(consrisk.gte.' +
+      riskArr[0] * 10 +
+      ',consrisk.lt.' +
+      riskArr[1] * 10 +
+      '),';
     filterString +=
-      'and(highestrisk.gte.' + (riskArr[0] * 10) + ',highestrisk.lt.' + (riskArr[1] * 10) + '),';
+      'and(highestrisk.gte.' +
+      riskArr[0] * 10 +
+      ',highestrisk.lt.' +
+      riskArr[1] * 10 +
+      '),';
   }
   filterString = filterString.substring(0, filterString.length - 1);
   let { data, error } = await supabase //common syntax on JS: const {data,error} = await...
@@ -222,8 +266,8 @@ export async function readPackagesDashboard(
       }
       packages.push({
         //map database result to Dashboard View Package
-        Componenent_name: pkg.name,
-        Component_ref: pkg.package_ref,
+        Component_Name: pkg.name,
+        Component_Ref: pkg.package_ref,
         Number_of_Vulnerabilities: pkg.junction.length,
         Highest_Risk: pkg.highestrisk,
         Consolidated_Risk: pkg.consrisk,
@@ -354,7 +398,7 @@ export async function readVulnerabilitiesDashboard(
   sortParam: VulnerabilityViewParam,
   severityFilters: string[],
   riskFilters: string[],
-  page: number
+  page: number,
 ) {
   let sortCol = mapVulnParamToColumn(sortParam);
   let pageLowerLimit = (page - 1) * PAGE_SIZE;
@@ -410,8 +454,6 @@ async function insertPackage(pkg: Package, sessionId: number) {
     name: pkg.name,
     packageversion: pkg.version,
     consrisk: pkg.consRisk,
-    impact: pkg.impact,
-    likelihood: pkg.likelihood,
     highestrisk: pkg.highestRisk,
     purl: pkg.purl,
     cpename: pkg.cpeName,
@@ -419,12 +461,12 @@ async function insertPackage(pkg: Package, sessionId: number) {
     package_ref: pkg.ref,
   });
   if (error) {
-    logger.error(error.message);
+    logger.error('insert Pkg ' + error.message);
   }
   return status;
 }
 
-async function updatePackage(pkg: Package, sessionId: number) {
+export async function updatePackage(pkg: Package, sessionId: number) {
   let { status, error } = await supabase
     .from('packages')
     .update({
@@ -432,8 +474,6 @@ async function updatePackage(pkg: Package, sessionId: number) {
       name: pkg.name,
       packageversion: pkg.version,
       consrisk: pkg.consRisk,
-      impact: pkg.impact,
-      likelihood: pkg.likelihood,
       highestrisk: pkg.highestRisk,
       purl: pkg.purl,
       cpename: pkg.cpeName,
@@ -441,7 +481,7 @@ async function updatePackage(pkg: Package, sessionId: number) {
     .eq('sessionid', sessionId)
     .eq('package_ref', pkg.ref);
   if (error) {
-    logger.error(error.message);
+    logger.error('update Pkg ' +error.message);
   }
   return status;
 }
@@ -455,9 +495,7 @@ function dbPkgToPkg(pkg: any): Package {
     highestRisk: pkg.highestrisk,
     purl: pkg.purl,
     cpeName: pkg.cpename,
-    impact: pkg.impact,
     consRisk: pkg.consrisk,
-    likelihood: pkg.likelihood,
   };
   return p;
 }
@@ -495,9 +533,14 @@ async function insertVuln(cve: Vulnerability, sessionId: number) {
   }
   if (data) {
     let vulnerabilityTableId = data[0].id; //vulnerability PRIMARY key in vulnerability table
-    return createJunctionEntry(vulnerabilityTableId, cve.packageRef, sessionId);
+    return await createJunctionEntry(
+      vulnerabilityTableId,
+      cve.packageRef,
+      sessionId
+    );
+  } else {
+    return status;
   }
-  return status;
 }
 
 async function createJunctionEntry(
