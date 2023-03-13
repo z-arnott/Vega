@@ -503,9 +503,14 @@ async function insertVuln(cve: Vulnerability, sessionId: number) {
   }
   if (data) {
     let vulnerabilityTableId = data[0].id; //vulnerability PRIMARY key in vulnerability table
-    return createJunctionEntry(vulnerabilityTableId, cve.packageRef, sessionId);
+    return await createJunctionEntry(
+      vulnerabilityTableId,
+      cve.packageRef,
+      sessionId
+    );
+  } else {
+    return status;
   }
-  return status;
 }
 
 async function createJunctionEntry(
