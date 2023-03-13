@@ -1,7 +1,7 @@
-import { Query, VulDatabase } from '@utils/types.utils';
-import { Vulnerability } from '@utils/types.utils';
-import { logger } from '@utils/logger.utils';
-import axios from 'axios';
+import { Query, VulDatabase, Vulnerability } from './types.utils';
+import { logger } from './logger.utils';
+import axios, { AxiosError } from 'axios';
+import rateLimit from 'axios-rate-limit';
 
 /****************** QUERY FACADE API **********************/
 /**
@@ -10,14 +10,38 @@ import axios from 'axios';
  * @returns a list of vulnerabilities found in database
  */
 async function sendQuery(query: Query) {
-  return getVulnerabilities(query).then((response) => {
-    //Handle error
-    if (!isNaN(response)) {
-      //To-do error handleide
-      return [];
-    }
-    return cleaningStrategy[query.database](response);
-  });
+  return await getVulnerabilities(query)
+    .then((response) => {
+      // if (response.resultsPerPage === 0) return ['No vulnerabilities caught'];
+      // if (response === undefined) return ['Response was undefined'];
+      // if (!isNaN(response)) return []; //Handle error --> To-do error handling
+      if (response.resultsPerPage === 0 || response === undefined) {
+        return [
+          {
+            cveId: 'dummy cve 3',
+            cvss2: 'dummy cvss2 3',
+            packageRef: '-1',
+            impact: -1,
+            likelihood: -1,
+            risk: -1,
+          },
+        ];
+      }
+      return cleaningStrategy[query.database](response);
+    })
+    .catch((err) => {
+      console.log(err);
+      // if (err instanceof AxiosError && err.cause) {
+      //   // Could retry here ?
+      //   return [err.cause.message];
+      // } else if (err instanceof TypeError) {
+      //   return ['Type error fuk'];
+      // } else if (err.response.status) {
+      //   return [`error response status: ${err.response.status}`];
+      // }
+      // return ['unknown error'];
+      return [err];
+    });
 }
 /***************** GET VULNERABILITIES FROM EXT DATABASES ****************************/
 async function getVulnerabilities(query: Query) {
@@ -32,36 +56,40 @@ async function getVulnerabilities(query: Query) {
     },
     data: query.body,
   };
-
-  return axios(config)
-    .then((response) => {
-      return response.data;
-    })
-    .catch(function (error) {
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        const err =
-          'Query Error: ' +
-          JSON.stringify(error.response.status) +
-          ' ' +
-          JSON.stringify(query.params) +
-          ' ' +
-          JSON.stringify(query.body);
-        logger.error(err);
-      } else if (error.request) {
-        // The request was made but no response was received
-        // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-        // http.ClientRequest in node.js
-        const err = 'Query Error: ' + JSON.stringify(error.request);
-        logger.error('Query Error: ' + err);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        const err = 'Query Error: ' + error.message;
-        logger.error(err);
-      }
-      return error.response.status;
-    });
+  const http = rateLimit(axios.create(), {
+    maxRequests: 2,
+    perMilliseconds: 1000,
+    maxRPS: 2,
+  });
+  return http(config).then((response) => {
+    return response.data;
+  });
+  // .catch(function (error) {
+  //   if (error.response) {
+  //     // The request was made and the server responded with a status code
+  //     // that falls out of the range of 2xx
+  //     const err = ``;
+  //     // 'Query Error: ' +
+  //     // JSON.stringify(error.response.status) +
+  //     // ' ' +
+  //     // JSON.stringify(query.params) +
+  //     // ' ' +
+  //     // JSON.stringify(query.body);
+  //     // logger.error(err);
+  //   } else if (error.request) {
+  //     // The request was made but no response was received
+  //     // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+  //     // http.ClientRequest in node.js
+  //     const err = ``; //'Query Error: ' + JSON.stringify(error.request);
+  //     // logger.error('Query Error: ' + err);
+  //   } else {
+  //     // Something happened in setting up the request that triggered an Error
+  //     const err = 'Query Error: ' + error.message;
+  //     // logger.error(err);
+  //   }
+  //   console.log(error.cause);
+  //   throw error;
+  // });
 }
 
 /****************** RESPONSE CLEANER INTERFACE **********************/
@@ -110,7 +138,7 @@ sonatypeCleaner = function (rawResponse): Vulnerability[] {
   //Create Vulnerability for each cve in response
   rawVulns.forEach(function (cve: any) {
     let v: Vulnerability = {
-      cveId: cve.id,
+      cveId: cve.cve,
       packageRef: '-1',
       impact: -1,
       likelihood: -1,

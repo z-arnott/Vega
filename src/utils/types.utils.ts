@@ -73,8 +73,8 @@ export enum PackageViewParam {
 }
 
 export interface DisplayPackage {
-  Componenent_name: string;
-  Component_ref: string;
+  Component_Name: string;
+  Component_Ref: string;
   Number_of_Vulnerabilities: number;
   Highest_Risk: number;
   Consolidated_Risk: number;
