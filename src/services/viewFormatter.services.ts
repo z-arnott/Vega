@@ -61,20 +61,53 @@ interface JsonFormatter {
 }
 
 function decodePackageViewParam(s: string): PackageViewParam {
-  if (s in PackageViewParam) {
-    return PackageViewParam[s as keyof typeof PackageViewParam];
-  } else {
-    return PackageViewParam.HIGHEST_RISK;
+  
+  let retCode:PackageViewParam;
+  switch(s) {
+    case PackageViewParam.COMPONENT_REF: 
+      retCode = PackageViewParam.COMPONENT_REF;
+      break;
+    case PackageViewParam.HIGHEST_RISK: 
+      retCode = PackageViewParam.HIGHEST_RISK;
+      break;
+    case PackageViewParam.CONSOLIDATED_RISK: 
+      retCode = PackageViewParam.CONSOLIDATED_RISK;
+      break;
+    case PackageViewParam.NAME: 
+      retCode = PackageViewParam.NAME;
+      break;
+    case PackageViewParam.NUMBER_OF_VULNERABILITIES: 
+      retCode = PackageViewParam.NUMBER_OF_VULNERABILITIES;
+      break;
+    default:
+      retCode = PackageViewParam.NUMBER_OF_VULNERABILITIES;
   }
+  return retCode;
 }
 
 function decodeVulnerabilityViewParam(s: string): VulnerabilityViewParam {
-  if (s in VulnerabilityViewParam) {
-    return VulnerabilityViewParam[s as keyof typeof VulnerabilityViewParam];
-  } else {
-    //default
-    return VulnerabilityViewParam.SEVERITY;
+  let retCode:VulnerabilityViewParam;
+  switch(s) {
+    case VulnerabilityViewParam.SEVERITY: 
+      retCode = VulnerabilityViewParam.SEVERITY;
+      break;
+    case VulnerabilityViewParam.CVEID: 
+      retCode = VulnerabilityViewParam.CVEID;
+      break;
+    case VulnerabilityViewParam.IMPACT: 
+      retCode = VulnerabilityViewParam.IMPACT;
+      break;
+    case VulnerabilityViewParam.LIKELIHOOD: 
+      retCode = VulnerabilityViewParam.LIKELIHOOD;
+      break;
+    case VulnerabilityViewParam.RISK: 
+      retCode = VulnerabilityViewParam.RISK;
+      break;
+    default:
+      retCode = VulnerabilityViewParam.SEVERITY;
+      break;
   }
+  return retCode;
 }
 
 //Formatter Instances

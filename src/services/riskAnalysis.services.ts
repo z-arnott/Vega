@@ -4,7 +4,7 @@ import {
   readAllPackages,
   readVulnsByPkg,
   updatePackage,
-  writeVuln,
+  updateVuln,
 } from '../utils/storageFacade.utils';
 
 const maxImpact = 100;
@@ -24,15 +24,14 @@ export async function analyzeSystem(sessionId: number) {
     //Vulnerability Level
     for (let v of cves) {
       analyzeVulnerability(v);
-      await writeVuln(v, sessionId);
+      await updateVuln(v, sessionId);
     }
 
     analyzePackage(p, cves);
     console.log(
       'Package Analyzed:\n' +
         JSON.stringify(p, null, 2) +
-        '\nCVEs Analyzed:\n' +
-        JSON.stringify(cves, null, 2)
+        '\n#CVEs Analyzed: ' + cves.length
     );
     updatePackage(p, sessionId);
   }
@@ -43,8 +42,13 @@ export async function analyzeSystem(sessionId: number) {
  * @param cves list of vulnerabilities in pkg
  */
 export function analyzePackage(pkg: Package, cves: Vulnerability[]) {
-  pkg.consRisk = consolidatedRisk(cves);
-  pkg.highestRisk = highestRisk(cves);
+  if(cves.length == 0){
+    pkg.consRisk = 0;
+    pkg.highestRisk = 0;
+  }else{
+    pkg.consRisk = consolidatedRisk(cves);
+    pkg.highestRisk = highestRisk(cves);
+  }
 }
 
 /**
@@ -52,6 +56,7 @@ export function analyzePackage(pkg: Package, cves: Vulnerability[]) {
  * @param cve to analyze
  */
 export function analyzeVulnerability(cve: Vulnerability) {
+  console.log("Analyzing " + cve.cveId + " in package " + cve.packageRef + " cvss = " + cve.cvss2);
   if (cve.cvss2) {
     cve.impact = cveImpact(cve.cvss2);
     cve.likelihood = cveLikelihood(cve.cvss2);
@@ -259,6 +264,7 @@ function highestRisk(cves: Vulnerability[]): number {
 }
 //Pacakge Consolidated Risk
 function consolidatedRisk(cves: Vulnerability[]): number {
+  if(cves.length > 16){return 100;}
   let sampleSpace: SampleElement[] = contstructSampleSpace(cves);
   let consolidatedRisk = 0;
   for (let e of sampleSpace) {

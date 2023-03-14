@@ -160,8 +160,6 @@ export async function readPackage(packageRef: string, sessionId: number) {
       name: pkg.name,
       packageversion: pkg.version,
       consrisk: pkg.consRisk,
-      impact: pkg.impact,
-      likelihood: pkg.likelihood,
       highestrisk: pkg.highestRisk,
       purl: pkg.purl,
       cpename: pkg.cpeName,
@@ -226,13 +224,13 @@ export async function readPackagesDashboard(
     filterString +=
       'and(consrisk.gte.' +
       riskArr[0] * 10 +
-      ',consrisk.lt.' +
+      ',consrisk.lte.' +
       riskArr[1] * 10 +
       '),';
     filterString +=
       'and(highestrisk.gte.' +
       riskArr[0] * 10 +
-      ',highestrisk.lt.' +
+      ',highestrisk.lte.' +
       riskArr[1] * 10 +
       '),';
   }
@@ -261,6 +259,7 @@ export async function readPackagesDashboard(
             likelihood: v.vulnerabilities.likelihood,
             risk: v.vulnerabilities.risk,
             cvss2: v.vulnerabilities.cvss_vector,
+            severity: v.vulnerabilities.severity
           }
         );
       }
@@ -307,38 +306,12 @@ export async function readVulnsByPkg(ref: string, sessionId: number) {
           likelihood: v.likelihood,
           risk: v.risk,
           cvss2: v.cvss_vector,
+          severity: v.severity
         }
       );
     }
   }
   return cves;
-}
-
-/**
- * Write Package, updates if entry exists in database, inserts otherwise
- * @param cve to write
- * @param sessionId associated with one user
- * @returns supabase write status
- */
-export async function writeVuln(cve: Vulnerability, sessionId: number) {
-  let { data, error } = await supabase
-    .from('vulnerabilities')
-    .select('*')
-    .eq('cveidstring', cve.cveId);
-
-  if (error) {
-    logger.error(error.message);
-    return error;
-  } else if (data) {
-    if (data.length == 0) {
-      //INSERT
-      return insertVuln(cve, sessionId);
-    } else {
-      //UPDATE
-      return updateVuln(cve, sessionId);
-    }
-  }
-  return 400;
 }
 
 /**
@@ -368,6 +341,7 @@ export async function readVulnsBySession(sessionId: number) {
           likelihood: v.likelihood,
           risk: v.risk,
           cvss2: v.cvss_vector,
+          severity: v.severity
         }
       );
     }
@@ -439,6 +413,7 @@ export async function readVulnerabilitiesDashboard(
           likelihood: v.likelihood,
           risk: v.risk,
           cvss2: v.cvss_vector,
+          severity: v.severity
         }
       );
     }
@@ -516,7 +491,7 @@ async function readPackageById(sessionid: number, packageid: number) {
 
 /****************** VULNERABILITY HELPERS **********************/
 //Function #5: Write Request (Vulnerability) - Single or Multiple
-async function insertVuln(cve: Vulnerability, sessionId: number) {
+export async function insertVuln(cve: Vulnerability, sessionId: number) {
   let { data, status, error } = await supabase
     .from('vulnerabilities')
     .insert({
@@ -525,6 +500,7 @@ async function insertVuln(cve: Vulnerability, sessionId: number) {
       risk: cve.risk,
       cveidstring: cve.cveId,
       cvss_vector: cve.cvss2,
+      severity: cve.severity
     })
     .select('id');
 
@@ -574,7 +550,7 @@ async function createJunctionEntry(
 }
 
 //Update vulnerability by cveid
-async function updateVuln(cve: Vulnerability, sessionId: number) {
+export async function updateVuln(cve: Vulnerability, sessionId: number) {
   let { status, error } = await supabase
     .from('vulnerabilities')
     .update({

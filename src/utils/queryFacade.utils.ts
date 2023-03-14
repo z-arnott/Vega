@@ -1,5 +1,6 @@
 import { Query, VulDatabase, Vulnerability } from './types.utils';
 import { logger } from './logger.utils';
+import { cvss3to2 } from '../services/riskAnalysis.services';
 import axios, { AxiosError } from 'axios';
 import rateLimit from 'axios-rate-limit';
 
@@ -18,12 +19,13 @@ async function sendQuery(query: Query) {
       if (response.resultsPerPage === 0 || response === undefined) {
         return [
           {
-            cveId: 'dummy cve 3',
-            cvss2: 'dummy cvss2 3',
-            packageRef: '-1',
+            cveId: 'CVE-2727-1212',
+            cvss2: 'AV:L/AC:L/Au:N/C:C/I:C/A:C',
+            packageRef: '',
             impact: -1,
             likelihood: -1,
             risk: -1,
+            severity: -1,
           },
         ];
       }
@@ -110,20 +112,24 @@ nvdCleaner = function (rawResponse): Vulnerability[] {
   rawVulns.forEach(function (cve: any) {
     let v: Vulnerability = {
       cveId: cve['cve'].id,
-      packageRef: '-1',
+      packageRef: '',
       impact: -1,
       likelihood: -1,
       risk: -1,
       cvss2: '',
+      severity: 7.9
     };
     //Get correct CVSS version
     if (cve['cve']['metrics'].hasOwnProperty('cvssMetricV2')) {
       //V2
       v.cvss2 =
         cve['cve']['metrics']['cvssMetricV2'][0]['cvssData']['vectorString'];
+      v.severity = cve['cve']['metrics']['cvssMetricV2'][0]['cvssData']['baseScore'];
     } else if (cve['cve']['metrics'].hasOwnProperty('cvssMetricV31')) {
       //V3
       //map cvss2 to cvss3
+      v.cvss2 = cvss3to2(cve['cve']['metrics']['cvssMetricV31'][0]['cvssData']['vectorString']);
+      v.severity = cve['cve']['metrics']['cvssMetricV31'][0]['cvssData']['baseScore'];
     }
     vulns.push(v);
   });
@@ -139,11 +145,12 @@ sonatypeCleaner = function (rawResponse): Vulnerability[] {
   rawVulns.forEach(function (cve: any) {
     let v: Vulnerability = {
       cveId: cve.cve,
-      packageRef: '-1',
+      packageRef: '',
       impact: -1,
       likelihood: -1,
       risk: -1,
       cvss2: '',
+      severity: -1,
     };
 
     //Get correct CVSS version
@@ -156,7 +163,7 @@ sonatypeCleaner = function (rawResponse): Vulnerability[] {
       } else if (cvssVector.startsWith('CVSS:3')) {
         //V3
         //TO-DO:map cvss2 to cvss3
-        v.cvss2 = cvssVector;
+        v.cvss2 = cvss3to2(cvssVector);
       }
     }
     vulns.push(v);

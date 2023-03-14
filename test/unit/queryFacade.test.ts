@@ -25,6 +25,7 @@ let expectedResult1: Vulnerability[] = [
     impact: -1,
     likelihood: -1,
     risk: -1,
+    severity: 0,
   },
 ];
 
@@ -54,6 +55,7 @@ let expectedResult2: Vulnerability[] = [
     impact: -1,
     likelihood: -1,
     risk: -1,
+    severity: 0,
   },
   {
     cveId: 'CVE-2020-27643',
@@ -62,6 +64,7 @@ let expectedResult2: Vulnerability[] = [
     impact: -1,
     likelihood: -1,
     risk: -1,
+    severity: 0,
   },
 ];
 
@@ -88,6 +91,7 @@ let expectedResult3: Vulnerability[] = [
     impact: -1,
     likelihood: -1,
     risk: -1,
+    severity: 0,
   },
 ];
 
@@ -153,6 +157,7 @@ let expectedResult6: Vulnerability[] = [
     likelihood: -1,
     packageRef: '-1',
     risk: -1,
+    severity: 0,
   },
   {
     cveId: 'CVE-2022-25857',
@@ -161,6 +166,7 @@ let expectedResult6: Vulnerability[] = [
     likelihood: -1,
     packageRef: '-1',
     risk: -1,
+    severity: 0,
   },
   {
     cveId: 'CVE-2022-38749',
@@ -169,6 +175,7 @@ let expectedResult6: Vulnerability[] = [
     likelihood: -1,
     packageRef: '-1',
     risk: -1,
+    severity: 0,
   },
   {
     cveId: 'CVE-2022-38751',
@@ -177,6 +184,7 @@ let expectedResult6: Vulnerability[] = [
     likelihood: -1,
     packageRef: '-1',
     risk: -1,
+    severity: 0,
   },
   {
     cveId: 'CVE-2022-38752',
@@ -185,6 +193,7 @@ let expectedResult6: Vulnerability[] = [
     likelihood: -1,
     packageRef: '-1',
     risk: -1,
+    severity: 0,
   },
   {
     cveId: 'CVE-2022-41854',
@@ -193,6 +202,7 @@ let expectedResult6: Vulnerability[] = [
     likelihood: -1,
     packageRef: '-1',
     risk: -1,
+    severity: 0,
   },
   {
     cveId: 'CVE-2022-38750',
@@ -201,6 +211,7 @@ let expectedResult6: Vulnerability[] = [
     likelihood: -1,
     packageRef: '-1',
     risk: -1,
+    severity: 0,
   },
 ];
 
