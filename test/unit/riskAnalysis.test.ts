@@ -14,6 +14,7 @@ let inputCVEs: Vulnerability[] = [
     impact: 0,
     likelihood: -1,
     risk: 0,
+    severity: 0,
   },
   {
     cveId: 'CVE-2021-20090',
@@ -22,6 +23,7 @@ let inputCVEs: Vulnerability[] = [
     impact: -1,
     likelihood: -1,
     risk: -1,
+    severity: 0,
   },
   {
     cveId: 'CVE-2021-20091',
@@ -30,6 +32,7 @@ let inputCVEs: Vulnerability[] = [
     impact: -1,
     likelihood: 0,
     risk: 0,
+    severity: 0,
   },
 ];
 
@@ -41,6 +44,7 @@ let expectedCVEs: Vulnerability[] = [
     impact: 100,
     likelihood: 1,
     risk: 100,
+    severity: 0,
   },
   {
     cveId: 'CVE-2021-20090',
@@ -49,6 +53,7 @@ let expectedCVEs: Vulnerability[] = [
     impact: 50,
     likelihood: 0.6,
     risk: 30,
+    severity: 0,
   },
   {
     cveId: 'CVE-2021-20091',
@@ -57,6 +62,7 @@ let expectedCVEs: Vulnerability[] = [
     impact: 50,
     likelihood: 0.4,
     risk: 20,
+    severity: 0,
   },
 ];
 analyzeVulnerability(inputCVEs[0]);

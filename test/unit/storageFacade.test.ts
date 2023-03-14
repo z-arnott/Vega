@@ -11,12 +11,12 @@ import {
   writePackage,
   readPackage,
   readAllPackages,
-  writeVuln,
   readVulnsBySession,
   readVulnsByPkg,
   readVulnerabilitiesDashboard,
   readPackagesDashboard,
-  purge_session
+  purge_session, 
+  insertVuln
 } from '@utils/storageFacade.utils';
 
 //Set up test data
@@ -78,6 +78,7 @@ let vulnerabilities: Vulnerability[] = [
     likelihood: 0,
     packageRef: 'SPDXRef-Package',
     risk: 0,
+    severity: 0,
   },
   {
     cveId: 'CVE-2022-25857',
@@ -86,6 +87,7 @@ let vulnerabilities: Vulnerability[] = [
     likelihood: 0,
     packageRef: 'SPDXRef-Package',
     risk: 0,
+    severity: 0,
   },
   {
     cveId: 'CVE-2022-38749',
@@ -94,6 +96,7 @@ let vulnerabilities: Vulnerability[] = [
     likelihood: 0,
     packageRef: 'SPDXRef-fromDoap-1',
     risk: 0,
+    severity: 0,
   },
   {
     cveId: 'CVE-2022-38751',
@@ -102,6 +105,7 @@ let vulnerabilities: Vulnerability[] = [
     likelihood: 0,
     packageRef: 'SPDXRef-fromDoap-0',
     risk: 0,
+    severity: 0,
   },
   {
     cveId: 'CVE-2022-38752',
@@ -110,6 +114,7 @@ let vulnerabilities: Vulnerability[] = [
     likelihood: 0,
     packageRef: 'SPDXRef-fromDoap-0',
     risk: 0,
+    severity: 0,
   },
   {
     cveId: 'CVE-2022-41854',
@@ -118,6 +123,7 @@ let vulnerabilities: Vulnerability[] = [
     likelihood: 0,
     packageRef: 'SPDXRef-Package',
     risk: 0,
+    severity: 0,
   },
   {
     cveId: 'CVE-2022-38750',
@@ -126,6 +132,7 @@ let vulnerabilities: Vulnerability[] = [
     likelihood: 0,
     packageRef: 'SPDXRef-fromDoap-0',
     risk: 0,
+    severity: 0,
   },
 ];
 
@@ -177,7 +184,7 @@ async function setup() {
       await writePackage(pkg, sessionId);
     }
     for (let v of vulnerabilities) {
-      await writeVuln(v, sessionId);
+      await insertVuln(v, sessionId);
     }
   });
 }
@@ -249,7 +256,7 @@ test('Test 7: Read one cve', async () => {
 //Test 8: Can read multiple cves by package
 test('Test 8: Can read all vulnerabilities for a package', async () => {
   for (let v of vulnerabilities) {
-    await writeVuln(v, sessionId);
+    await insertVuln(v, sessionId);
   }
   return readVulnsByPkg(vulnerabilities[0].packageRef, sessionId).then(
     (cves) => {
@@ -273,15 +280,6 @@ let updatedCve = {
   packageRef: 'SPDXRef-Package',
   risk: 89,
 };
-//Test 9: Update existing package (does NOT duplicate)
-test('Test 9: Updated existing cve (no duplicates)', async () => {
-  return writeVuln(updatedCve, sessionId).then(async () => {
-    return readVulnsBySession(sessionId).then((cves) => {
-      expect(cves).toContainEqual(updatedCve);
-      expect(cves).not.toContainEqual(vulnerabilities[1]);
-    });
-  });
-});
 
 //Test 10: Read vulnerabilities not present in database
 test('Test 10: Read vulnerabilities not present in database', async () => {

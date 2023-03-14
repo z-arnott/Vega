@@ -259,6 +259,7 @@ export async function readPackagesDashboard(
             likelihood: v.vulnerabilities.likelihood,
             risk: v.vulnerabilities.risk,
             cvss2: v.vulnerabilities.cvss_vector,
+            severity: v.vulnerabilities.severity
           }
         );
       }
@@ -305,38 +306,12 @@ export async function readVulnsByPkg(ref: string, sessionId: number) {
           likelihood: v.likelihood,
           risk: v.risk,
           cvss2: v.cvss_vector,
+          severity: v.severity
         }
       );
     }
   }
   return cves;
-}
-
-/**
- * Write Package, updates if entry exists in database, inserts otherwise
- * @param cve to write
- * @param sessionId associated with one user
- * @returns supabase write status
- */
-export async function writeVuln(cve: Vulnerability, sessionId: number) {
-  let { data, error } = await supabase
-    .from('vulnerabilities')
-    .select('*')
-    .eq('cveidstring', cve.cveId);
-
-  if (error) {
-    logger.error(error.message);
-    return error;
-  } else if (data) {
-    if (data.length == 0) {
-      //INSERT
-      return insertVuln(cve, sessionId);
-    } else {
-      //UPDATE
-      return updateVuln(cve, sessionId);
-    }
-  }
-  return 400;
 }
 
 /**
@@ -366,6 +341,7 @@ export async function readVulnsBySession(sessionId: number) {
           likelihood: v.likelihood,
           risk: v.risk,
           cvss2: v.cvss_vector,
+          severity: v.severity
         }
       );
     }
@@ -437,6 +413,7 @@ export async function readVulnerabilitiesDashboard(
           likelihood: v.likelihood,
           risk: v.risk,
           cvss2: v.cvss_vector,
+          severity: v.severity
         }
       );
     }
@@ -523,6 +500,7 @@ export async function insertVuln(cve: Vulnerability, sessionId: number) {
       risk: cve.risk,
       cveidstring: cve.cveId,
       cvss_vector: cve.cvss2,
+      severity: cve.severity
     })
     .select('id');
 

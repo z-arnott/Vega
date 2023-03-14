@@ -52,6 +52,7 @@ export interface Vulnerability {
   impact: number;
   likelihood: number;
   risk: number;
+  severity: number;
 }
 
 export enum VulnerabilityViewParam {

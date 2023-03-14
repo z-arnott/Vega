@@ -21,10 +21,11 @@ async function sendQuery(query: Query) {
           {
             cveId: 'CVE-2727-1212',
             cvss2: 'AV:L/AC:L/Au:N/C:C/I:C/A:C',
-            packageRef: '-1',
+            packageRef: '',
             impact: -1,
             likelihood: -1,
             risk: -1,
+            severity: -1,
           },
         ];
       }
@@ -111,21 +112,24 @@ nvdCleaner = function (rawResponse): Vulnerability[] {
   rawVulns.forEach(function (cve: any) {
     let v: Vulnerability = {
       cveId: cve['cve'].id,
-      packageRef: '-1',
+      packageRef: '',
       impact: -1,
       likelihood: -1,
       risk: -1,
       cvss2: '',
+      severity: 7.9
     };
     //Get correct CVSS version
     if (cve['cve']['metrics'].hasOwnProperty('cvssMetricV2')) {
       //V2
       v.cvss2 =
         cve['cve']['metrics']['cvssMetricV2'][0]['cvssData']['vectorString'];
+      v.severity = cve['cve']['metrics']['cvssMetricV2'][0]['cvssData']['baseScore'];
     } else if (cve['cve']['metrics'].hasOwnProperty('cvssMetricV31')) {
       //V3
       //map cvss2 to cvss3
       v.cvss2 = cvss3to2(cve['cve']['metrics']['cvssMetricV31'][0]['cvssData']['vectorString']);
+      v.severity = cve['cve']['metrics']['cvssMetricV31'][0]['cvssData']['baseScore'];
     }
     vulns.push(v);
   });
@@ -141,11 +145,12 @@ sonatypeCleaner = function (rawResponse): Vulnerability[] {
   rawVulns.forEach(function (cve: any) {
     let v: Vulnerability = {
       cveId: cve.cve,
-      packageRef: '-1',
+      packageRef: '',
       impact: -1,
       likelihood: -1,
       risk: -1,
       cvss2: '',
+      severity: -1,
     };
 
     //Get correct CVSS version
