@@ -130,7 +130,7 @@ app.get('/dashboard', (req: any, res: any, next: any) => {
     riskFilters: riskFilters,
     severityFilters: severityFilters,
   };
-  console.log(reqParams.sortParam, reqParams.sessionId);
+  console.log(reqParams.sessionId);
   getView(reqParams).then((results) => {
     res.send(results);
   });

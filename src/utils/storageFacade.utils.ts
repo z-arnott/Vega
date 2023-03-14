@@ -234,7 +234,6 @@ export async function readPackagesDashboard(
       riskArr[1] * 10 +
       '),';
   }
-  console.log(sortCol);
   filterString = filterString.substring(0, filterString.length - 1);
   let { data, error } = await supabase //common syntax on JS: const {data,error} = await...
     .from('packages')
