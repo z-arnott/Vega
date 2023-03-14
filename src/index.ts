@@ -75,14 +75,21 @@ app.get('/query', async (req: any, res: any, next: any) => {
       .then((data: Vulnerability[]) => {
         console.log('DATA RETURNED BY QUERY: ', data);
         vulns.concat(data);
-
+        let k = data.length;
         data.forEach((vuln: Vulnerability) => {
           vuln['packageRef'] = packages[i]['ref'];
           insertVuln(vuln, sessionId)
-            .then((status) => console.log('added to db status:', vuln, status))
-            .catch((err) => console.log('ERROR: ', vuln, err));
+            .then((status) => {
+              console.log('added to db status:', vuln, status)
+              k--;
+              if(k == 0){
+                j--;
+              }
+            })
+            .catch((err) => {
+              console.log('ERROR: ', vuln, err)
+            });
         });
-        j--;
       })
       .catch((err) => {
         console.log('error in sendQuery: ', err);
