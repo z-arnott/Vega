@@ -90,13 +90,13 @@ app.get('/query', async (req: any, res: any, next: any) => {
               console.log('ERROR: ', vuln, err)
             });
         });
+        if(data.length == 0){j--;}
       })
       .catch((err) => {
         console.log('error in sendQuery: ', err);
         // res.send(err);
         j--;
       });
-      if(vulns.length == 0){j--;}
   }
   while(j > 0 && timeout >0){
     await new Promise(r => setTimeout(r, 200));
