@@ -96,6 +96,7 @@ app.get('/query', async (req: any, res: any, next: any) => {
         // res.send(err);
         j--;
       });
+      if(vulns.length == 0){j--;}
   }
   while(j > 0 && timeout >0){
     await new Promise(r => setTimeout(r, 200));
