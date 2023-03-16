@@ -166,6 +166,10 @@ sonatypeCleaner = function (rawResponse): Vulnerability[] {
         v.cvss2 = cvss3to2(cvssVector);
       }
     }
+    //Get CVSS Score
+    if (cve.hasOwnProperty('cvssScore')) {
+      v.severity = cve.cvssScore;
+    }
     vulns.push(v);
   });
 
